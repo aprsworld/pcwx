@@ -129,9 +129,8 @@ void init() {
 	setup_timer_2(T2_DIV_BY_4,74,1);
 
 	enable_interrupts(INT_TIMER2);
-
-
-
+	enable_interrupts(INT_RDA2); /* debug cable */
+	/* RDA2 - PI is turned on in modbus_slave_piCameraWeatherX's init */
 }
 
 

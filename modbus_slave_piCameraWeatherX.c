@@ -277,7 +277,8 @@ void modbus_init() {
 	RCV_ON();
 
 //	setup_timer_2(T2_DIV_BY_16,249,5);  //~4ms interrupts
-	setup_timer_0(RTCC_INTERNAL | RTCC_DIV_32 | RTCC_8_BIT);
+//	setup_timer_0(RTCC_INTERNAL | RTCC_DIV_32 | RTCC_8_BIT); /* ~1.024 ms @ 8 MHz ... 0.686 ms @ 12 MHz */
+	setup_timer_0(RTCC_INTERNAL | RTCC_DIV_128 | RTCC_8_BIT); /* ~4.096 ms @ 8 MHz ... 2.73 ms @ 12 MHz */
 	enable_interrupts(GLOBAL);
 }
 
@@ -291,22 +292,11 @@ void modbus_enable_timeout(int1 enable) {
 		clear_interrupt(INT_TIMER0);
 		enable_interrupts(INT_TIMER0);
 	}
-
-#if 0
-timer 2 code
-   disable_interrupts(INT_TIMER2);
-   if (enable) {
-      set_timer2(0);
-      clear_interrupt(INT_TIMER2);
-      enable_interrupts(INT_TIMER2);
-   }
-#endif
 }
 
 // Purpose:    Check if we have timed out waiting for a response
 // Inputs:     None
 // Outputs:    None
-//#int_timer2
 #int_timer0
 void modbus_timeout_now(void)
 {
