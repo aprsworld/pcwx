@@ -8,6 +8,8 @@ typedef struct {
 	int16 serial_number;
 
 	int16 adc_sample_ticks;
+
+	int8 allow_bootload_request;
 } struct_config;
 
 
@@ -156,7 +158,9 @@ void periodic_millisecond(void) {
 	b1_state=(b1_state<<1) | !bit_test(timers.port_c,PIC_BOOTLOAD_REQUEST_BIT) | 0xe000;
 	if ( b1_state==0xf000) {
 		/* reset line asserted */
-		// reset_cpu();
+		if ( config.allow_bootload_request ) {
+			reset_cpu();
+		}
 		/* BUG - I think that bootload request should be high for x milliseconds, rather than low */
 	}
 

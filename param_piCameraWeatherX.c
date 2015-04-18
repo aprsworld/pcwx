@@ -44,17 +44,8 @@ void write_default_param_file() {
 	config.serial_prefix='P';
 	config.serial_number=9876;
 
-#if 0
-	config.adc_average_mode[0]=ADC_AVERAGE_NORMAL;
-	config.adc_average_mode[1]=ADC_AVERAGE_NORMAL;
-	config.adc_average_mode[2]=ADC_AVERAGE_NORMAL;
-	config.adc_average_mode[3]=ADC_AVERAGE_NORMAL;
-	config.adc_average_mode[4]=ADC_AVERAGE_NORMAL;
-	config.adc_average_mode[5]=ADC_AVERAGE_NORMAL;
-	config.adc_average_mode[6]=ADC_AVERAGE_NORMAL;
-	config.adc_average_mode[7]=ADC_AVERAGE_NORMAL;
-#endif
 	config.adc_sample_ticks=20;
+	config.allow_bootload_request=0;
 
 	/* write them so next time we use from EEPROM */
 	write_param_file();
