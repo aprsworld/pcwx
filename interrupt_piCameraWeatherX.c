@@ -111,61 +111,53 @@ void isr_100us(void) {
 }
 
 
-void foo_isr_10ms(void) {
-	static int16 uptimeticks=0;
-	static int16 adcTicks=0;
-	static int8 ticks=0;
+/* debugging cable */
+#int_rda2
+void isr_rda2() {
+	int8 c;
 
-	clear_interrupt(INT_TIMER1);
-	set_timer1(45536);
+	c=fgetc(DEBUG);
 
-	output_high(PIN_D5);
-
-	/* anemometers quit moving */
-	if ( 0xffff == timers.pulse_period[0] )
-				current.pulse_period[0]=0;
-	if ( 0xffff == timers.pulse_period[1] )
-				current.pulse_period[1]=0;
-	if ( 0xffff == timers.pulse_period[2] )
-				current.pulse_period[2]=0;
-
-	/* seconds since last query */
-	if ( current.interval_milliseconds < 65535 ) {
-		current.interval_milliseconds++;
+	if ( current.bridged_uarts ) {
+		/* from debugging cable to Raspberry PI */
+		fputc(c,MODBUS_SERIAL);
 	}
+}
 
-	/* seconds */
-	ticks++;
-	if ( 100 == ticks ) {
-		ticks=0;
+/*  from PIC to Raspberry PI */
+#int_rda
+void isr_rda() {
+	int8 c;
+
+	c=fgetc(MODBUS_SERIAL);
+
+	if ( current.bridged_uarts ) {
+		/* from PI to debugging cable */
+		fputc(c,DEBUG);
+		return;
+	} 
+
+
+	/* Modbus */
+	if (!modbus_serial_new) {
+		if(modbus_serial_state == MODBUS_GETADDY) {
+			modbus_serial_crc.d = 0xFFFF;
+			modbus_rx.address = c;
+			modbus_serial_state++;
+			modbus_rx.len = 0;
+			modbus_rx.error=0;
+		} else if(modbus_serial_state == MODBUS_GETFUNC) {
+			modbus_rx.func = c;
+			modbus_serial_state++;
+		} else if(modbus_serial_state == MODBUS_GETDATA) {
+			if (modbus_rx.len>=MODBUS_SERIAL_RX_BUFFER_SIZE) {
+				modbus_rx.len=MODBUS_SERIAL_RX_BUFFER_SIZE-1;
+			}
+			modbus_rx.data[modbus_rx.len]=c;
+			modbus_rx.len++;
+		}
+
+		modbus_calc_crc(c);
+		modbus_enable_timeout(TRUE);
 	}
-
-	/* uptime counter */
-	uptimeTicks++;
-	if ( 6000 == uptimeTicks ) {
-		uptimeTicks=0;
-		if ( current.uptime_minutes < 65535 ) 
-			current.uptime_minutes++;
-	}
-
-	/* ADC sample counter */
-	if ( timers.now_adc_reset_count ) {
-		timers.now_adc_reset_count=0;
-		adcTicks=0;
-	}
-
-	adcTicks++;
-	if ( adcTicks == config.adc_sample_ticks ) {
-		adcTicks=0;
-		timers.now_adc_sample=1;
-	}
-
-	/* LEDs */
-	if ( 0==timers.led_on_green ) {
-		output_low(LED_GREEN);
-	} else {
-		output_high(LED_GREEN);
-		timers.led_on_green--;
-	}
-
 }

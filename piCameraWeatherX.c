@@ -36,6 +36,7 @@ typedef struct {
 	int16 interval_milliseconds;
 
 	int8 factory_unlocked;
+	int1 bridged_uarts;
 } struct_current;
 
 typedef struct {
@@ -62,11 +63,13 @@ struct_time_keep timers;
 
 
 #include "adc_piCameraWeatherX.c"
-#include "interrupt_piCameraWeatherX.c"
 #include "param_piCameraWeatherX.c"
 
 #include "modbus_slave_piCameraWeatherX.c"
 #include "modbus_handler_piCameraWeatherX.c"
+
+#include "interrupt_piCameraWeatherX.c"
+
 
 void init() {
 	int8 i;
@@ -84,7 +87,7 @@ void init() {
 	timers.now_adc_sample=0;
 	timers.now_adc_reset_count=0;
 	timers.now_millisecond=0;
-	timers.now_bridged=1;
+	current.bridged_uarts=1;
 	timers.port_b=0b11111111;
 
 	for ( i=0 ; i<3 ; i++ ) {
@@ -133,6 +136,9 @@ void init() {
 
 
 void periodic_millisecond(void) {
+	static int16 uptimeticks=0;
+	static int16 adcTicks=0;
+	static int8 ticks=0;
 	/* button debouncing */
 	static int16 b0_state=0;
 
@@ -156,6 +162,54 @@ void periodic_millisecond(void) {
 
 	/* read port_b pin states */
 	timers.port_b=port_b;
+
+
+	/* green LED control */
+	if ( current.bridged_uarts ) {
+		/* always on when ports are bridged */
+		output_high(LED_GREEN);
+	} else {
+		/* green LED in Modbus mode */
+		if ( 0==timers.led_on_green ) {
+			output_low(LED_GREEN);
+		} else {
+			output_high(LED_GREEN);
+			timers.led_on_green--;
+		}
+	}
+
+
+	/* some other random stuff that we don't need to do every cycle in main */
+	if ( current.interval_milliseconds < 65535 ) {
+		current.interval_milliseconds++;
+	}
+
+	/* seconds */
+	ticks++;
+	if ( 100 == ticks ) {
+		ticks=0;
+	}
+
+	/* uptime counter */
+	uptimeTicks++;
+	if ( 6000 == uptimeTicks ) {
+		uptimeTicks=0;
+		if ( current.uptime_minutes < 65535 ) 
+			current.uptime_minutes++;
+	}
+
+
+	/* ADC sample counter */
+	if ( timers.now_adc_reset_count ) {
+		timers.now_adc_reset_count=0;
+		adcTicks=0;
+	}
+
+	adcTicks++;
+	if ( adcTicks == config.adc_sample_ticks ) {
+		adcTicks=0;
+		timers.now_adc_sample=1;
+	}
 }
 
 
