@@ -33,7 +33,7 @@
 
 
 #include <stdlib.h>
-#use delay(clock=16000000, restart_wdt)
+#use delay(clock=12000000, restart_wdt)
 
 /* 
 Parameters are stored in EEPROM

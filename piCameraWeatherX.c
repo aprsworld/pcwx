@@ -71,7 +71,10 @@ struct_time_keep timers;
 void init() {
 	int8 i;
 
-	setup_oscillator(OSC_16MHZ|OSC_INTRC);
+//	setup_oscillator(OSC_16MHZ|OSC_INTRC);
+	/* oscillator is external crystal, so no software setup required. Just the fuse */
+
+
 	setup_adc_ports(sAN0 | sAN1 | sAN2 | sAN4 | sAN5 | sAN6 | sAN7 | sAN9, VSS_VREF);
 	setup_adc(ADC_CLOCK_INTERNAL);
 
@@ -115,7 +118,13 @@ void init() {
 	enable_interrupts(INT_EXT2);
 
 	/* one periodic interrupt @ 100uS. Generated from internal 16 MHz clock */
-	setup_timer_2(T2_DIV_BY_16,24,1); /* prescale=16, match=24, postscale=1. Match is 24 because when match occurs, one cycle is lost */
+	/* prescale=16, match=24, postscale=1. Match is 24 because when match occurs, one cycle is lost */
+	// setup_timer_2(T2_DIV_BY_16,24,1); 
+
+	/* one periodic interrupt @ 100uS. Generated from system 12 MHz clock */
+	/* prescale=4, match=74, postscale=1. Match is 74 because when match occurs, one cycle is lost */
+	setup_timer_2(T2_DIV_BY_4,74,1);
+
 	enable_interrupts(INT_TIMER2);
 
 
