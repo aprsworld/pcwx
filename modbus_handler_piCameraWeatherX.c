@@ -1,4 +1,4 @@
-#define MAX_STATUS_REGISTER  50
+#define MAX_STATUS_REGISTER  51
 
 #define MIN_CONFIG_REGISTER  1000
 #define MAX_CONFIG_REGISTER  1017
@@ -121,17 +121,19 @@ int16 map_modbus(int16 addr) {
 		/* status */
 		case 42: return (int16) current.sequence_number++;
 		case 43: return (int16) current.interval_milliseconds; /* milliseconds since last query */
-		case 44: return (int16) current.uptime_minutes; /* uptime seconds */
-		/* 45 triggers a new measurement */
-		case 45: reset_counters(); return (int16) 0;
-		/* 46 triggers a reset of pulse sum */
-		case 46: reset_pulse_sum(); return (int16) 0;
+		case 44: return (int16) current.uptime_minutes; 
+		case 45: return (int16) current.watchdog_seconds; 
+
+		/* triggers a new measurement */
+		case 46: reset_counters(); return (int16) 0;
+		/* triggers a reset of pulse sum */
+		case 47: reset_pulse_sum(); return (int16) 0;
 		/* modbus statistics */
-		case 47: return (int16) current.modbus_our_packets;
-		case 48: return (int16) current.modbus_other_packets;
-		case 49: return (int16) current.modbus_last_error;
-		/* 50 triggers a modbus statistics reset */
-		case 50: reset_modbus_stats(); return (int16) 0;
+		case 48: return (int16) current.modbus_our_packets;
+		case 49: return (int16) current.modbus_other_packets;
+		case 50: return (int16) current.modbus_last_error;
+		/* triggers a modbus statistics reset */
+		case 51: reset_modbus_stats(); return (int16) 0;
 
 		/* configuration */
 //		case 1000: return (int16) modbus_rx.len;
