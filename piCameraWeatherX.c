@@ -11,6 +11,7 @@ typedef struct {
 
 	int8 allow_bootload_request;
 	int16 watchdog_seconds_max;
+	int8 pi_offtime_seconds;
 } struct_config;
 
 
