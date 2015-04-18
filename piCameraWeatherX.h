@@ -65,10 +65,14 @@ Parameters are stored in EEPROM
 #use standard_io(D)
 #use standard_io(E)
 
-#define LED_GREEN    PIN_C2
-#define PUSH_BUTTON  PIN_B3
-#define BUTTON_0_BIT 3
-#define PI_POWER_EN  PIN_C0
+#define LED_GREEN                PIN_C2
+#define BUTTON                   PIN_B3
+#define BUTTON_BIT               3
+#define PI_POWER_EN              PIN_C0
+#define PIC_BOOTLOAD_REQUEST     PIN_D2 
+#define PIC_BOOTLOAD_REQUEST_BIT 2
+#define WATCHDOG_FROM_PI         PIN_C5
+
 
 /* analog channels */
 #define AN_USER_USER_0 1
@@ -88,3 +92,4 @@ typedef union {
 } u_lblock;
 
 #byte port_b=GETENV("SFR:portb")
+#byte port_c=GETENV("SFR:portc")

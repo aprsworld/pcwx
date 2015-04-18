@@ -52,6 +52,7 @@ typedef struct {
 	int1 now_bridged;
 
 	int8 port_b;
+	int8 port_c;
 } struct_time_keep;
 
 
@@ -88,6 +89,7 @@ void init() {
 	timers.now_millisecond=0;
 	current.bridged_uarts=1;
 	timers.port_b=0b11111111;
+	timers.port_c=0b11111111;
 
 	for ( i=0 ; i<3 ; i++ ) {
 		current.pulse_period[i]=0;
@@ -138,16 +140,26 @@ void periodic_millisecond(void) {
 	static int16 adcTicks=0;
 	static int8 ticks=0;
 	/* button debouncing */
-	static int16 b0_state=0;
+	static int16 b0_state=0; /* bridge push button */
+	static int16 b1_state=0; /* reset line from PI */
 
 	timers.now_millisecond=0;
 
 	/* button must be down for 12 milliseconds */
-	b0_state=(b0_state<<1) | !bit_test(timers.port_b,BUTTON_0_BIT) | 0xe000;
+	b0_state=(b0_state<<1) | !bit_test(timers.port_b,BUTTON_BIT) | 0xe000;
 	if ( b0_state==0xf000) {
 		/* button pressed */
 		timers.now_bridged = !timers.now_bridged;
 	}
+
+	/* reset must be down for 12 milliseconds */
+	b1_state=(b1_state<<1) | !bit_test(timers.port_c,PIC_BOOTLOAD_REQUEST_BIT) | 0xe000;
+	if ( b1_state==0xf000) {
+		/* reset line asserted */
+		// reset_cpu();
+		/* BUG - I think that bootload request should be high for x milliseconds, rather than low */
+	}
+
 
 	/* anemometers quit moving */
 	if ( 0xffff == timers.pulse_period[0] )
@@ -158,8 +170,9 @@ void periodic_millisecond(void) {
 				current.pulse_period[2]=0;
 
 
-	/* read port_b pin states */
+	/* read port_b and c pin states */
 	timers.port_b=port_b;
+	timers.port_c=port_c;
 
 
 	/* green LED control */
