@@ -7,7 +7,6 @@ typedef struct {
 	int8 serial_prefix;
 	int16 serial_number;
 
-	int8 adc_average_mode[8];
 	int16 adc_sample_ticks;
 } struct_config;
 

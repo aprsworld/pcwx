@@ -1,10 +1,7 @@
-#define MAX_STATUS_REGISTER  53
+#define MAX_STATUS_REGISTER  50
 
 #define MIN_CONFIG_REGISTER  1000
 #define MAX_CONFIG_REGISTER  1017
-
-#define MIN_COEFF_REGISTER   1100
-#define MAX_COEFF_REGISTER   1108
 
 
 /* This function may come in handy for you since MODBUS uses MSB first. */
@@ -24,6 +21,7 @@ void reset_counters(void) {
 	current.pulse_count[0]=0;
 	current.pulse_count[1]=0;
 	current.pulse_count[2]=0;
+
 	/* pulse period is reset in interrupt */
 	current.pulse_min_period[0]=65535;
 	current.pulse_min_period[1]=65535;
@@ -139,34 +137,13 @@ int16 map_modbus(int16 addr) {
 //		case 1000: return (int16) modbus_rx.len;
 		case 1000: return (int16) config.serial_prefix;
 		case 1001: return (int16) config.serial_number;
-		case 1002: return (int16) 'X';
-		case 1003: return (int16) 'G';
+		case 1002: return (int16) 'P';
+		case 1003: return (int16) 'W';
 		case 1004: return (int16) 'X';
 		case 1005: return (int16) 1;
 		case 1006: return (int16) config.modbus_address;
-//		case 1007: return (int16) config.modbus_speed;
-//		case 1008: return (int16) config.modbus_mode;
-//		case 1009: return (int16) config.worldData_seconds;
-//		case 1010: return (int16) config.worldData_trigger_prefix;
-//		case 1011: return (int16) config.worldData_trigger_number;
-//		case 1012: return (int16) config.io_enable;
-//		case 1013: return (int16) config.io_mode[IO_LINE_XBEE_SLEEP];
-//		case 1014: return (int16) config.io_mode[IO_LINE_XBEE_RTS];
-//		case 1015: return (int16) config.io_mode[IO_LINE_XBEE_CTS];
-//		case 1016: return (int16) config.modbus_strobe_address;
-//		case 1017: return (int16) config.modbus_strobe_register;
+		case 1007: return (int16) config.adc_sample_ticks;
 
-#if 0
-		case 1100: return (int16) config.adc_average_mode[0];
-		case 1101: return (int16) config.adc_average_mode[1];
-		case 1102: return (int16) config.adc_average_mode[2];
-		case 1103: return (int16) config.adc_average_mode[3];
-		case 1104: return (int16) config.adc_average_mode[4];
-		case 1105: return (int16) config.adc_average_mode[5];
-		case 1106: return (int16) config.adc_average_mode[6];
-		case 1107: return (int16) config.adc_average_mode[7];
-		case 1108: return (int16) config.adc_sample_ticks;
-#endif
 
 		/* we should have range checked, and never gotten here */
 		default: return (int16) 65535;
@@ -179,9 +156,6 @@ int8 modbus_valid_read_registers(int16 start, int16 end) {
 	if ( 19999==start && 20000==end)
 		return 1;
 
-
-	if ( start >= MIN_COEFF_REGISTER && end <= MAX_COEFF_REGISTER+1 )
-		return 1;
 	
 	if ( start >= MIN_CONFIG_REGISTER && end <= MAX_CONFIG_REGISTER+1 )
 		return 1;
@@ -199,9 +173,6 @@ int8 modbus_valid_write_registers(int16 start, int16 end) {
 		return 1;
 
 
-	if ( start >= MIN_COEFF_REGISTER && end <= MAX_COEFF_REGISTER+1 )
-		return 1;
-	
 	if ( start >= MIN_CONFIG_REGISTER && end <= MAX_CONFIG_REGISTER+1 )
 		return 1;
 	
@@ -256,24 +227,12 @@ exception modbus_write_register(int16 address, int16 value) {
 			config.modbus_address=value;
 			break;
 
-		case 1108:
+		case 1007:
 			/* ADC sample interval */
 			timers.now_adc_reset_count=1;
 			config.adc_sample_ticks=value;
 			break;
 		
-		case 1100:
-		case 1101:
-		case 1102:
-		case 1103:
-		case 1104:
-		case 1105:
-		case 1106:
-		case 1107:
-			/* Analog channels averaging mode */
-			address -= 1100;
-			config.adc_average_mode[address]=value;
-			break;
 		case 1999:
 			/* write config to EEPROM */
 			if ( 1 != value ) return ILLEGAL_DATA_VALUE;
