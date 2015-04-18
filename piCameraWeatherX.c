@@ -10,6 +10,7 @@ typedef struct {
 	int16 adc_sample_ticks;
 
 	int8 allow_bootload_request;
+	int16 watchdog_seconds_max;
 } struct_config;
 
 
@@ -38,6 +39,8 @@ typedef struct {
 
 	int8 factory_unlocked;
 	int1 bridged_uarts;
+
+	int8 watchdog_seconds;
 } struct_current;
 
 typedef struct {
@@ -89,7 +92,6 @@ void init() {
 	timers.now_adc_sample=0;
 	timers.now_adc_reset_count=0;
 	timers.now_millisecond=0;
-	current.bridged_uarts=1;
 	timers.port_b=0b11111111;
 	timers.port_c=0b11111111;
 
@@ -109,7 +111,8 @@ void init() {
 	current.interval_milliseconds=0;
 	current.adc_buffer_index=0;
 	current.factory_unlocked=0;
-
+	current.bridged_uarts=1;
+	current.watchdog_seconds=0;
 
 
 
@@ -144,6 +147,7 @@ void periodic_millisecond(void) {
 	/* button debouncing */
 	static int16 b0_state=0; /* bridge push button */
 	static int16 b1_state=0; /* reset line from PI */
+	static int16 b2_state=0; /* watchdog line from PI */
 
 	timers.now_millisecond=0;
 
@@ -164,6 +168,12 @@ void periodic_millisecond(void) {
 		/* BUG - I think that bootload request should be high for x milliseconds, rather than low */
 	}
 
+	/* watchdog must be down for 12 milliseconds for hit to register */
+	b2_state=(b2_state<<1) | !bit_test(timers.port_c,WATCHDOG_FROM_PI_BIT) | 0xe000;
+	if ( b2_state==0xf000) {
+		/* watchdog hit */
+		current.watchdog_seconds=0;
+	}
 
 	/* anemometers quit moving */
 	if ( 0xffff == timers.pulse_period[0] )
@@ -203,6 +213,14 @@ void periodic_millisecond(void) {
 	ticks++;
 	if ( 100 == ticks ) {
 		ticks=0;
+
+		if ( current.watchdog_seconds < 65535 ) {
+			current.watchdog_seconds++;
+		}
+
+		if ( 0 != config.watchdog_seconds_max && current.watchdog_seconds > config.watchdog_seconds_max ) {
+			/* TODO power cycle the PI */
+		}
 	}
 
 	/* uptime counter */

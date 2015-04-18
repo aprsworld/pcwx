@@ -144,6 +144,7 @@ int16 map_modbus(int16 addr) {
 		case 1006: return (int16) config.modbus_address;
 		case 1007: return (int16) config.adc_sample_ticks;
 		case 1008: return (int16) config.allow_bootload_request;
+		case 1009: return (int16) config.watchdog_seconds_max;
 
 		/* we should have range checked, and never gotten here */
 		default: return (int16) 65535;
@@ -237,6 +238,10 @@ exception modbus_write_register(int16 address, int16 value) {
 			/* allow this processor to follow requests of the PIC BOOTLOAD REQUEST line to reset ourselves */
 			if ( value > 1 ) return ILLEGAL_DATA_VALUE;
 			config.allow_bootload_request=value;
+			break;
+
+		case 1009:
+			config.watchdog_seconds_max=value;
 			break;
 		
 		case 1999:

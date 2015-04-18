@@ -72,6 +72,7 @@ Parameters are stored in EEPROM
 #define PIC_BOOTLOAD_REQUEST     PIN_D2 
 #define PIC_BOOTLOAD_REQUEST_BIT 2
 #define WATCHDOG_FROM_PI         PIN_C5
+#define WATCHDOG_FROM_PI_BIT     5
 
 
 /* analog channels */

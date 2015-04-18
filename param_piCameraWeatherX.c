@@ -47,6 +47,8 @@ void write_default_param_file() {
 	config.adc_sample_ticks=20;
 	config.allow_bootload_request=0;
 
+	config.watchdog_seconds_max=302;
+
 	/* write them so next time we use from EEPROM */
 	write_param_file();
 
