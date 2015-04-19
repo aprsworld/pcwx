@@ -119,15 +119,9 @@
 
 #define MODBUS_TYPE                MODBUS_TYPE_SLAVE
 #define MODBUS_SERIAL_INT_SOURCE   MODBUS_INT_RDA    // Select between external interrupt
-/* serial baud rate determined by config.modbus_speed */
-#define MODBUS_SERIAL_RX_PIN       PIN_C7   // Data receive pin
-#define MODBUS_SERIAL_TX_PIN       PIN_C6   // Data transmit pin
-#define MODBUS_SERIAL_ENABLE_PIN   PIN_C4   // Controls DE pin.  RX low, TX high.
-#define MODBUS_SERIAL_RX_ENABLE    PIN_C5   // Controls RE pin.  Should keep low.
 #define MODBUS_SERIAL_TIMEOUT      10000    //in us
 
 
-//#use rs232(baud=9600, UART1, parity=N, stream=MODBUS_SERIAL, errors)
 #define RCV_OFF() {disable_interrupts(INT_RDA);}
 
 
@@ -258,12 +252,13 @@ const char modbus_auchCRCLo[] = {
 // Outputs:    None
 void RCV_ON(void) {
 	// Clear RX buffer. Clear RDA interrupt flag. Clear overrun error flag.
-	while(kbhit(MODBUS_SERIAL)) {
+	while ( kbhit(MODBUS_SERIAL) ) {
+		fprintf(DEBUG,"# reading starting ...");
 		fgetc(MODBUS_SERIAL);
-	}  
-	
+		fprintf(DEBUG," complete");
+	}
+
 	clear_interrupt(INT_RDA);
-	output_low(MODBUS_SERIAL_RX_ENABLE);
 	enable_interrupts(INT_RDA);
 }
 
@@ -272,14 +267,21 @@ void RCV_ON(void) {
 // Inputs:     None
 // Outputs:    None
 void modbus_init() {
-	output_low(MODBUS_SERIAL_ENABLE_PIN);
 
+//	fprintf(DEBUG,"# rcv_on() starting ...\r\n");
 	RCV_ON();
+//	fprintf(DEBUG,"# rcv_on() complete\r\n");
 
 //	setup_timer_2(T2_DIV_BY_16,249,5);  //~4ms interrupts
 //	setup_timer_0(RTCC_INTERNAL | RTCC_DIV_32 | RTCC_8_BIT); /* ~1.024 ms @ 8 MHz ... 0.686 ms @ 12 MHz */
-	setup_timer_0(RTCC_INTERNAL | RTCC_DIV_128 | RTCC_8_BIT); /* ~4.096 ms @ 8 MHz ... 2.73 ms @ 12 MHz */
+
+	fprintf(DEBUG,"# setup_timer_0 starting ...\r\n");
+	setup_timer_0(T0_INTERNAL | T0_DIV_128 | T0_8_BIT); /* ~4.096 ms @ 8 MHz ... 2.73 ms @ 12 MHz */
+	fprintf(DEBUG,"# setup_timer_0 complete\r\n");
+
+	fprintf(DEBUG,"# enable_interrupts(GLOBAL) starting ...\r\n");
 	enable_interrupts(GLOBAL);
+	fprintf(DEBUG,"# enable interrupts complete\r\n");
 }
 
 // Purpose:    Start our timeout timer
@@ -415,8 +417,8 @@ void modbus_serial_send_start(int8 to, int8 func)
 
    RCV_OFF();
    
-	output_high(MODBUS_SERIAL_RX_ENABLE); // JJJ
-   output_high(MODBUS_SERIAL_ENABLE_PIN);
+//	output_high(MODBUS_SERIAL_RX_ENABLE); // JJJ
+ //  output_high(MODBUS_SERIAL_ENABLE_PIN);
 
 	/* 3.5 character delay (3500000/baud) */
 	delay_us(31); /* 115200 */
@@ -445,8 +447,8 @@ void modbus_serial_send_stop()
 
    RCV_ON();
 
-   output_low(MODBUS_SERIAL_ENABLE_PIN);
-	output_low(MODBUS_SERIAL_RX_ENABLE); // JJJ
+//   output_low(MODBUS_SERIAL_ENABLE_PIN);
+//	output_low(MODBUS_SERIAL_RX_ENABLE); // JJJ
 
    modbus_serial_crc.d=0xFFFF;
 }

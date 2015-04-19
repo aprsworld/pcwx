@@ -2,11 +2,9 @@
 #device ADC=12
 #device *=16
 #device HIGH_INTS=TRUE /* allow high priority "FAST" interrutps */
-#fuses NOXINST
 
-#if 0
-/* no boot loader */
-#fuses HSH
+
+#fuses HSM
 #fuses NOPLLEN
 #fuses NOFCMEN
 #fuses NOIESO
@@ -19,8 +17,7 @@
 #fuses NOXINST
 #fuses NODEBUG
 
-#else
-
+#if 0
 /* DS30 boot loader version 1.5.1 - engine 2.2.2 */
 /* leave last nine pages alone for boot loader. first two words do the jump to the boot loader */
 /* max mem address - 0x243, max mem address - 0x240 */

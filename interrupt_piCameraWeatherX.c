@@ -111,7 +111,7 @@ void isr_100us(void) {
 }
 
 
-/* debugging cable */
+/* debugging cable connected serial port */
 #int_rda2
 void isr_rda2() {
 	int8 c;
@@ -122,9 +122,11 @@ void isr_rda2() {
 		/* from debugging cable to Raspberry PI */
 		fputc(c,MODBUS_SERIAL);
 	}
+
+	output_toggle(LED_GREEN);
 }
 
-/*  from PIC to Raspberry PI */
+/*  Raspberry PI connected serial port*/
 #int_rda
 void isr_rda() {
 	int8 c;

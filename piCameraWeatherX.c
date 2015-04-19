@@ -55,7 +55,6 @@ typedef struct {
 	int1 now_adc_reset_count;
 
 	int1 now_millisecond;
-	int1 now_bridged;
 
 	int8 port_b;
 	int8 port_c;
@@ -121,11 +120,11 @@ void init() {
 
 	/* external interrupts for anemometers */
 	ext_int_edge(0,H_TO_L);
-	enable_interrupts(INT_EXT);
+//	enable_interrupts(INT_EXT);
 	ext_int_edge(1,H_TO_L);
-	enable_interrupts(INT_EXT1);
+//	enable_interrupts(INT_EXT1);
 	ext_int_edge(2,H_TO_L);
-	enable_interrupts(INT_EXT2);
+//	enable_interrupts(INT_EXT2);
 
 	/* one periodic interrupt @ 100uS. Generated from internal 16 MHz clock */
 	/* prescale=16, match=24, postscale=1. Match is 24 because when match occurs, one cycle is lost */
@@ -137,7 +136,7 @@ void init() {
 
 	enable_interrupts(INT_TIMER2);
 	enable_interrupts(INT_RDA2); /* debug cable */
-	/* RDA2 - PI is turned on in modbus_slave_piCameraWeatherX's init */
+	/* RDA - PI is turned on in modbus_slave_piCameraWeatherX's init */
 }
 
 
@@ -152,11 +151,14 @@ void periodic_millisecond(void) {
 
 	timers.now_millisecond=0;
 
+//	fputc('.',DEBUG);
+
 	/* button must be down for 12 milliseconds */
 	b0_state=(b0_state<<1) | !bit_test(timers.port_b,BUTTON_BIT) | 0xe000;
 	if ( b0_state==0xf000) {
 		/* button pressed */
-		timers.now_bridged = !timers.now_bridged;
+		current.bridged_uarts = !current.bridged_uarts;
+		fprintf(DEBUG,"# bridged=%u\r\n",current.bridged_uarts);
 	}
 
 	/* reset must be down for 12 milliseconds */
@@ -197,9 +199,9 @@ void periodic_millisecond(void) {
 	} else {
 		/* green LED in Modbus mode */
 		if ( 0==timers.led_on_green ) {
-			output_low(LED_GREEN);
+//			output_low(LED_GREEN);
 		} else {
-			output_high(LED_GREEN);
+//			output_high(LED_GREEN);
 			timers.led_on_green--;
 		}
 	}
@@ -215,7 +217,7 @@ void periodic_millisecond(void) {
 	if ( 100 == ticks ) {
 		ticks=0;
 
-		if ( current.watchdog_seconds < 65535 ) {
+		if ( current.watchdog_seconds != 65535 ) {
 			current.watchdog_seconds++;
 		}
 
@@ -248,27 +250,55 @@ void periodic_millisecond(void) {
 
 
 void main(void) {
-//	int8 c;
-//	int1 bridged=false;
 	int8 i;
+
+	i=restart_cause();
 
 	init();
 
-	fprintf(DEBUG,"# piCameraWeatherX %s\r\n",__DATE__);
-	fprintf(DEBUG,"# restart_cause()=%u\r\n",restart_cause());
+	output_high(LED_GREEN);
+	output_high(PI_POWER_EN);
+	delay_ms(1000);
+	output_low(LED_GREEN);
+	output_low(PI_POWER_EN);
+	delay_ms(1000);
+	output_high(LED_GREEN);
+	output_high(PI_POWER_EN);
 
+
+
+
+	fprintf(DEBUG,"# piCameraWeatherX %s\r\n",__DATE__);
+	fprintf(DEBUG,"# restart_cause()=%u ",i);
+	switch ( i ) {
+		case WDT_TIMEOUT: fprintf(DEBUG,"WDT_TIMEOUT"); break;
+		case MCLR_FROM_SLEEP: fprintf(DEBUG,"MCLR_FROM_SLEEP"); break;
+		case MCLR_FROM_RUN: fprintf(DEBUG,"MCLR_FROM_RUN"); break;
+		case NORMAL_POWER_UP: fprintf(DEBUG,"NORMAL_POWER_UP"); break;
+		case BROWNOUT_RESTART: fprintf(DEBUG,"BROWNOUT_RESTART"); break;
+		case WDT_FROM_SLEEP: fprintf(DEBUG,"WDT_FROM_SLEEP"); break;
+		case RESET_INSTRUCTION: fprintf(DEBUG,"RESET_INSTRUCTION"); break;
+		default: fprintf(DEBUG,"unknown!");
+	}
+	fprintf(DEBUG,"\r\n");
+
+	fprintf(DEBUG,"# read_param_file() starting ...");
 	read_param_file();
+	fprintf(DEBUG," complete\r\n");
 
 
 	if ( config.modbus_address > 127 ) {
+		fprintf(DEBUG,"# write_default_param_file() starting ...");
 		write_default_param_file();
+		fprintf(DEBUG," complete\r\n");
 	}
 
 	/* start Modbus slave */
 	setup_uart(TRUE);
 	/* modbus_init turns on global interrupts */
+	fprintf(DEBUG,"# modbus_init() starting ...");
 	modbus_init();
-
+	fprintf(DEBUG," complete\r\n");
 
 	/* Prime ADC filter */
 	for ( i=0 ; i<30 ; i++ ) {
@@ -290,47 +320,9 @@ void main(void) {
 			adc_update();
 		}
 
-
-#if 0
-		/* button switches between bridged and non bridged */		
-		if ( ! input(PUSH_BUTTON) ) {
-			bridged=!bridged;
-			delay_ms(250);
-
-			if ( ! bridged ) {
-				fprintf(DEBUG,"# g=LED off G=LED on p=PI off P=PI on r=reset\r\n");
-				output_low(LED_GREEN);
-			} else {
-				fprintf(DEBUG,"# entering bridge mode\r\n");
-				output_high(LED_GREEN);
-			}
-
+		if ( ! current.bridged_uarts ) {
+			modbus_process();
 		}
 
-		if ( bridged ) {
-			if ( kbhit(DEBUG) ) {
-				fputc(fgetc(DEBUG),MODBUS_SERIAL);
-			}
-			if ( kbhit(MODBUS_SERIAL) ) {
-				fputc(fgetc(MODBUS_SERIAL),DEBUG);
-			}
-
-		} else {
-			if ( kbhit(DEBUG) ) {
-				c = fgetc(DEBUG);
-
-				switch ( c ) {
-					case 'g': output_low(LED_GREEN); break;
-					case 'G': output_high(LED_GREEN); break;
-					case 'p': output_low(PI_POWER_EN); break;
-					case 'P': output_high(PI_POWER_EN); break;
-					case 'r': delay_ms(1000); reset_cpu(); break;
-					case '?': fprintf(DEBUG,"# g=LED off G=LED on p=PI off P=PI on r=reset\r\n"); break;
-					default: fprintf(DEBUG,"# invalid command. Valid commands are {g,G,p,P,r,?} (%s)\r\n",__DATE__);
-				}
-
-			}
-		}
-#endif
 	}
 }
