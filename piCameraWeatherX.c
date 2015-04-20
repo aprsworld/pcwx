@@ -134,7 +134,7 @@ void init() {
 	/* prescale=4, match=74, postscale=1. Match is 74 because when match occurs, one cycle is lost */
 	setup_timer_2(T2_DIV_BY_4,74,1);
 
-	enable_interrupts(INT_TIMER2);
+//	enable_interrupts(INT_TIMER2);
 	enable_interrupts(INT_RDA2); /* debug cable */
 	/* RDA - PI is turned on in modbus_slave_piCameraWeatherX's init */
 }
@@ -294,11 +294,14 @@ void main(void) {
 	}
 
 	/* start Modbus slave */
-	setup_uart(TRUE);
+//	setup_uart(TRUE);
 	/* modbus_init turns on global interrupts */
 	fprintf(DEBUG,"# modbus_init() starting ...");
-	modbus_init();
+//	modbus_init();
 	fprintf(DEBUG," complete\r\n");
+
+	enable_interrupts(INT_RDA);
+	enable_interrupts(GLOBAL);
 
 	/* Prime ADC filter */
 	for ( i=0 ; i<30 ; i++ ) {
@@ -320,9 +323,9 @@ void main(void) {
 			adc_update();
 		}
 
-		if ( ! current.bridged_uarts ) {
-			modbus_process();
-		}
+//		if ( ! current.bridged_uarts ) {
+//			modbus_process();
+//		}
 
 	}
 }

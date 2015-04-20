@@ -40,7 +40,7 @@ Parameters are stored in EEPROM
 
 
 /* UART1 - async serial connection connection to Pi */
-#use rs232(UART1,stream=MODBUS_SERIAL,baud=115200,xmit=PIN_C6,rcv=PIN_C7,errors)	
+#use rs232(UART1,stream=MODBUS_SERIAL,baud=57600,xmit=PIN_C6,rcv=PIN_C7,errors)	
 
 
 #byte TXSTA=GETENV("SFR:txsta1")
@@ -53,7 +53,7 @@ Parameters are stored in EEPROM
 #bit RBPU=INTCON2.7
 
 /* UART2 - FTDI cable */
-#use rs232(UART2,stream=DEBUG, baud=115200,xmit=PIN_D6,rcv=PIN_D7,errors)	
+#use rs232(UART2,stream=DEBUG, baud=57600,xmit=PIN_D6,rcv=PIN_D7,errors)	
 
 
 #use standard_io(A)
