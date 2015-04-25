@@ -39,6 +39,7 @@ void isr_100us(void) {
 	ext0_now=input(PIN_B0);
 	if ( 0 == ext0_now && 1 == ext0_last ) {
 		current.pulse_count[0]++;
+		current.pulse_sum[0]++;
 		if ( 1 == ext0_state ) {
 			/* currently counting, time to finish */
 			ext0_count=0;
@@ -61,6 +62,7 @@ void isr_100us(void) {
 	ext1_now=input(PIN_B1);
 	if ( 0 == ext1_now && 1 == ext1_last ) {
 		current.pulse_count[1]++;
+		current.pulse_sum[1]++;
 		if ( 1 == ext1_state ) {
 			/* currently counting, time to finish */
 			ext1_count=0;
@@ -83,6 +85,7 @@ void isr_100us(void) {
 	ext2_now=input(PIN_B2);
 	if ( 0 == ext2_now && 1 == ext2_last ) {
 		current.pulse_count[2]++;
+		current.pulse_sum[2]++;
 		if ( 1 == ext2_state ) {
 			/* currently counting, time to finish */
 			ext2_count=0;
