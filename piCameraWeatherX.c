@@ -41,7 +41,7 @@ typedef struct {
 	int8 factory_unlocked;
 	int1 bridged_uarts;
 
-	int8 watchdog_seconds;
+	int16 watchdog_seconds;
 } struct_current;
 
 typedef struct {
@@ -111,7 +111,7 @@ void init() {
 	current.interval_milliseconds=0;
 	current.adc_buffer_index=0;
 	current.factory_unlocked=0;
-	current.bridged_uarts=1;
+	current.bridged_uarts=0;
 	current.watchdog_seconds=0;
 
 
@@ -134,16 +134,16 @@ void init() {
 	/* prescale=4, match=74, postscale=1. Match is 74 because when match occurs, one cycle is lost */
 	setup_timer_2(T2_DIV_BY_4,74,1);
 
-//	enable_interrupts(INT_TIMER2);
+	enable_interrupts(INT_TIMER2);
 	enable_interrupts(INT_RDA2); /* debug cable */
 	/* RDA - PI is turned on in modbus_slave_piCameraWeatherX's init */
 }
 
 
 void periodic_millisecond(void) {
-	static int16 uptimeticks=0;
+	static int8 uptimeticks=0;
 	static int16 adcTicks=0;
-	static int8 ticks=0;
+	static int16 ticks=0;
 	/* button debouncing */
 	static int16 b0_state=0; /* bridge push button */
 	static int16 b1_state=0; /* reset line from PI */
@@ -199,9 +199,9 @@ void periodic_millisecond(void) {
 	} else {
 		/* green LED in Modbus mode */
 		if ( 0==timers.led_on_green ) {
-//			output_low(LED_GREEN);
+			output_low(LED_GREEN);
 		} else {
-//			output_high(LED_GREEN);
+			output_high(LED_GREEN);
 			timers.led_on_green--;
 		}
 	}
@@ -214,7 +214,7 @@ void periodic_millisecond(void) {
 
 	/* seconds */
 	ticks++;
-	if ( 100 == ticks ) {
+	if ( 1000 == ticks ) {
 		ticks=0;
 
 		if ( current.watchdog_seconds != 65535 ) {
@@ -224,14 +224,14 @@ void periodic_millisecond(void) {
 		if ( 0 != config.watchdog_seconds_max && current.watchdog_seconds > config.watchdog_seconds_max ) {
 			/* TODO power cycle the PI */
 		}
-	}
-
-	/* uptime counter */
-	uptimeTicks++;
-	if ( 6000 == uptimeTicks ) {
-		uptimeTicks=0;
-		if ( current.uptime_minutes < 65535 ) 
-			current.uptime_minutes++;
+		
+		/* uptime counter */
+		uptimeTicks++;
+		if ( 60 == uptimeTicks ) {
+			uptimeTicks=0;
+			if ( current.uptime_minutes < 65535 ) 
+				current.uptime_minutes++;
+		}
 	}
 
 
@@ -294,14 +294,16 @@ void main(void) {
 	}
 
 	/* start Modbus slave */
-//	setup_uart(TRUE);
+	setup_uart(TRUE);
 	/* modbus_init turns on global interrupts */
 	fprintf(DEBUG,"# modbus_init() starting ...");
-//	modbus_init();
+	modbus_init();
 	fprintf(DEBUG," complete\r\n");
 
-	enable_interrupts(INT_RDA);
-	enable_interrupts(GLOBAL);
+	fprintf(DEBUG,"# bridged_uarts=%u\r\n",current.bridged_uarts);
+
+//	enable_interrupts(INT_RDA);
+//	enable_interrupts(GLOBAL);
 
 	/* Prime ADC filter */
 	for ( i=0 ; i<30 ; i++ ) {
@@ -323,9 +325,9 @@ void main(void) {
 			adc_update();
 		}
 
-//		if ( ! current.bridged_uarts ) {
-//			modbus_process();
-//		}
+		if ( ! current.bridged_uarts ) {
+			modbus_process();
+		}
 
 	}
 }
