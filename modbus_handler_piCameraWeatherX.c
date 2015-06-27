@@ -280,7 +280,7 @@ void modbus_process(void) {
 
 	/* check for message */
 	if ( modbus_kbhit() ) {
-		if ( modbus_rx.address==config.modbus_address ) {
+		if ( 255==config.modbus_address || modbus_rx.address==config.modbus_address ) {
 			/* Modbus statistics */
 			if ( current.modbus_our_packets < 65535 )
 				current.modbus_our_packets++;

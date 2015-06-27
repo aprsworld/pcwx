@@ -38,9 +38,11 @@ Parameters are stored in EEPROM
 #define PARAM_CRC_ADDRESS  0x000
 #define PARAM_ADDRESS      PARAM_CRC_ADDRESS+2
 
+#define WEATHER_X_BAUD 57600
+
 
 /* UART1 - async serial connection connection to Pi */
-#use rs232(UART1,stream=MODBUS_SERIAL,baud=57600,xmit=PIN_C6,rcv=PIN_C7,errors)	
+#use rs232(UART1,stream=MODBUS_SERIAL,baud=WEATHER_X_BAUD,xmit=PIN_C6,rcv=PIN_C7,errors)	
 
 
 #byte TXSTA=GETENV("SFR:txsta1")
@@ -53,7 +55,7 @@ Parameters are stored in EEPROM
 #bit RBPU=INTCON2.7
 
 /* UART2 - FTDI cable */
-#use rs232(UART2,stream=DEBUG, baud=57600,xmit=PIN_D6,rcv=PIN_D7,errors)	
+#use rs232(UART2,stream=DEBUG, baud=WEATHER_X_BAUD,xmit=PIN_D6,rcv=PIN_D7,errors)	
 
 
 #use standard_io(A)

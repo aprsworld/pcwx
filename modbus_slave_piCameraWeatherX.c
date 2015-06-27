@@ -311,68 +311,6 @@ void modbus_serial_putc(int8 c) {
 	//delay_us(1000000/MODBUS_SERIAL_BAUD); //one stop bit.  not exact
 }
 
-#if 0
-
-// Purpose:   Interrupt service routine for handling incoming serial data
-// Inputs:    None
-// Outputs:   None
-
-
-void incomming_modbus_serial() {
-	static int8 buff[4];
-	int8 c;
-
-//	output_high(TP1);
-	c=fgetc(MODBUS_SERIAL);
-
-	/* check to see if we match our trigger station's serial number */
-	if ( current.worldData_enabled ) {
-		timers.led_on_red=5;
-
-		if ( 0 == config.worldData_trigger_prefix )
-			return;
-
-		buff[0]=buff[1];
-		buff[1]=buff[2];
-		buff[2]=buff[3];
-		buff[3]=c;
-//		output_low(TP1);
-	
-		if ( '#' == buff[0] && 
-				config.worldData_trigger_prefix == buff[1] &&
-				config.worldData_trigger_number == make16(buff[2],buff[3])
-			) {
-			/* found a packet that is from a trigger sender ... or at least contains the right byte sequence */
-				timers.now_live_send=1;
-				timers.live_seconds=0;
-		}
-		return;
-	}
-
-	if (!modbus_serial_new) {
-		if(modbus_serial_state == MODBUS_GETADDY) {
-			modbus_serial_crc.d = 0xFFFF;
-			modbus_rx.address = c;
-			modbus_serial_state++;
-			modbus_rx.len = 0;
-			modbus_rx.error=0;
-		} else if(modbus_serial_state == MODBUS_GETFUNC) {
-			modbus_rx.func = c;
-			modbus_serial_state++;
-		} else if(modbus_serial_state == MODBUS_GETDATA) {
-			if (modbus_rx.len>=MODBUS_SERIAL_RX_BUFFER_SIZE) {
-				modbus_rx.len=MODBUS_SERIAL_RX_BUFFER_SIZE-1;
-			}
-			modbus_rx.data[modbus_rx.len]=c;
-			modbus_rx.len++;
-		}
-
-		modbus_calc_crc(c);
-		modbus_enable_timeout(TRUE);
-	}
-}
-
-#endif
 
 // Purpose:    Send a message over the RS485 bus
 // Inputs:     1) The destination address
