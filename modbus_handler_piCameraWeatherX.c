@@ -226,7 +226,7 @@ exception modbus_write_register(int16 address, int16 value) {
 
 		case 1006:
 			/* Modbus address {0 to 127} */
-			if ( value > 127 ) return ILLEGAL_DATA_VALUE;
+			if ( value != 255 && value > 127 ) return ILLEGAL_DATA_VALUE;
 			config.modbus_address=value;
 			break;
 
@@ -296,13 +296,13 @@ void modbus_process(void) {
 	
 					/* make sure our address is within range */
 					if ( ! modbus_valid_read_registers(start_addr,start_addr+num_registers) ) {
-					    modbus_exception_rsp(config.modbus_address,modbus_rx.func,ILLEGAL_DATA_ADDRESS);
+					    modbus_exception_rsp(modbus_rx.address,modbus_rx.func,ILLEGAL_DATA_ADDRESS);
 						current.modbus_last_error=ILLEGAL_DATA_ADDRESS;
 
 						/* red LED for 1 second */
 						timers.led_on_green=0;
 					} else {
-						modbus_read_register_response(modbus_rx.func,config.modbus_address,start_addr,num_registers);
+						modbus_read_register_response(modbus_rx.func,modbus_rx.address,start_addr,num_registers);
 					}
 					break;
 				case FUNC_WRITE_SINGLE_REGISTER: /* 6 */
@@ -313,14 +313,14 @@ void modbus_process(void) {
 
 					if ( result ) {
 						/* exception */
-						modbus_exception_rsp(config.modbus_address,modbus_rx.func,result);
+						modbus_exception_rsp(modbus_rx.address,modbus_rx.func,result);
 						current.modbus_last_error=result;
 
 						/* red LED for 1 second */
 						timers.led_on_green=0;
 					}  else {
 						/* no exception, send ack */
-						modbus_write_single_register_rsp(config.modbus_address,
+						modbus_write_single_register_rsp(modbus_rx.address,
 							start_addr,
 							make16(modbus_rx.data[2],modbus_rx.data[3])
 						);
@@ -336,7 +336,7 @@ void modbus_process(void) {
 
 						if ( result ) {
 							/* exception */
-							modbus_exception_rsp(config.modbus_address,modbus_rx.func,result);
+							modbus_exception_rsp(modbus_rx.address,modbus_rx.func,result);
 							current.modbus_last_error=result;
 	
 							/* red LED for 1 second */
@@ -349,13 +349,13 @@ void modbus_process(void) {
 					/* we could have gotten here with an exception already send, so only send if no exception */
 					if ( 0 == result ) {
 						/* no exception, send ack */
-						modbus_write_multiple_registers_rsp(config.modbus_address,start_addr,num_registers);
+						modbus_write_multiple_registers_rsp(modbus_rx.address,start_addr,num_registers);
 					}
 
 					break;  
 				default:
 					/* we don't support most operations, so return ILLEGAL_FUNCTION exception */
-					modbus_exception_rsp(config.modbus_address,modbus_rx.func,ILLEGAL_FUNCTION);
+					modbus_exception_rsp(modbus_rx.address,modbus_rx.func,ILLEGAL_FUNCTION);
 					current.modbus_last_error=ILLEGAL_FUNCTION;
 
 					/* red led for 1 second */
