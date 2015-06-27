@@ -93,3 +93,13 @@ typedef union {
 
 #byte port_b=GETENV("SFR:portb")
 #byte port_c=GETENV("SFR:portc")
+/* ADC registers */
+#byte ADCON0=GETENV("SFR:adcon0")
+#byte ADCON1=GETENV("SFR:adcon1")
+#byte ADCON2=GETENV("SFR:adcon2")
+
+#byte ANCON0=GETENV("SFR:ancon0")
+#byte ANCON1=GETENV("SFR:ancon1")
+
+#byte ADRESH=GETENV("SFR:adresh")
+#byte ADRESL=GETENV("SFR:adresl")

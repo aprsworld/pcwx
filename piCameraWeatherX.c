@@ -83,9 +83,13 @@ void init() {
 	/* oscillator is external crystal, so no software setup required. Just the fuse */
 
 
-	setup_adc_ports(sAN0 | sAN1 | sAN2 | sAN4 | sAN5 | sAN6 | sAN7 | sAN9, VSS_VREF);
-	setup_adc(ADC_CLOCK_INTERNAL);
+//	setup_adc_ports(sAN0 | sAN1 | sAN2 | sAN4 | sAN5 | sAN6 | sAN7 | sAN9, VSS_VREF);
+//	setup_adc(ADC_CLOCK_INTERNAL);
+	setup_adc(ADC_CLOCK_DIV_16);
 
+	ADCON1=0b00010000; /* Vref+ external 5 volt reference, Vref- VSS */
+	ANCON0=0b11111111;
+	ANCON1=0b00000010;
 
 	/* data structure initialization */
 	timers.led_on_green=0;
