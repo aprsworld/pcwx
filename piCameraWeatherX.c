@@ -79,12 +79,6 @@ struct_time_keep timers;
 void init() {
 	int8 i;
 
-//	setup_oscillator(OSC_16MHZ|OSC_INTRC);
-	/* oscillator is external crystal, so no software setup required. Just the fuse */
-
-
-//	setup_adc_ports(sAN0 | sAN1 | sAN2 | sAN4 | sAN5 | sAN6 | sAN7 | sAN9, VSS_VREF);
-//	setup_adc(ADC_CLOCK_INTERNAL);
 	setup_adc_ports(AN0_TO_AN7,VSS_VREF);
 	setup_adc(ADC_CLOCK_DIV_16);
 

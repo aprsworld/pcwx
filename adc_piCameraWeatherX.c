@@ -26,6 +26,14 @@ void adc_update(void) {
 
 
 	for ( i=0 ; i<8 ; i++ ) {
+		if ( AN_IN_VOLTS == adcChannelMap[i] ) { 
+			setup_adc_ports(AN0_TO_AN11,VSS_VREF);
+			/* this will cause INT_EXT1 and INT_EXT2 to be analog while we do this sample. Potential for timing
+			inaccuracy? */
+		} else {
+			setup_adc_ports(AN0_TO_AN7,VSS_VREF);
+		}
+
 		set_adc_channel(adcChannelMap[i]);
 		delay_us(5);
 
