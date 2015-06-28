@@ -80,7 +80,7 @@ void init() {
 	int8 i;
 
 	setup_adc_ports(AN0_TO_AN7,VSS_VREF);
-	setup_adc(ADC_CLOCK_DIV_16);
+	setup_adc(ADC_CLOCK_DIV_64 | ADC_TAD_MUL_20 );
 
 
 	set_tris_a(0b00101111);
