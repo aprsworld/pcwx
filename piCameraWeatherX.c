@@ -85,11 +85,15 @@ void init() {
 
 //	setup_adc_ports(sAN0 | sAN1 | sAN2 | sAN4 | sAN5 | sAN6 | sAN7 | sAN9, VSS_VREF);
 //	setup_adc(ADC_CLOCK_INTERNAL);
+	setup_adc_ports(AN0_TO_AN7,VSS_VREF);
 	setup_adc(ADC_CLOCK_DIV_16);
 
-	ADCON1=0b00010000; /* Vref+ external 5 volt reference, Vref- VSS */
-	ANCON0=0b11111111;
-	ANCON1=0b00000010;
+
+	set_tris_a(0b00101111);
+	set_tris_b(0b11011111);
+	set_tris_c(0b10100010);
+	set_tris_d(0b10100100);
+	set_tris_e(0b00000111);
 
 	/* data structure initialization */
 	timers.led_on_green=0;
@@ -139,7 +143,7 @@ void init() {
 	setup_timer_2(T2_DIV_BY_4,74,1);
 
 	enable_interrupts(INT_TIMER2);
-	enable_interrupts(INT_RDA2); /* debug cable */
+//	enable_interrupts(INT_RDA2); /* debug cable */
 	/* RDA - PI is turned on in modbus_slave_piCameraWeatherX's init */
 }
 

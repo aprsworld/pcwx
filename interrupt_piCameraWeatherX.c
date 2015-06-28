@@ -115,7 +115,7 @@ void isr_100us(void) {
 
 
 /* debugging cable connected serial port */
-#int_rda2
+//#int_rda2
 void isr_rda2() {
 	int8 c;
 

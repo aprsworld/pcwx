@@ -1,35 +1,10 @@
-#include <18F45K80.h>
+#include <18F4523.h>
 #device ADC=12
 #device *=16
 #device HIGH_INTS=TRUE /* allow high priority "FAST" interrutps */
 
-
-#fuses HSM
-#fuses NOPLLEN
-#fuses NOFCMEN
-#fuses NOIESO
-#fuses PUT
-#fuses BORV30
-#fuses WDT32768
-#fuses NOMCLR
-#fuses STVREN
-#fuses SOSC_DIG
-#fuses NOXINST
-#fuses NODEBUG
-
-#if 0
-/* DS30 boot loader version 1.5.1 - engine 2.2.2 */
-/* leave last nine pages alone for boot loader. first two words do the jump to the boot loader */
-/* max mem address - 0x243, max mem address - 0x240 */
-#build(reset=0x7dbc:0x7dbf)
-/* max mem address - 0x23f, max mem address - see memory organization in datasheet */
-//#org 0x7dc0,0x7fff {}
-#org 0x7dc0,0x7fff {}
-
-#endif
-
-
 #include <stdlib.h>
+#FUSES HS,NOPROTECT,PUT,NOLVP,BROWNOUT,NOMCLR,WDT32768
 #use delay(clock=12000000, restart_wdt)
 
 /* 
@@ -45,24 +20,24 @@ Parameters are stored in EEPROM
 #use rs232(UART1,stream=MODBUS_SERIAL,baud=WEATHER_X_BAUD,xmit=PIN_C6,rcv=PIN_C7,errors)	
 
 
-#byte TXSTA=GETENV("SFR:txsta1")
+#byte TXSTA=GETENV("SFR:txsta")
 #bit  TRMT=TXSTA.1
-#byte ANCON0=GETENV("SFR:ancon0")
-#byte ANCON1=GETENV("SFR:ancon1")
 
 #byte PORTB=GETENV("SFR:portb")
 #byte INTCON2=GETENV("SFR:intcon2")
 #bit RBPU=INTCON2.7
 
 /* UART2 - FTDI cable */
-#use rs232(UART2,stream=DEBUG, baud=WEATHER_X_BAUD,xmit=PIN_D6,rcv=PIN_D7,errors)	
+#use rs232(stream=DEBUG, baud=WEATHER_X_BAUD,xmit=PIN_D6,rcv=PIN_D7,errors)	
 
 
-#use standard_io(A)
-#use standard_io(B)
-#use standard_io(C)
-#use standard_io(D)
-#use standard_io(E)
+
+
+#use fast_io(A)
+#use fast_io(B)
+#use fast_io(C)
+#use fast_io(D)
+#use fast_io(E)
 
 #define LED_GREEN                PIN_C2
 #define BUTTON                   PIN_B3
@@ -93,13 +68,3 @@ typedef union {
 
 #byte port_b=GETENV("SFR:portb")
 #byte port_c=GETENV("SFR:portc")
-/* ADC registers */
-#byte ADCON0=GETENV("SFR:adcon0")
-#byte ADCON1=GETENV("SFR:adcon1")
-#byte ADCON2=GETENV("SFR:adcon2")
-
-#byte ANCON0=GETENV("SFR:ancon0")
-#byte ANCON1=GETENV("SFR:ancon1")
-
-#byte ADRESH=GETENV("SFR:adresh")
-#byte ADRESL=GETENV("SFR:adresl")
