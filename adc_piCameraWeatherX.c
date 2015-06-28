@@ -25,6 +25,7 @@ int16 read_adc_channel(int8 channel) {
 	ANCON0=0b11111111;
 	ANCON1=0b00000010;
 
+	delay_us(10);
 
 	bit_set(ADCON0,1);
 
