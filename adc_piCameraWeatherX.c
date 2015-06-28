@@ -34,13 +34,13 @@ void adc_update(void) {
 			setup_adc_ports(AN0_TO_AN7,VSS_VREF);
 		}
 
-//		set_adc_channel(adcChannelMap[i]);
-//		delay_us(20);
+		set_adc_channel(adcChannelMap[i]);
+		delay_us(3);
 
 		current.adc_buffer[i][current.adc_buffer_index] = read_adc();
 		current.adc_std_dev[i]=0;
 
-//		delay_us(20);
+		delay_us(3);
 	}
 
 
