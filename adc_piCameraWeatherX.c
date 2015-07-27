@@ -3,13 +3,10 @@ const int8 adcChannelMap[8]={AN_IN_VOLTS, AN_TEMPERATURE, AN_WIND_DIR_0, AN_WIND
 int16 adc_get(int8 ch) {
 	int16 sum;
 	int8 i;
-	int16 result;
 
 	/* pre-compute address of channel adc buffer. Saves computing it 16 times in the loop below */
 	int16 *p;
 	p = current.adc_buffer[ch];
-
-	output_high(TP_RED);
 
 	// Calculate the mean.  This is done by summing up the
 	// values and dividing by the number of elements.
@@ -19,14 +16,8 @@ int16 adc_get(int8 ch) {
 		sum += p[i];
 	}
 
-	output_low(TP_RED);
-
 	/* divide sum by our 16 samples and round by adding 8 */
-	result = ( (sum+8) >> 4 );
-
-//	output_low(TP_RED);
-
-	return result;
+	return ( (sum+8) >> 4 );
 }
 
 

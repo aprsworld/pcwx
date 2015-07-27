@@ -1,7 +1,7 @@
 #define MAX_STATUS_REGISTER  51
 
 #define MIN_CONFIG_REGISTER  1000
-#define MAX_CONFIG_REGISTER  1017
+#define MAX_CONFIG_REGISTER  1010
 
 
 /* This function may come in handy for you since MODBUS uses MSB first. */
@@ -120,7 +120,7 @@ int16 map_modbus(int16 addr) {
 
 		/* status */
 		case 42: return (int16) current.sequence_number++;
-		case 43: return (int16) current.interval_milliseconds; /* milliseconds since last query */
+		case 43: output_toggle(TP_RED); return (int16) current.interval_milliseconds; /* milliseconds since last query */
 		case 44: return (int16) current.uptime_minutes; 
 		case 45: return (int16) current.watchdog_seconds; 
 
@@ -147,6 +147,7 @@ int16 map_modbus(int16 addr) {
 		case 1007: return (int16) config.adc_sample_ticks;
 		case 1008: return (int16) config.allow_bootload_request;
 		case 1009: return (int16) config.watchdog_seconds_max;
+		case 1010: return (int16) config.pi_offtime_seconds;
 
 		/* we should have range checked, and never gotten here */
 		default: return (int16) 65535;
@@ -245,6 +246,11 @@ exception modbus_write_register(int16 address, int16 value) {
 		case 1009:
 			config.watchdog_seconds_max=value;
 			break;
+
+		case 1010:
+			if ( value < 1 || value > 255 ) return ILLEGAL_DATA_VALUE;
+			config.pi_offtime_seconds=value;
+			break;
 		
 		case 1999:
 			/* write config to EEPROM */
@@ -280,6 +286,8 @@ void modbus_process(void) {
 
 	/* check for message */
 	if ( modbus_kbhit() ) {
+//		output_high(TP_RED);
+
 		if ( 255==config.modbus_address || modbus_rx.address==config.modbus_address ) {
 			/* Modbus statistics */
 			if ( current.modbus_our_packets < 65535 )
@@ -370,4 +378,5 @@ void modbus_process(void) {
 			timers.led_on_green=20;
 		}
 	}
+//	output_low(TP_RED);
 }

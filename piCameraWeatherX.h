@@ -13,7 +13,7 @@ Parameters are stored in EEPROM
 #define PARAM_CRC_ADDRESS  0x000
 #define PARAM_ADDRESS      PARAM_CRC_ADDRESS+2
 
-#define WEATHER_X_BAUD 9600
+#define WEATHER_X_BAUD 57600
 
 
 /* UART1 - async serial connection connection to Pi */
@@ -28,7 +28,7 @@ Parameters are stored in EEPROM
 #bit RBPU=INTCON2.7
 
 /* FTDI cable on software serial port */
-#use rs232(stream=DEBUG, baud=WEATHER_X_BAUD,xmit=PIN_D6,rcv=PIN_D7,errors)	
+#use rs232(stream=DEBUG, baud=9600,xmit=PIN_D6,rcv=PIN_D7,errors)	
 
 
 

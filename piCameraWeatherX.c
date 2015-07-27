@@ -167,13 +167,11 @@ void periodic_millisecond(void) {
 	static int16 adcTicks=0;
 	static int16 ticks=0;
 	/* button debouncing */
-	static int16 b0_state=0; /* bridge push button */
-	static int16 b1_state=0; /* reset line from PI */
+//	static int16 b0_state=0; /* bridge push button */
+//	static int16 b1_state=0; /* reset line from PI */
 	static int16 b2_state=0; /* watchdog line from PI */
 	/* power control */
-	int16 adcValue;
-
-//	output_high(TP_RED);
+	static int16 adcValue; /* updates after each ADC sample run */
 
 	timers.now_millisecond=0;
 
@@ -206,14 +204,12 @@ void periodic_millisecond(void) {
 	}
 #endif
 
-#if 0
 	/* watchdog must be down for 12 milliseconds for hit to register */
 	b2_state=(b2_state<<1) | !bit_test(timers.port_c,WATCHDOG_FROM_PI_BIT) | 0xe000;
 	if ( b2_state==0xf000) {
 		/* watchdog hit */
 		current.watchdog_seconds=0;
 	}
-#endif
 
 	/* anemometers quit moving */
 	if ( 0xffff == timers.pulse_period[0] )
@@ -228,13 +224,11 @@ void periodic_millisecond(void) {
 	timers.port_b=port_b;
 	timers.port_c=port_c;
 
-#if 0
 	/* green LED control */
 	if ( current.bridged_uarts ) {
 		/* always on when ports are bridged */
 		output_high(LED_GREEN);
 	} else {
-#endif
 		/* green LED in Modbus mode */
 		if ( 0==timers.led_on_green ) {
 			output_low(LED_GREEN);
@@ -242,9 +236,7 @@ void periodic_millisecond(void) {
 			output_high(LED_GREEN);
 			timers.led_on_green--;
 		}
-#if 0
 	}
-#endif
 
 
 	/* some other random stuff that we don't need to do every cycle in main */
@@ -275,27 +267,11 @@ void periodic_millisecond(void) {
 	}
 
 
-	/* ADC sample counter */
-	if ( timers.now_adc_reset_count ) {
-		timers.now_adc_reset_count=0;
-		adcTicks=0;
+	if ( 65535 == adcValue ) {
+		/* signaled that a new ADC sample was taken and we need to run again */
+		/* read current ADC value */	
+		adcValue=adc_get(0);
 	}
-
-	adcTicks++;
-	if ( adcTicks == config.adc_sample_ticks ) {
-		adcTicks=0;
-		timers.now_adc_sample=1;
-	}
-
-
-	/* raspberry pi power control */
-	if ( current.power_override_timeout > 0 ) {
-		current.power_override_timeout--;
-		continue;
-	}
-
-	/* read current ADC value */	
-	adcValue=adc_get(0);
 
 	if ( adcValue > config.power_on_above_adc ) {
 		if ( current.power_on_delay > 0 ) {
@@ -319,12 +295,30 @@ void periodic_millisecond(void) {
 	}
 	
 
+	/* ADC sample counter */
+	if ( timers.now_adc_reset_count ) {
+		timers.now_adc_reset_count=0;
+		adcTicks=0;
+	}
+
+	/* ADC sampling trigger */
+	adcTicks++;
+	if ( adcTicks == config.adc_sample_ticks ) {
+		adcTicks=0;
+		timers.now_adc_sample=1;
+		adcValue=65535; /* signal power control (above) on next pass to resample */
+	}
+
+
+	/* raspberry pi power control */
+	if ( current.power_override_timeout > 0 ) {
+		current.power_override_timeout--;
+//		continue; what is this doing?
+	}
+
 	/* set the output bit to reflect their requested state */
 //	output_bit(PI_POWER_EN,current.p_on);
 	output_high(PI_POWER_EN);
-
-
-//	output_low(TP_RED);
 }
 
 

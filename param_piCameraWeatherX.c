@@ -48,7 +48,8 @@ void write_default_param_file() {
 	config.adc_sample_ticks=20;
 	config.allow_bootload_request=0;
 
-	config.watchdog_seconds_max=302;
+	config.watchdog_seconds_max=302; /* 5 minutes & 2 seconds */
+	config.pi_offtime_seconds=2;
 
 	/* write them so next time we use from EEPROM */
 	write_param_file();
