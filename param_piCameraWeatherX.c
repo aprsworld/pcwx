@@ -50,7 +50,7 @@ void write_default_param_file() {
 
 	config.watchdog_seconds_max=302; /* 5 minutes & 2 seconds */
 	config.pi_offtime_seconds=2;
-	config.power_startup=1;
+	config.power_startup=0;
 
 	/* write them so next time we use from EEPROM */
 	write_param_file();
