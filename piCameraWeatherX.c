@@ -15,7 +15,7 @@ typedef struct {
 
 
 	/* power control switch settings */
-	int8 power_startup;
+	int8 power_startup; /* 0==start with PI off, 1==start with PI on */
 	int16 power_off_below_adc;
 	int16 power_off_below_delay;
 	int16 power_on_above_adc;
@@ -51,6 +51,7 @@ typedef struct {
 	int1 bridged_uarts;
 
 	int16 watchdog_seconds;
+	int8 watchdog_power_on_after_seconds; /* when counter hits zero, power goes */
 
 	/* power control switch */
 	int8 p_on;
@@ -208,7 +209,7 @@ void periodic_millisecond(void) {
 	b2_state=(b2_state<<1) | !bit_test(timers.port_c,WATCHDOG_FROM_PI_BIT) | 0xe000;
 	if ( b2_state==0xf000) {
 		/* watchdog hit */
-		current.watchdog_seconds=0;
+//		current.watchdog_seconds=0;
 	}
 
 	/* anemometers quit moving */
@@ -249,13 +250,29 @@ void periodic_millisecond(void) {
 	if ( 1000 == ticks ) {
 		ticks=0;
 
+		/* watchdog power control of pi */
 		if ( current.watchdog_seconds != 65535 ) {
 			current.watchdog_seconds++;
 		}
 
 		if ( 0 != config.watchdog_seconds_max && current.watchdog_seconds > config.watchdog_seconds_max ) {
-			/* TODO power cycle the PI */
+			/* when this timer reaches 0, then we power back on */
+			current.watchdog_power_on_after_seconds=config.pi_offtime_seconds+1;
 		}
+
+		if ( current.watchdog_power_on_after_seconds > 0 ) {
+			/* we are in off time */
+			current.watchdog_power_on_after_seconds--;
+			current.p_on=0;
+
+			/* reset out watchdog seconds so we don't immediately power back off */
+			if ( 0 == current.watchdog_power_on_after_seconds ) {
+				current.watchdog_seconds=0;
+			}
+		} else {
+			/* we should be on */
+			current.p_on=1;
+		}	
 		
 		/* uptime counter */
 		uptimeTicks++;
@@ -273,6 +290,7 @@ void periodic_millisecond(void) {
 		adcValue=adc_get(0);
 	}
 
+#if 0
 	if ( adcValue > config.power_on_above_adc ) {
 		if ( current.power_on_delay > 0 ) {
 			current.power_on_delay--;
@@ -293,7 +311,7 @@ void periodic_millisecond(void) {
 	} else {
 		current.power_off_delay=config.power_off_below_delay;
 	}
-	
+#endif	
 
 	/* ADC sample counter */
 	if ( timers.now_adc_reset_count ) {
@@ -310,15 +328,18 @@ void periodic_millisecond(void) {
 	}
 
 
+#if 0
 	/* raspberry pi power control */
 	if ( current.power_override_timeout > 0 ) {
 		current.power_override_timeout--;
 //		continue; what is this doing?
 	}
+#endif
+
 
 	/* set the output bit to reflect their requested state */
-//	output_bit(PI_POWER_EN,current.p_on);
-	output_high(PI_POWER_EN);
+	output_bit(PI_POWER_EN,current.p_on);
+//	output_high(PI_POWER_EN);
 }
 
 

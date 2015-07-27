@@ -369,6 +369,9 @@ void modbus_process(void) {
 					/* red led for 1 second */
 					timers.led_on_green=0;
 			}
+			/* reset watchdog seconds now that we are done processing request */
+			current.watchdog_seconds=0;
+
 		} else {
 			/* MODBUS packet for somebody else */
 			if ( current.modbus_other_packets < 65535 )
@@ -377,6 +380,7 @@ void modbus_process(void) {
 			/* yellow LED 200 milliseconds */
 			timers.led_on_green=20;
 		}
+
 	}
 //	output_low(TP_RED);
 }
