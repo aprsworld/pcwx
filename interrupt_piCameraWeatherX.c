@@ -27,6 +27,8 @@ void isr_100us(void) {
 	static short ext2_last=0;
 	static short ext2_state=0;
 
+//	output_high(TP_RED);
+	
 	/* count time between falling edges */
 	if ( ext0_count && 0xffff != timers.pulse_period[0] )
 		timers.pulse_period[0]++;
@@ -120,6 +122,8 @@ void isr_100us(void) {
 		tick=0;
 		timers.now_millisecond=1;
 	}
+
+//	output_low(TP_RED);
 }
 
 /*  Raspberry PI connected serial port*/

@@ -27,12 +27,21 @@ void adc_update(void) {
 
 	for ( i=0 ; i<8 ; i++ ) {
 		if ( 0==i ) { 
-			setup_adc_ports(AN0_TO_AN11,VSS_VREF);
+			/* PIC18F4523 can't individually select analogs. And our input voltage measurement got connected to AN11.
+			So if we want to turn on A11, we have to turn on AN8, AN9, AN10. And AN8 and AN10 happen to be INT2 and INT1.
+			Doing the anlog select causes those interrupts to trigger. So either no input voltage or no INT1 or INT2
+			with this revision of hardware */
+
+			current.adc_buffer[i][current.adc_buffer_index] = 0;
+			continue;
+		}
+
+//			setup_adc_ports(AN0_TO_AN11,VSS_VREF);
 			/* this will cause INT_EXT1 and INT_EXT2 to be analog while we do this sample. Potential for timing
 			inaccuracy? */
-		} else if ( 1==i ) {
-			setup_adc_ports(AN0_TO_AN7,VSS_VREF);
-		}
+//		} else if ( 1==i ) {
+//			setup_adc_ports(AN0_TO_AN7,VSS_VREF);
+//		}
 
 		set_adc_channel(adcChannelMap[i]);
 		delay_us(3);

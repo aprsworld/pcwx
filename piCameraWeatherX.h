@@ -68,3 +68,8 @@ typedef union {
 
 #byte port_b=GETENV("SFR:portb")
 #byte port_c=GETENV("SFR:portc")
+
+
+#define TP_BLACK PIN_D5
+#define TP_BROWN PIN_D7
+#define TP_RED   PIN_D6

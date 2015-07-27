@@ -101,7 +101,7 @@ void init() {
 	set_tris_a(0b00101111);
 	set_tris_b(0b11011111);
 	set_tris_c(0b10100010);
-	set_tris_d(0b10100100);
+	set_tris_d(0b10000100); /* D5 as output for debugging */
 	set_tris_e(0b00000111);
 
 	/* data structure initialization */
@@ -170,11 +170,18 @@ void periodic_millisecond(void) {
 	static int16 b0_state=0; /* bridge push button */
 	static int16 b1_state=0; /* reset line from PI */
 	static int16 b2_state=0; /* watchdog line from PI */
+	/* power control */
+	int16 adcValue;
+
+	output_high(TP_RED);
+
+//	output_toggle(TP_RED);
 
 	timers.now_millisecond=0;
 
 //	fputc('.',DEBUG);
 
+#if 0
 	/* button must be down for 12 milliseconds */
 	b0_state=(b0_state<<1) | !bit_test(timers.port_b,BUTTON_BIT) | 0xe000;
 	if ( b0_state==0xf000) {
@@ -187,8 +194,9 @@ void periodic_millisecond(void) {
 	if ( current.bridged_uarts ) {
 		return;
 	}
+#endif
 
-
+#if 0
 	/* reset must be down for 12 milliseconds */
 	b1_state=(b1_state<<1) | !bit_test(timers.port_c,PIC_BOOTLOAD_REQUEST_BIT) | 0xe000;
 	if ( b1_state==0xf000) {
@@ -198,13 +206,16 @@ void periodic_millisecond(void) {
 		}
 		/* BUG - I think that bootload request should be high for x milliseconds, rather than low */
 	}
+#endif
 
+#if 0
 	/* watchdog must be down for 12 milliseconds for hit to register */
 	b2_state=(b2_state<<1) | !bit_test(timers.port_c,WATCHDOG_FROM_PI_BIT) | 0xe000;
 	if ( b2_state==0xf000) {
 		/* watchdog hit */
 		current.watchdog_seconds=0;
 	}
+#endif
 
 	/* anemometers quit moving */
 	if ( 0xffff == timers.pulse_period[0] )
@@ -219,12 +230,13 @@ void periodic_millisecond(void) {
 	timers.port_b=port_b;
 	timers.port_c=port_c;
 
-
+#if 0
 	/* green LED control */
 	if ( current.bridged_uarts ) {
 		/* always on when ports are bridged */
 		output_high(LED_GREEN);
 	} else {
+#endif
 		/* green LED in Modbus mode */
 		if ( 0==timers.led_on_green ) {
 			output_low(LED_GREEN);
@@ -232,7 +244,9 @@ void periodic_millisecond(void) {
 			output_high(LED_GREEN);
 			timers.led_on_green--;
 		}
+#if 0
 	}
+#endif
 
 
 	/* some other random stuff that we don't need to do every cycle in main */
@@ -282,7 +296,10 @@ void periodic_millisecond(void) {
 		continue;
 	}
 
-	if ( adc_get(0) > config.power_on_above_adc ) {
+	/* read current ADC value */	
+	adcValue=adc_get(0);
+
+	if ( adcValue > config.power_on_above_adc ) {
 		if ( current.power_on_delay > 0 ) {
 			current.power_on_delay--;
 		} else {
@@ -293,7 +310,7 @@ void periodic_millisecond(void) {
 	}
 			
 
-	if ( adc_get(0) < config.power_off_below_adc ) {
+	if ( adcValue < config.power_off_below_adc ) {
 		if ( current.power_off_delay > 0 ) {
 			current.power_off_delay--;
 		} else {
@@ -309,7 +326,7 @@ void periodic_millisecond(void) {
 	output_high(PI_POWER_EN);
 
 
-
+	output_low(TP_RED);
 }
 
 
@@ -381,8 +398,11 @@ void main(void) {
 
 
 	for ( ; ; ) {
+//		output_toggle(TP_RED);
+
 		restart_wdt();
 
+#if 0
 		if ( current.bridged_uarts ) {
 			disable_interrupts(INT_TIMER2);
 			if ( kbhit(DEBUG) ) {
@@ -396,6 +416,7 @@ void main(void) {
 
 			continue;
 		} 
+#endif
 
 		if ( timers.now_millisecond ) {
 			periodic_millisecond();
@@ -407,9 +428,9 @@ void main(void) {
 			adc_update();
 		}
 
-		if ( ! current.bridged_uarts ) {
+//		if ( ! current.bridged_uarts ) {
 			modbus_process();
-		}
+//		}
 
 	}
 }
