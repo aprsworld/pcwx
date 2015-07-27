@@ -55,8 +55,8 @@ Parameters are stored in EEPROM
 #define AN_USER_USER_2 4
 #define AN_USER_USER_3 5
 
-#define AN_TEMPERATURE 0
-#define AN_IN_VOLTS    11
+#define AN_TEMPERATURE 0 /* not connected */
+#define AN_IN_VOLTS    0
 #define AN_WIND_DIR_0  6
 #define AN_WIND_DIR_1  7
 

@@ -173,9 +173,7 @@ void periodic_millisecond(void) {
 	/* power control */
 	int16 adcValue;
 
-	output_high(TP_RED);
-
-//	output_toggle(TP_RED);
+//	output_high(TP_RED);
 
 	timers.now_millisecond=0;
 
@@ -326,7 +324,7 @@ void periodic_millisecond(void) {
 	output_high(PI_POWER_EN);
 
 
-	output_low(TP_RED);
+//	output_low(TP_RED);
 }
 
 
@@ -398,8 +396,6 @@ void main(void) {
 
 
 	for ( ; ; ) {
-//		output_toggle(TP_RED);
-
 		restart_wdt();
 
 #if 0
