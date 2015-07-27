@@ -11,7 +11,7 @@ typedef struct {
 
 	int8 allow_bootload_request;
 	int16 watchdog_seconds_max;
-//	int16 pi_offtime_seconds;
+	int16 pi_offtime_seconds;
 
 
 	/* power control switch settings */
