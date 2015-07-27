@@ -11,7 +11,7 @@ typedef struct {
 
 	int8 allow_bootload_request;
 	int16 watchdog_seconds_max;
-	int8 pi_offtime_seconds;
+//	int16 pi_offtime_seconds;
 
 
 	/* power control switch settings */
@@ -51,7 +51,6 @@ typedef struct {
 	int1 bridged_uarts;
 
 	int16 watchdog_seconds;
-	int8 watchdog_power_on_after_seconds; /* when counter hits zero, power goes */
 
 	/* power control switch */
 	int8 p_on;
@@ -66,7 +65,7 @@ typedef struct {
 	int8 pulse_ch_en;
 
 	int8 led_on_green;
-	int8 load_off_seconds;
+	int16 load_off_seconds;
 
 	int1 now_adc_sample;
 	int1 now_adc_reset_count;

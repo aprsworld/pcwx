@@ -1,7 +1,7 @@
 #define MAX_STATUS_REGISTER  51
 
 #define MIN_CONFIG_REGISTER  1000
-#define MAX_CONFIG_REGISTER  1010
+#define MAX_CONFIG_REGISTER  1011
 
 
 /* This function may come in handy for you since MODBUS uses MSB first. */
@@ -148,6 +148,7 @@ int16 map_modbus(int16 addr) {
 		case 1008: return (int16) config.allow_bootload_request;
 		case 1009: return (int16) config.watchdog_seconds_max;
 		case 1010: return (int16) config.pi_offtime_seconds;
+		case 1011: return (int16) config.power_startup;
 
 		/* we should have range checked, and never gotten here */
 		default: return (int16) 65535;
@@ -248,10 +249,16 @@ exception modbus_write_register(int16 address, int16 value) {
 			break;
 
 		case 1010:
-			if ( value < 1 || value > 255 ) return ILLEGAL_DATA_VALUE;
+			if ( value < 1 ) return ILLEGAL_DATA_VALUE;
 			config.pi_offtime_seconds=value;
 			break;
 		
+		case 1011:
+			if ( value > 1 ) return ILLEGAL_DATA_VALUE;
+			config.power_startup=value;
+			break;
+		
+
 		case 1999:
 			/* write config to EEPROM */
 			if ( 1 != value ) return ILLEGAL_DATA_VALUE;
