@@ -66,6 +66,7 @@ typedef struct {
 	int8 pulse_ch_en;
 
 	int8 led_on_green;
+	int8 load_off_seconds;
 
 	int1 now_adc_sample;
 	int1 now_adc_reset_count;
@@ -107,6 +108,7 @@ void init() {
 
 	/* data structure initialization */
 	timers.led_on_green=0;
+	timers.load_off_seconds=2;
 	timers.now_adc_sample=0;
 	timers.now_adc_reset_count=0;
 	timers.now_millisecond=0;
@@ -240,6 +242,8 @@ void periodic_millisecond(void) {
 	}
 
 
+
+
 	/* some other random stuff that we don't need to do every cycle in main */
 	if ( current.interval_milliseconds < 65535 ) {
 		current.interval_milliseconds++;
@@ -255,24 +259,23 @@ void periodic_millisecond(void) {
 			current.watchdog_seconds++;
 		}
 
-		if ( 0 != config.watchdog_seconds_max && current.watchdog_seconds > config.watchdog_seconds_max ) {
-			/* when this timer reaches 0, then we power back on */
-			current.watchdog_power_on_after_seconds=config.pi_offtime_seconds+1;
+		if ( 0 != config.watchdog_seconds_max && current.watchdog_seconds > config.watchdog_seconds_max && 0 == timers.load_off_seconds ) {
+			timers.load_off_seconds=config.pi_offtime_seconds;
 		}
 
-		if ( current.watchdog_power_on_after_seconds > 0 ) {
-			/* we are in off time */
-			current.watchdog_power_on_after_seconds--;
-			current.p_on=0;
+		/* control power to the raspberrry pi load */
+		if ( 0==timers.load_off_seconds ) {
+			output_high(PI_POWER_EN);
+		} else {
+			output_low(PI_POWER_EN);
+			timers.load_off_seconds--;
 
-			/* reset out watchdog seconds so we don't immediately power back off */
-			if ( 0 == current.watchdog_power_on_after_seconds ) {
+			if ( 0 == timers.load_off_seconds ) {
+				/* reset watchdog seconds so we can turn back on */
 				current.watchdog_seconds=0;
 			}
-		} else {
-			/* we should be on */
-			current.p_on=1;
-		}	
+		}
+
 		
 		/* uptime counter */
 		uptimeTicks++;
@@ -337,9 +340,6 @@ void periodic_millisecond(void) {
 #endif
 
 
-	/* set the output bit to reflect their requested state */
-	output_bit(PI_POWER_EN,current.p_on);
-//	output_high(PI_POWER_EN);
 }
 
 
@@ -382,7 +382,7 @@ void main(void) {
 	fprintf(DEBUG," complete\r\n");
 
 
-	if ( config.modbus_address > 127 ) {
+	if ( config.modbus_address != 255 && config.modbus_address > 127 ) {
 		fprintf(DEBUG,"# write_default_param_file() starting ...");
 		write_default_param_file();
 		fprintf(DEBUG," complete\r\n");
