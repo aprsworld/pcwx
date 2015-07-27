@@ -12,6 +12,15 @@ typedef struct {
 	int8 allow_bootload_request;
 	int16 watchdog_seconds_max;
 	int8 pi_offtime_seconds;
+
+
+	/* power control switch settings */
+	int8 power_startup;
+	int16 power_off_below_adc;
+	int16 power_off_below_delay;
+	int16 power_on_above_adc;
+	int16 power_on_above_delay;
+	int16 power_override_timeout;
 } struct_config;
 
 
@@ -42,6 +51,12 @@ typedef struct {
 	int1 bridged_uarts;
 
 	int16 watchdog_seconds;
+
+	/* power control switch */
+	int8 p_on;
+	int16 power_on_delay;
+	int16 power_off_delay;
+	int16 power_override_timeout;
 } struct_current;
 
 typedef struct {
@@ -117,6 +132,11 @@ void init() {
 	current.watchdog_seconds=0;
 
 
+	/* power control switch */
+	current.power_on_delay=config.power_on_above_delay;
+	current.power_off_delay=config.power_off_below_delay;
+	current.power_override_timeout=0;
+
 
 	/* interrupts */
 
@@ -162,6 +182,12 @@ void periodic_millisecond(void) {
 		current.bridged_uarts = !current.bridged_uarts;
 		fprintf(DEBUG,"# bridged=%u\r\n",current.bridged_uarts);
 	}
+
+	/* if we are in bridged uarts ... only check for button press */
+	if ( current.bridged_uarts ) {
+		return;
+	}
+
 
 	/* reset must be down for 12 milliseconds */
 	b1_state=(b1_state<<1) | !bit_test(timers.port_c,PIC_BOOTLOAD_REQUEST_BIT) | 0xe000;
@@ -248,6 +274,42 @@ void periodic_millisecond(void) {
 		adcTicks=0;
 		timers.now_adc_sample=1;
 	}
+
+
+	/* raspberry pi power control */
+	if ( current.power_override_timeout > 0 ) {
+		current.power_override_timeout--;
+		continue;
+	}
+
+	if ( adc_get(0) > config.power_on_above_adc ) {
+		if ( current.power_on_delay > 0 ) {
+			current.power_on_delay--;
+		} else {
+			current.p_on=1;
+		}
+	} else {
+		current.power_on_delay=config.power_on_above_delay;
+	}
+			
+
+	if ( adc_get(0) < config.power_off_below_adc ) {
+		if ( current.power_off_delay > 0 ) {
+			current.power_off_delay--;
+		} else {
+			current.p_on=0;
+		}
+	} else {
+		current.power_off_delay=config.power_off_below_delay;
+	}
+	
+
+	/* set the output bit to reflect their requested state */
+//	output_bit(PI_POWER_EN,current.p_on);
+	output_high(PI_POWER_EN);
+
+
+
 }
 
 
@@ -258,6 +320,7 @@ void main(void) {
 
 	init();
 
+#if 0
 	output_high(LED_GREEN);
 	output_high(PI_POWER_EN);
 	delay_ms(1000);
@@ -266,7 +329,7 @@ void main(void) {
 	delay_ms(1000);
 	output_high(LED_GREEN);
 	output_high(PI_POWER_EN);
-
+#endif
 
 
 
@@ -312,10 +375,27 @@ void main(void) {
 		adc_update();
 	}
 
+	/* set power switch to initial state */
+	current.p_on=config.power_startup;
+
 
 
 	for ( ; ; ) {
 		restart_wdt();
+
+		if ( current.bridged_uarts ) {
+			disable_interrupts(INT_TIMER2);
+			if ( kbhit(DEBUG) ) {
+				fputc(fgetc(DEBUG),MODBUS_SERIAL);
+			}
+
+			if ( !bit_test(timers.port_b,BUTTON_BIT) ) {
+				current.bridged_uarts=0;
+				enable_interrupts(INT_TIMER2);
+			}
+
+			continue;
+		} 
 
 		if ( timers.now_millisecond ) {
 			periodic_millisecond();
