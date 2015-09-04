@@ -52,10 +52,12 @@ Parameters are stored in EEPROM
 #define SER_TO_NET               PIN_D6
 #define SER_FROM_NET             PIN_D7
 #define PI_POWER_FLAG            PIN_C1
+
 #define ADC_CLK                  PIN_C3
 #define ADC_DOUT                 PIN_C4
 #define ADC_DIN                  PIN_C5
 #define ADC_NCS                  PIN_D2
+
 #define RS485_NRE                PIN_D0
 #define RS485_DE                 PIN_D1
 #define PIC_TO_PI                PIN_D3

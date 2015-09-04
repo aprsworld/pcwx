@@ -32,6 +32,7 @@ file_004=.
 file_005=.
 file_006=.
 file_007=.
+file_008=.
 [GENERATED_FILES]
 file_000=no
 file_001=no
@@ -41,6 +42,7 @@ file_004=no
 file_005=no
 file_006=no
 file_007=no
+file_008=no
 [OTHER_FILES]
 file_000=no
 file_001=no
@@ -50,6 +52,7 @@ file_004=yes
 file_005=yes
 file_006=yes
 file_007=yes
+file_008=yes
 [FILE_INFO]
 file_000=piCameraWeatherX.c
 file_001=piCameraWeatherX.h
@@ -59,6 +62,7 @@ file_004=interrupt_piCameraWeatherX.c
 file_005=modbus_handler_piCameraWeatherX.c
 file_006=modbus_slave_piCameraWeatherX.c
 file_007=param_piCameraWeatherX.c
+file_008=mcp3208_piCameraWeatherX.c
 [SUITE_INFO]
 suite_guid={BA86BF99-4C07-4CE2-A9E7-C2A337910996}
 suite_state=

@@ -82,7 +82,7 @@ struct_config config;
 struct_current current;
 struct_time_keep timers;
 
-
+#include "mcp3208_piCameraWeatherX.c"
 #include "adc_piCameraWeatherX.c"
 #include "param_piCameraWeatherX.c"
 

@@ -1,11 +1,10 @@
-#define MCP3208_CLK  SPI_CLK
-#define MCP3208_DOUT SPI_DOUT
-#define MCP3208_DIN  SPI_DIN
+#define MCP3208_CLK  ADC_CLK
+#define MCP3208_DOUT ADC_DOUT
+#define MCP3208_DIN  ADC_DIN
 
-
+#inline
 void mcp3208_init(void) {
-	output_high(CS_ADC1);
-	output_high(CS_ADC0);
+	output_high(ADC_NCS);
 }
 
 int16 mcp3208_read(int8 ch) {
@@ -13,20 +12,12 @@ int16 mcp3208_read(int8 ch) {
 	int8 i;
 	int8 c;
 
-//	return (int16) ch; 
-
 
 
 	output_low(MCP3208_CLK);
 	output_high(MCP3208_DIN);
 
-
-	if ( ch<8 ) {
-		output_low(CS_ADC0);
-	} else {
-		output_low(CS_ADC1);
-		ch-=8;
-	}
+	output_low(ADC_NCS);
 
 	/* d0, d1, d2, single / !differential, start */	
 	if ( 0 == ch ) 
@@ -65,7 +56,7 @@ int16 mcp3208_read(int8 ch) {
 	bit_clear(value,13);
 	bit_clear(value,12);
 
-	/* de-select both ADCs */
+	/* de-select ADCs */
 	mcp3208_init();
 
 	return value;
