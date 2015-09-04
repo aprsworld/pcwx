@@ -1,4 +1,4 @@
-#include <18F4523.h>
+#include <18F46K22.h>
 #device ADC=12
 #device *=16
 #device HIGH_INTS=TRUE /* allow high priority "FAST" interrutps */
