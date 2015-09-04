@@ -136,8 +136,9 @@ int16 map_modbus(int16 addr) {
 		case 51: reset_modbus_stats(); return (int16) 0;
 
 		/* configuration */
+		case 1000: return (int16) input(BUTTON);
 //		case 1000: return (int16) modbus_rx.len;
-		case 1000: return (int16) config.serial_prefix;
+//		case 1000: return (int16) config.serial_prefix;
 		case 1001: return (int16) config.serial_number;
 		case 1002: return (int16) 'P';
 		case 1003: return (int16) 'W';

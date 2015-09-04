@@ -100,13 +100,14 @@ void init() {
 
 	setup_adc(ADC_OFF);
 
-/*
-	set_tris_a(0b00101111);
-	set_tris_b(0b11011111);
-	set_tris_c(0b10100010);
-	set_tris_d(0b10000100); 
-	set_tris_e(0b00000111);
-*/
+	port_b_pullups(0b00001000);
+
+	set_tris_a(0b00000000);
+	set_tris_b(0b11111111);
+	set_tris_c(0b10010010);
+	set_tris_d(0b10000000); 
+	set_tris_e(0b00000000);
+
 
 	/* data structure initialization */
 	timers.led_on_green=0;
@@ -362,7 +363,6 @@ void main(void) {
 	output_high(LED_GREEN);
 	output_high(PI_POWER_EN);
 #endif
-
 
 
 	fprintf(DEBUG,"# piCameraWeatherX %s\r\n",__DATE__);
