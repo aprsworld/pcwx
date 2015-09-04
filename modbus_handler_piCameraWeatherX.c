@@ -258,7 +258,11 @@ exception modbus_write_register(int16 address, int16 value) {
 			config.power_startup=value;
 			break;
 		
-
+		case 1998:
+			/* write default config to EEPROM */
+			if ( 1 != value ) return ILLEGAL_DATA_VALUE;
+			write_default_param_file();
+			break;
 		case 1999:
 			/* write config to EEPROM */
 			if ( 1 != value ) return ILLEGAL_DATA_VALUE;
