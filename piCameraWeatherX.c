@@ -95,15 +95,18 @@ struct_time_keep timers;
 void init() {
 	int8 i;
 
-	setup_adc_ports(AN0_TO_AN7,VSS_VREF);
-	setup_adc(ADC_CLOCK_DIV_16 | ADC_TAD_MUL_20 );
+//	setup_adc_ports(AN0_TO_AN7,VSS_VREF);
+//	setup_adc(ADC_CLOCK_DIV_16 | ADC_TAD_MUL_20 );
 
+	setup_adc(ADC_OFF);
 
+/*
 	set_tris_a(0b00101111);
 	set_tris_b(0b11011111);
 	set_tris_c(0b10100010);
-	set_tris_d(0b10000100); /* D5 as output for debugging */
+	set_tris_d(0b10000100); 
 	set_tris_e(0b00000111);
+*/
 
 	/* data structure initialization */
 	timers.led_on_green=0;

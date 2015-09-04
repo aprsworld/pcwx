@@ -1,6 +1,7 @@
-const int8 adcChannelMap[8]={AN_IN_VOLTS, AN_TEMPERATURE, AN_WIND_DIR_0, AN_WIND_DIR_1, AN_USER_USER_0, AN_USER_USER_1, AN_USER_USER_2, AN_USER_USER_3};
+// const int8 adcChannelMap[8]={AN_IN_VOLTS, AN_TEMPERATURE, AN_WIND_DIR_0, AN_WIND_DIR_1, AN_USER_USER_0, AN_USER_USER_1, AN_USER_USER_2, AN_USER_USER_3};
 
 int16 adc_get(int8 ch) {
+#if 0
 	int16 sum;
 	int8 i;
 
@@ -18,10 +19,13 @@ int16 adc_get(int8 ch) {
 
 	/* divide sum by our 16 samples and round by adding 8 */
 	return ( (sum+8) >> 4 );
+#endif
+	return (int16) 0;
 }
 
 
 void adc_update(void) {
+#if 0
 	int8 i;
 
 	/* wrap buffer around */
@@ -50,8 +54,5 @@ void adc_update(void) {
 
 		delay_us(3);
 	}
-
-
-
-
+#endif
 }

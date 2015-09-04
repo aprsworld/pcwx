@@ -4,7 +4,7 @@
 #device HIGH_INTS=TRUE /* allow high priority "FAST" interrutps */
 
 #include <stdlib.h>
-#FUSES HS,NOPROTECT,PUT,NOLVP,BROWNOUT,NOMCLR,WDT32768
+#FUSES HSM,NOPROTECT,PUT,NOLVP,BROWNOUT,NOMCLR,WDT32768
 #use delay(clock=12000000, restart_wdt)
 
 /* 
@@ -20,15 +20,15 @@ Parameters are stored in EEPROM
 #use rs232(UART1,stream=MODBUS_SERIAL,baud=WEATHER_X_BAUD,xmit=PIN_C6,rcv=PIN_C7,errors)	
 
 
-#byte TXSTA=GETENV("SFR:txsta")
+#byte TXSTA=GETENV("SFR:txsta1")
 #bit  TRMT=TXSTA.1
 
 #byte PORTB=GETENV("SFR:portb")
 #byte INTCON2=GETENV("SFR:intcon2")
 #bit RBPU=INTCON2.7
 
-/* FTDI cable on software serial port */
-#use rs232(stream=DEBUG, baud=9600,xmit=PIN_D6,rcv=PIN_D7,errors)	
+/* UART2 - RS-485 network */
+#use rs232(UART2, stream=DEBUG, baud=9600,errors)	
 
 
 
@@ -39,16 +39,30 @@ Parameters are stored in EEPROM
 #use fast_io(D)
 #use fast_io(E)
 
-#define LED_GREEN                PIN_C2
+#define LED_GREEN                PIN_A3
 #define BUTTON                   PIN_B3
 #define BUTTON_BIT               3
 #define PI_POWER_EN              PIN_C0
-#define PIC_BOOTLOAD_REQUEST     PIN_D2 
-#define PIC_BOOTLOAD_REQUEST_BIT 2
-#define WATCHDOG_FROM_PI         PIN_C5
+#define PIC_BOOTLOAD_REQUEST     PIN_B4
+#define PIC_BOOTLOAD_REQUEST_BIT 4
+#define WATCHDOG_FROM_PI         PIN_B5
 #define WATCHDOG_FROM_PI_BIT     5
+#define SYNC_OUT                 PIN_D4
+#define SER_TO_NET               PIN_D6
+#define SER_FROM_NET             PIN_D7
+#define PI_POWER_FLAG            PIN_C1
+#define ADC_CLK                  PIN_C3
+#define ADC_DOUT                 PIN_C4
+#define ADC_DIN                  PIN_C5
+#define ADC_NCS                  PIN_D2
+#define RS485_NRE                PIN_D0
+#define RS485_DE                 PIN_D1
+#define PIC_TO_PI                PIN_D3
+#define SER_TO_PI                PIN_C6
+#define SER_FROM_PI              PIN_C7
 
 
+#if 0
 /* analog channels */
 #define AN_USER_USER_0 1
 #define AN_USER_USER_1 2
@@ -59,6 +73,7 @@ Parameters are stored in EEPROM
 #define AN_IN_VOLTS    0
 #define AN_WIND_DIR_0  6
 #define AN_WIND_DIR_1  7
+#endif
 
 typedef union {
 	int16 l[2];
@@ -69,7 +84,3 @@ typedef union {
 #byte port_b=GETENV("SFR:portb")
 #byte port_c=GETENV("SFR:portc")
 
-
-#define TP_BLACK PIN_D5
-#define TP_BROWN PIN_D7
-#define TP_RED   PIN_D6

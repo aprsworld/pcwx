@@ -120,7 +120,7 @@ int16 map_modbus(int16 addr) {
 
 		/* status */
 		case 42: return (int16) current.sequence_number++;
-		case 43: output_toggle(TP_RED); return (int16) current.interval_milliseconds; /* milliseconds since last query */
+		case 43: return (int16) current.interval_milliseconds; /* milliseconds since last query */
 		case 44: return (int16) current.uptime_minutes; 
 		case 45: return (int16) current.watchdog_seconds; 
 
