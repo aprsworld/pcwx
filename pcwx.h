@@ -67,20 +67,6 @@ Parameters are stored in EEPROM
 #define SER_TO_PI                PIN_C6
 #define SER_FROM_PI              PIN_C7
 
-
-#if 0
-/* analog channels */
-#define AN_USER_USER_0 1
-#define AN_USER_USER_1 2
-#define AN_USER_USER_2 4
-#define AN_USER_USER_3 5
-
-#define AN_TEMPERATURE 0 /* not connected */
-#define AN_IN_VOLTS    0
-#define AN_WIND_DIR_0  6
-#define AN_WIND_DIR_1  7
-#endif
-
 typedef union {
 	int16 l[2];
     int8 b[4];

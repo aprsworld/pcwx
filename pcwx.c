@@ -364,6 +364,7 @@ void main(void) {
 	output_high(PI_POWER_EN);
 #endif
 
+	/* sent on RS-485 port */
 	output_high(RS485_DE);
 	output_high(RS485_NRE);
 	delay_ms(1);
@@ -391,24 +392,7 @@ void main(void) {
 
 	output_low(RS485_DE);
 	output_low(RS485_NRE);
-
-	
-	for ( ; ; ) {
-		if ( kbhit(DEBUG) ) {
-			i=fgetc(DEBUG);
-
-	
-			output_high(RS485_DE);
-			output_high(RS485_NRE);
-
-			fputc(i,DEBUG);
-			while ( ! TRMT2 )
-				;
-	
-			output_low(RS485_DE);
-			output_low(RS485_NRE);
-		}
-	}
+	/* done with RS-485 port startup message */
 
 
 
@@ -426,9 +410,6 @@ void main(void) {
 	fprintf(DEBUG," complete\r\n");
 
 	fprintf(DEBUG,"# bridged_uarts=%u\r\n",current.bridged_uarts);
-
-//	enable_interrupts(INT_RDA);
-//	enable_interrupts(GLOBAL);
 
 	/* Prime ADC filter */
 	for ( i=0 ; i<30 ; i++ ) {
