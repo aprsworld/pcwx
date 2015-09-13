@@ -1,4 +1,4 @@
-#include "piCameraWeatherX.h"
+#include "pcwx.h"
 
 typedef struct {
 	int8 modbus_address;
@@ -82,14 +82,14 @@ struct_config config;
 struct_current current;
 struct_time_keep timers;
 
-#include "mcp3208_piCameraWeatherX.c"
-#include "adc_piCameraWeatherX.c"
-#include "param_piCameraWeatherX.c"
+#include "mcp3208_pcwx.c"
+#include "adc_pcwx.c"
+#include "param_pcwx.c"
 
-#include "modbus_slave_piCameraWeatherX.c"
-#include "modbus_handler_piCameraWeatherX.c"
+#include "modbus_slave_pcwx.c"
+#include "modbus_handler_pcwx.c"
 
-#include "interrupt_piCameraWeatherX.c"
+#include "interrupt_pcwx.c"
 
 
 void init() {
@@ -164,7 +164,7 @@ void init() {
 
 	enable_interrupts(INT_TIMER2);
 //	enable_interrupts(INT_RDA2); /* debug cable */
-	/* RDA - PI is turned on in modbus_slave_piCameraWeatherX's init */
+	/* RDA - PI is turned on in modbus_slave_pcwx's init */
 }
 
 
@@ -367,7 +367,7 @@ void main(void) {
 	output_high(RS485_DE);
 	output_high(RS485_NRE);
 	delay_ms(1);
-	fprintf(DEBUG,"# piCameraWeatherX %s\r\n",__DATE__);
+	fprintf(DEBUG,"# pcwx %s\r\n",__DATE__);
 	fprintf(DEBUG,"# restart_cause()=%u ",i);
 	switch ( i ) {
 		case WDT_TIMEOUT: fprintf(DEBUG,"WDT_TIMEOUT"); break;
