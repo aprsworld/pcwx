@@ -24,6 +24,9 @@ Parameters are stored in EEPROM
 #byte TXSTA=GETENV("SFR:txsta1")
 #bit  TRMT=TXSTA.1
 
+#byte TXSTA2=GETENV("SFR:txsta2")
+#bit  TRMT2=TXSTA2.1
+
 #byte PORTB=GETENV("SFR:portb")
 #byte INTCON2=GETENV("SFR:intcon2")
 #bit RBPU=INTCON2.7

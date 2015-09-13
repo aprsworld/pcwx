@@ -364,7 +364,9 @@ void main(void) {
 	output_high(PI_POWER_EN);
 #endif
 
-
+	output_high(RS485_DE);
+	output_high(RS485_NRE);
+	delay_ms(1);
 	fprintf(DEBUG,"# piCameraWeatherX %s\r\n",__DATE__);
 	fprintf(DEBUG,"# restart_cause()=%u ",i);
 	switch ( i ) {
@@ -382,6 +384,32 @@ void main(void) {
 	fprintf(DEBUG,"# read_param_file() starting ...");
 	read_param_file();
 	fprintf(DEBUG," complete\r\n");
+
+	/* wait for message to finish transmitting */
+	while ( ! TRMT2 )
+		;
+
+	output_low(RS485_DE);
+	output_low(RS485_NRE);
+
+	
+	for ( ; ; ) {
+		if ( kbhit(DEBUG) ) {
+			i=fgetc(DEBUG);
+
+	
+			output_high(RS485_DE);
+			output_high(RS485_NRE);
+
+			fputc(i,DEBUG);
+			while ( ! TRMT2 )
+				;
+	
+			output_low(RS485_DE);
+			output_low(RS485_NRE);
+		}
+	}
+
 
 
 	if ( config.modbus_address != 255 && config.modbus_address > 127 ) {
