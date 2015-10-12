@@ -262,6 +262,9 @@ void periodic_millisecond(void) {
 			current.watchdog_seconds++;
 		}
 
+		/* shut off when:
+			a) watchdog_seconds_max != 0 AND watchdog_seconds is greater than watchdog_seconds_max AND it isn't already off 
+		*/
 		if ( 0 != config.watchdog_seconds_max && current.watchdog_seconds > config.watchdog_seconds_max && 0 == timers.load_off_seconds ) {
 			timers.load_off_seconds=config.pi_offtime_seconds;
 		}
@@ -334,14 +337,6 @@ void periodic_millisecond(void) {
 	}
 
 
-#if 0
-	/* raspberry pi power control */
-	if ( current.power_override_timeout > 0 ) {
-		current.power_override_timeout--;
-//		continue; what is this doing?
-	}
-#endif
-
 
 }
 
@@ -353,21 +348,11 @@ void main(void) {
 
 	init();
 
-#if 0
-	output_high(LED_GREEN);
-	output_high(PI_POWER_EN);
-	delay_ms(1000);
-	output_low(LED_GREEN);
-	output_low(PI_POWER_EN);
-	delay_ms(1000);
-	output_high(LED_GREEN);
-	output_high(PI_POWER_EN);
-#endif
 
-	/* sent on RS-485 port */
+	/* debugging messages sent on RS-485 port ... so we will start transmitting */
 	output_high(RS485_DE);
 	output_high(RS485_NRE);
-	delay_ms(1);
+
 	fprintf(DEBUG,"# pcwx %s\r\n",__DATE__);
 	fprintf(DEBUG,"# restart_cause()=%u ",i);
 	switch ( i ) {
@@ -385,15 +370,6 @@ void main(void) {
 	fprintf(DEBUG,"# read_param_file() starting ...");
 	read_param_file();
 	fprintf(DEBUG," complete\r\n");
-
-	/* wait for message to finish transmitting */
-	while ( ! TRMT2 )
-		;
-
-	output_low(RS485_DE);
-	output_low(RS485_NRE);
-	/* done with RS-485 port startup message */
-
 
 
 	if ( config.modbus_address != 255 && config.modbus_address > 127 ) {
@@ -419,6 +395,13 @@ void main(void) {
 	/* set power switch to initial state */
 	current.p_on=config.power_startup;
 
+
+	/* shut off RS-485 transmit once transmit buffer is empty */
+	while ( ! TRMT2 )
+		;
+	output_low(RS485_DE);
+	output_low(RS485_NRE);
+	/* done with RS-485 port startup message */
 
 
 	for ( ; ; ) {

@@ -3,6 +3,9 @@
 #define MIN_CONFIG_REGISTER  1000
 #define MAX_CONFIG_REGISTER  1011
 
+#define MIN_EE_REGISTER      2000
+#define MAX_EE_REGISTER      MIN_EE_REGISTER + 512
+
 
 /* This function may come in handy for you since MODBUS uses MSB first. */
 int8 swap_bits(int8 c) {
@@ -58,6 +61,9 @@ int32 get_pulse_sum(int8 ch) {
 int16 map_modbus(int16 addr) {
 	static u_lblock ps;
 
+	if ( addr >= MIN_EE_REGISTER && addr < MAX_EE_REGISTER ) {
+		return (int16) read_eeprom(addr - MIN_EE_REGISTER);
+	}
 
 	switch ( addr ) {
 		/* counters */
@@ -136,9 +142,9 @@ int16 map_modbus(int16 addr) {
 		case 51: reset_modbus_stats(); return (int16) 0;
 
 		/* configuration */
-		case 1000: return (int16) input(BUTTON);
+//		case 1000: return (int16) input(BUTTON);
 //		case 1000: return (int16) modbus_rx.len;
-//		case 1000: return (int16) config.serial_prefix;
+		case 1000: return (int16) config.serial_prefix;
 		case 1001: return (int16) config.serial_number;
 		case 1002: return (int16) 'P';
 		case 1003: return (int16) 'W';
@@ -165,6 +171,9 @@ int8 modbus_valid_read_registers(int16 start, int16 end) {
 	
 	if ( start >= MIN_CONFIG_REGISTER && end <= MAX_CONFIG_REGISTER+1 )
 		return 1;
+
+	if ( start >= MIN_EE_REGISTER && end <= MAX_EE_REGISTER+1 )
+		return 1;
 	
 
 	/* end is always start + at least one ... so no need to test for range starting at 0 */
@@ -178,6 +187,8 @@ int8 modbus_valid_write_registers(int16 start, int16 end) {
 	if ( 19999==start && 20000==end)
 		return 1;
 
+	if ( start >= MIN_EE_REGISTER && end <= MAX_EE_REGISTER+1 )
+		return 1;
 
 	if ( start >= MIN_CONFIG_REGISTER && end <= MAX_CONFIG_REGISTER+1 )
 		return 1;
@@ -211,6 +222,12 @@ try to write the specified register
 if successful, return 0, otherwise return a modbus exception
 */
 exception modbus_write_register(int16 address, int16 value) {
+
+	if ( address >= MIN_EE_REGISTER && address < MAX_EE_REGISTER ) {
+		if ( value > 256 ) return ILLEGAL_DATA_VALUE;
+		write_eeprom(address,(int8) value);
+		return 0;
+	}
 
 	/* if we have been unlocked, then we can modify serial number */
 	if ( current.factory_unlocked ) {
