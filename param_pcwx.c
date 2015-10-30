@@ -40,7 +40,7 @@ void write_default_param_file() {
 	timers.led_on_green=150;
 
 //	config.modbus_address=38;
-	config.modbus_address=255; /* use any address */
+	config.modbus_address=128; /* use any address */
 
 	config.serial_prefix='P';
 	config.serial_number=9876;

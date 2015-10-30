@@ -372,7 +372,7 @@ void main(void) {
 	fprintf(DEBUG," complete\r\n");
 
 
-	if ( config.modbus_address != 255 && config.modbus_address > 127 ) {
+	if ( config.modbus_address > 128 ) {
 		fprintf(DEBUG,"# write_default_param_file() starting ...");
 		write_default_param_file();
 		fprintf(DEBUG," complete\r\n");

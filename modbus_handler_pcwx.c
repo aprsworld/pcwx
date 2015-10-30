@@ -245,8 +245,8 @@ exception modbus_write_register(int16 address, int16 value) {
 			
 
 		case 1006:
-			/* Modbus address {0 to 127} */
-			if ( value != 255 && value > 127 ) return ILLEGAL_DATA_VALUE;
+			/* Modbus address {0 to 127 or 128 for respond to any} */
+			if ( value > 128 ) return ILLEGAL_DATA_VALUE;
 			config.modbus_address=value;
 			break;
 
@@ -317,7 +317,7 @@ void modbus_process(void) {
 	if ( modbus_kbhit() ) {
 //		output_high(TP_RED);
 
-		if ( 255==config.modbus_address || modbus_rx.address==config.modbus_address ) {
+		if ( 128==config.modbus_address || modbus_rx.address==config.modbus_address ) {
 			/* Modbus statistics */
 			if ( current.modbus_our_packets < 65535 )
 				current.modbus_our_packets++;
