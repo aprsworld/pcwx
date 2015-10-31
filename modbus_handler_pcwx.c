@@ -62,7 +62,7 @@ int16 map_modbus(int16 addr) {
 	static u_lblock ps;
 
 	if ( addr >= MIN_EE_REGISTER && addr < MAX_EE_REGISTER ) {
-		return (int16) read_eeprom(addr - MIN_EE_REGISTER);
+		return (int16) read_eeprom(addr - MIN_EE_REGISTER + EE_FOR_HOST_ADDRESS);
 	}
 
 	switch ( addr ) {
@@ -225,7 +225,7 @@ exception modbus_write_register(int16 address, int16 value) {
 
 	if ( address >= MIN_EE_REGISTER && address < MAX_EE_REGISTER ) {
 		if ( value > 256 ) return ILLEGAL_DATA_VALUE;
-		write_eeprom(address,(int8) value);
+		write_eeprom(address - MIN_EE_REGISTER + EE_FOR_HOST_ADDRESS,(int8) value);
 		return 0;
 	}
 
