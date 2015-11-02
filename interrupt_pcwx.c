@@ -142,11 +142,11 @@ void isr_rda2() {
 void isr_rda() {
 	int8 c;
 
-	c=fgetc(MODBUS_SERIAL);
+	c=fgetc(STREAM_PI);
 
 	if ( current.bridged_uarts ) {
 		/* from PI to debugging cable */
-		fputc(c,DEBUG);
+		fputc(c,STREAM_RS485);
 		return;
 	}
 

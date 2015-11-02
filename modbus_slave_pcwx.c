@@ -223,8 +223,8 @@ const char modbus_auchCRCLo[] = {
 // Outputs:    None
 void RCV_ON(void) {
 	// Clear RX buffer. Clear RDA interrupt flag. Clear overrun error flag.
-	while ( kbhit(MODBUS_SERIAL) ) {
-		fgetc(MODBUS_SERIAL);
+	while ( kbhit(STREAM_PI) ) {
+		fgetc(STREAM_PI);
 	}
 
 	clear_interrupt(INT_RDA);
@@ -293,7 +293,7 @@ void modbus_calc_crc(char data)
 // Inputs:     Character
 // Outputs:    None
 void modbus_serial_putc(int8 c) {
-	fputc(c, MODBUS_SERIAL);
+	fputc(c, STREAM_PI);
 	modbus_calc_crc(c);
 
 	/* one stop bit delay */

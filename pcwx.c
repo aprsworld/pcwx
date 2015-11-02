@@ -354,6 +354,7 @@ void main(void) {
 	output_high(RS485_DE);
 	output_high(RS485_NRE);
 
+#if 0
 	fprintf(DEBUG,"# pcwx %s\r\n",__DATE__);
 	fprintf(DEBUG,"# restart_cause()=%u ",i);
 	switch ( i ) {
@@ -367,26 +368,27 @@ void main(void) {
 		default: fprintf(DEBUG,"unknown!");
 	}
 	fprintf(DEBUG,"\r\n");
+#endif
 
-	fprintf(DEBUG,"# read_param_file() starting ...");
+//	fprintf(DEBUG,"# read_param_file() starting ...");
 	read_param_file();
-	fprintf(DEBUG," complete\r\n");
+//	fprintf(DEBUG," complete\r\n");
 
 
 	if ( config.modbus_address > 128 ) {
-		fprintf(DEBUG,"# write_default_param_file() starting ...");
+//		fprintf(DEBUG,"# write_default_param_file() starting ...");
 		write_default_param_file();
-		fprintf(DEBUG," complete\r\n");
+//		fprintf(DEBUG," complete\r\n");
 	}
 
 	/* start Modbus slave */
 	setup_uart(TRUE);
 	/* modbus_init turns on global interrupts */
-	fprintf(DEBUG,"# modbus_init() starting ...");
+//	fprintf(DEBUG,"# modbus_init() starting ...");
 	modbus_init();
-	fprintf(DEBUG," complete\r\n");
+//	fprintf(DEBUG," complete\r\n");
 
-	fprintf(DEBUG,"# bridged_uarts=%u\r\n",current.bridged_uarts);
+//	fprintf(DEBUG,"# bridged_uarts=%u\r\n",current.bridged_uarts);
 
 	/* Prime ADC filter */
 	for ( i=0 ; i<30 ; i++ ) {
@@ -397,13 +399,14 @@ void main(void) {
 	current.p_on=config.power_startup;
 
 
+#if 0
 	/* shut off RS-485 transmit once transmit buffer is empty */
 	while ( ! TRMT2 )
 		;
 	output_low(RS485_DE);
 	output_low(RS485_NRE);
 	/* done with RS-485 port startup message */
-
+#endif
 
 	for ( ; ; ) {
 		restart_wdt();

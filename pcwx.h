@@ -21,7 +21,7 @@ Parameters are stored in EEPROM
 
 
 /* UART1 - async serial connection connection to Pi */
-#use rs232(UART1,stream=MODBUS_SERIAL,baud=WEATHER_X_BAUD,xmit=PIN_C6,rcv=PIN_C7,errors)	
+#use rs232(UART1,stream=STREAM_PI,baud=WEATHER_X_BAUD,xmit=PIN_C6,rcv=PIN_C7,errors)	
 
 
 #byte TXSTA=GETENV("SFR:txsta1")
