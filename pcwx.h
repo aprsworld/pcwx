@@ -35,7 +35,7 @@ Parameters are stored in EEPROM
 #bit RBPU=INTCON2.7
 
 /* UART2 - RS-485 network */
-#use rs232(UART2, stream=DEBUG, baud=9600,errors)	
+#use rs232(UART2, stream=STREAM_RS485, baud=9600,errors)	
 
 
 

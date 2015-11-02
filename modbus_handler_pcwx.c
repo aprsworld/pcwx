@@ -1,7 +1,7 @@
 #define MAX_STATUS_REGISTER  51
 
 #define MIN_CONFIG_REGISTER  1000
-#define MAX_CONFIG_REGISTER  1011
+#define MAX_CONFIG_REGISTER  1012
 
 #define MIN_EE_REGISTER      2000
 #define MAX_EE_REGISTER      MIN_EE_REGISTER + 512
@@ -156,6 +156,7 @@ int16 map_modbus(int16 addr) {
 		case 1009: return (int16) config.watchdog_seconds_max;
 		case 1010: return (int16) config.pi_offtime_seconds;
 		case 1011: return (int16) config.power_startup;
+		case 1012: return (int16) config.modbus_bridge;
 
 		/* we should have range checked, and never gotten here */
 		default: return (int16) 65535;
@@ -275,6 +276,12 @@ exception modbus_write_register(int16 address, int16 value) {
 			if ( value > 1 ) return ILLEGAL_DATA_VALUE;
 			config.power_startup=value;
 			break;
+
+		case 1012:
+			if ( value > 1 ) return ILLEGAL_DATA_VALUE;
+			config.modbus_bridge=value;
+			break;
+		
 		
 		case 1998:
 			/* write default config to EEPROM */
@@ -316,6 +323,10 @@ void modbus_process(void) {
 	/* check for message */
 	if ( modbus_kbhit() ) {
 //		output_high(TP_RED);
+
+		if ( 1==config.modbus_bridge && modbus_rx.address!=config.modbus_address ) {
+			/* add to buffer to send to RS-485 network */
+		}
 
 		if ( 128==config.modbus_address || modbus_rx.address==config.modbus_address ) {
 			/* Modbus statistics */

@@ -3,6 +3,7 @@
 typedef struct {
 	int8 modbus_address;
 	int8 modbus_mode;
+	int8 modbus_bridge;
 
 	int8 serial_prefix;
 	int16 serial_number;

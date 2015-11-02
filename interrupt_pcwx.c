@@ -126,6 +126,17 @@ void isr_100us(void) {
 //	output_low(TP_RED);
 }
 
+#int_rda2
+void isr_rda2() {
+	int8 c;
+
+	c=fgetc(STREAM_RS485);
+
+	if ( config.modbus_bridge) {
+		/* add to buffer to send to PI */
+	}
+}
+
 /*  Raspberry PI connected serial port*/
 #int_rda
 void isr_rda() {
@@ -137,8 +148,7 @@ void isr_rda() {
 		/* from PI to debugging cable */
 		fputc(c,DEBUG);
 		return;
-	} 
-
+	}
 
 	/* Modbus */
 	if (!modbus_serial_new) {
