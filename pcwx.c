@@ -75,6 +75,16 @@ typedef struct {
 
 	int8 port_b;
 	int8 port_c;
+
+	short now_parse_rda;
+	int8 rda_buff[256];
+	int8 rda_buff_pos;
+	int8 rda_buff_gap;
+
+	short now_parse_rda2;
+	int8 rda2_buff[256];
+	int8 rda2_buff_pos;
+	int8 rda2_buff_gap;
 } struct_time_keep;
 
 
@@ -118,6 +128,14 @@ void init() {
 	timers.now_millisecond=0;
 	timers.port_b=0b11111111;
 	timers.port_c=0b11111111;
+
+	timers.rda_buff_pos=0;
+	timers.rda_buff_gap=255;
+	timers.now_parse_rda=0;
+
+	timers.rda2_buff_pos=0;
+	timers.rda2_buff_gap=255;
+	timers.now_parse_rda2=0;
 
 	for ( i=0 ; i<3 ; i++ ) {
 		current.pulse_period[i]=0;
@@ -164,7 +182,7 @@ void init() {
 	setup_timer_2(T2_DIV_BY_4,74,1);
 
 	enable_interrupts(INT_TIMER2);
-//	enable_interrupts(INT_RDA2); /* debug cable */
+	enable_interrupts(INT_RDA2); /* debug cable */
 	/* RDA - PI is turned on in modbus_slave_pcwx's init */
 }
 
@@ -182,7 +200,7 @@ void periodic_millisecond(void) {
 
 	timers.now_millisecond=0;
 
-//	fputc('.',DEBUG);
+//	fputc('.',STREAM_RS485);
 
 #if 0
 	/* button must be down for 12 milliseconds */
@@ -190,7 +208,7 @@ void periodic_millisecond(void) {
 	if ( b0_state==0xf000) {
 		/* button pressed */
 		current.bridged_uarts = !current.bridged_uarts;
-		fprintf(DEBUG,"# bridged=%u\r\n",current.bridged_uarts);
+		fprintf(STREAM_RS485,"# bridged=%u\r\n",current.bridged_uarts);
 	}
 
 	/* if we are in bridged uarts ... only check for button press */
@@ -337,8 +355,42 @@ void periodic_millisecond(void) {
 		adcValue=65535; /* signal power control (above) on next pass to resample */
 	}
 
+	/* for xbee */		
+	if ( timers.rda_buff_gap < 255 ) {
+		timers.rda_buff_gap++;
+	}
+	/* for bluetooth */
+	if ( timers.rda2_buff_gap < 255 ) {
+		timers.rda2_buff_gap++;
+	}
+
+	/* xbee: if we have data and we have >=3 miliseconds gap, we parse */
+	if ( timers.rda_buff_gap >= 3 && timers.rda_buff_pos>0 ) {
+		timers.now_parse_rda=1;	
+	}
+	/* bluetooth: if we have data and we have >=3 miliseconds gap, we parse */
+	if ( timers.rda2_buff_gap >= 3 && timers.rda2_buff_pos>0 ) {
+		timers.now_parse_rda2=1;	
+	}
+}
 
 
+void rs485_to_host(void) {
+	int8 buff[sizeof(timers.rda2_buff)];
+	int8 length;
+	int16 l;
+
+	/* get a local copy of our data */
+	length=timers.rda2_buff_pos;
+	timers.rda2_buff_pos=255; /* stop getting more data for a second */
+	memcpy(buff,timers.rda2_buff,length);
+	timers.rda2_buff_gap=0;
+	timers.rda2_buff_pos=0;
+
+	/* transmit back out to the PI */
+	for ( l=0 ; l<length ; l++ ) {
+		fputc(buff[l],STREAM_PI);
+	}
 }
 
 
@@ -354,41 +406,44 @@ void main(void) {
 	output_high(RS485_DE);
 	output_high(RS485_NRE);
 
-#if 0
-	fprintf(DEBUG,"# pcwx %s\r\n",__DATE__);
-	fprintf(DEBUG,"# restart_cause()=%u ",i);
+#if 1
+	fprintf(STREAM_RS485,"# pcwx %s\r\n",__DATE__);
+	fprintf(STREAM_RS485,"# restart_cause()=%u ",i);
+
 	switch ( i ) {
-		case WDT_TIMEOUT: fprintf(DEBUG,"WDT_TIMEOUT"); break;
-		case MCLR_FROM_SLEEP: fprintf(DEBUG,"MCLR_FROM_SLEEP"); break;
-		case MCLR_FROM_RUN: fprintf(DEBUG,"MCLR_FROM_RUN"); break;
-		case NORMAL_POWER_UP: fprintf(DEBUG,"NORMAL_POWER_UP"); break;
-		case BROWNOUT_RESTART: fprintf(DEBUG,"BROWNOUT_RESTART"); break;
-		case WDT_FROM_SLEEP: fprintf(DEBUG,"WDT_FROM_SLEEP"); break;
-		case RESET_INSTRUCTION: fprintf(DEBUG,"RESET_INSTRUCTION"); break;
-		default: fprintf(DEBUG,"unknown!");
+		case WDT_TIMEOUT: fprintf(STREAM_RS485,"WDT_TIMEOUT"); break;
+		case MCLR_FROM_SLEEP: fprintf(STREAM_RS485,"MCLR_FROM_SLEEP"); break;
+		case MCLR_FROM_RUN: fprintf(STREAM_RS485,"MCLR_FROM_RUN"); break;
+		case NORMAL_POWER_UP: fprintf(STREAM_RS485,"NORMAL_POWER_UP"); break;
+		case BROWNOUT_RESTART: fprintf(STREAM_RS485,"BROWNOUT_RESTART"); break;
+		case WDT_FROM_SLEEP: fprintf(STREAM_RS485,"WDT_FROM_SLEEP"); break;
+		case RESET_INSTRUCTION: fprintf(STREAM_RS485,"RESET_INSTRUCTION"); break;
+		default: fprintf(STREAM_RS485,"unknown!");
 	}
-	fprintf(DEBUG,"\r\n");
+	fprintf(STREAM_RS485,"\r\n");
 #endif
 
-//	fprintf(DEBUG,"# read_param_file() starting ...");
+//	fprintf(STREAM_RS485,"# read_param_file() starting ...");
 	read_param_file();
-//	fprintf(DEBUG," complete\r\n");
+fprintf(STREAM_RS485,"# config.modbus_address=%u\r\n",config.modbus_address);
+//	fprintf(STREAM_RS485," complete\r\n");
 
 
 	if ( config.modbus_address > 128 ) {
-//		fprintf(DEBUG,"# write_default_param_file() starting ...");
+//		fprintf(STREAM_RS485,"# write_default_param_file() starting ...");
 		write_default_param_file();
-//		fprintf(DEBUG," complete\r\n");
+//		fprintf(STREAM_RS485," complete\r\n");
 	}
+	fprintf(STREAM_RS485,"# config.modbus_address=%u\r\n",config.modbus_address);
 
 	/* start Modbus slave */
 	setup_uart(TRUE);
 	/* modbus_init turns on global interrupts */
-//	fprintf(DEBUG,"# modbus_init() starting ...");
+//	fprintf(STREAM_RS485,"# modbus_init() starting ...");
 	modbus_init();
-//	fprintf(DEBUG," complete\r\n");
+//	fprintf(STREAM_RS485," complete\r\n");
 
-//	fprintf(DEBUG,"# bridged_uarts=%u\r\n",current.bridged_uarts);
+//	fprintf(STREAM_RS485,"# bridged_uarts=%u\r\n",current.bridged_uarts);
 
 	/* Prime ADC filter */
 	for ( i=0 ; i<30 ; i++ ) {
@@ -399,7 +454,7 @@ void main(void) {
 	current.p_on=config.power_startup;
 
 
-#if 0
+#if 1
 	/* shut off RS-485 transmit once transmit buffer is empty */
 	while ( ! TRMT2 )
 		;
@@ -408,14 +463,16 @@ void main(void) {
 	/* done with RS-485 port startup message */
 #endif
 
+	fprintf(STREAM_PI,"# pcwx %s\r\n",__DATE__);
+
 	for ( ; ; ) {
 		restart_wdt();
 
 #if 0
 		if ( current.bridged_uarts ) {
 			disable_interrupts(INT_TIMER2);
-			if ( kbhit(DEBUG) ) {
-				fputc(fgetc(DEBUG),MODBUS_SERIAL);
+			if ( kbhit(STREAM_RS485) ) {
+				fputc(fgetc(STREAM_RS485),MODBUS_SERIAL);
 			}
 
 			if ( !bit_test(timers.port_b,BUTTON_BIT) ) {
@@ -440,6 +497,12 @@ void main(void) {
 //		if ( ! current.bridged_uarts ) {
 			modbus_process();
 //		}
+
+
+		if ( timers.now_parse_rda2 ) {
+			timers.now_parse_rda2=0;
+			rs485_to_host();
+		}
 
 	}
 }

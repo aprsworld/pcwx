@@ -134,6 +134,13 @@ void isr_rda2() {
 
 	if ( config.modbus_bridge) {
 		/* add to buffer to send to PI */
+
+		timers.rda2_buff_gap=0;
+
+		if ( timers.rda2_buff_pos < sizeof(timers.rda2_buff)-1 ) {
+			timers.rda2_buff[timers.rda2_buff_pos]=c;
+			timers.rda2_buff_pos++;
+		}
 	}
 }
 

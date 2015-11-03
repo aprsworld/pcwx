@@ -325,7 +325,37 @@ void modbus_process(void) {
 //		output_high(TP_RED);
 
 		if ( 1==config.modbus_bridge && modbus_rx.address!=config.modbus_address ) {
-			/* add to buffer to send to RS-485 network */
+			/* rebuld modbus packet and send to RS-485 port */
+
+			/* start transmitting */
+			output_high(RS485_DE);
+			output_high(RS485_NRE);
+			/* 3.5 character delay (3500000/baud) */
+			delay_us(365); /* 9600 */
+
+			/* address */
+			fputc(modbus_rx.address,STREAM_RS485);
+			delay_us(104); //one stop bit @ 9600 baud
+
+			/* function */
+			fputc(modbus_rx.func,STREAM_RS485);
+			delay_us(104); //one stop bit @ 9600 baud
+
+			/* data and (hopefully) CRC */
+			for ( i=0 ; i<modbus_rx.len+2 ; i++ ) {
+				fputc(modbus_rx.data[i],STREAM_RS485);
+				delay_us(104); //one stop bit @ 9600 baud
+			}
+
+			/* wait for transmitter buffer to empty */
+			while ( ! TRMT2 )
+				;
+			/* 3.5 character delay (3500000/baud) */
+			delay_us(365); /* 9600 */
+			/* shut off transmitter */
+			output_low(RS485_DE);
+			output_low(RS485_NRE);
+
 		}
 
 		if ( 128==config.modbus_address || modbus_rx.address==config.modbus_address ) {
@@ -418,7 +448,7 @@ void modbus_process(void) {
 				current.modbus_other_packets++;
 
 			/* yellow LED 200 milliseconds */
-			timers.led_on_green=20;
+			timers.led_on_green=10;
 		}
 
 	}

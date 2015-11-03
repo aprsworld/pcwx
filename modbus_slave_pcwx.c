@@ -322,7 +322,7 @@ void modbus_serial_send_start(int8 to, int8 func)
  //  output_high(MODBUS_SERIAL_ENABLE_PIN);
 
 	/* 3.5 character delay (3500000/baud) */
-	delay_us(31); /* 115200 */
+	delay_us(61); /* 57600 */
 
    modbus_serial_putc(to);
    modbus_serial_putc(func);
@@ -341,7 +341,7 @@ void modbus_serial_send_stop()
    WAIT_FOR_HW_BUFFER();
     
 	/* 3.5 character delay (3500000/baud) */
-	delay_us(31); /* 115200 */
+	delay_us(61); /* 57600 */
 
 
    RCV_ON();
