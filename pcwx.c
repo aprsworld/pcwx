@@ -364,12 +364,12 @@ void periodic_millisecond(void) {
 		timers.rda2_buff_gap++;
 	}
 
-	/* xbee: if we have data and we have >=3 miliseconds gap, we parse */
-	if ( timers.rda_buff_gap >= 3 && timers.rda_buff_pos>0 ) {
+	/* xbee: if we have data and we have >=10 miliseconds gap, we parse */
+	if ( timers.rda_buff_gap >= 10 && timers.rda_buff_pos>0 ) {
 		timers.now_parse_rda=1;	
 	}
 	/* bluetooth: if we have data and we have >=3 miliseconds gap, we parse */
-	if ( timers.rda2_buff_gap >= 3 && timers.rda2_buff_pos>0 ) {
+	if ( timers.rda2_buff_gap >= 10 && timers.rda2_buff_pos>0 ) {
 		timers.now_parse_rda2=1;	
 	}
 }
@@ -402,11 +402,12 @@ void main(void) {
 	init();
 
 
+#if 0
 	/* debugging messages sent on RS-485 port ... so we will start transmitting */
 	output_high(RS485_DE);
 	output_high(RS485_NRE);
 
-#if 1
+
 	fprintf(STREAM_RS485,"# pcwx %s\r\n",__DATE__);
 	fprintf(STREAM_RS485,"# restart_cause()=%u ",i);
 
@@ -425,7 +426,6 @@ void main(void) {
 
 //	fprintf(STREAM_RS485,"# read_param_file() starting ...");
 	read_param_file();
-fprintf(STREAM_RS485,"# config.modbus_address=%u\r\n",config.modbus_address);
 //	fprintf(STREAM_RS485," complete\r\n");
 
 
@@ -434,7 +434,7 @@ fprintf(STREAM_RS485,"# config.modbus_address=%u\r\n",config.modbus_address);
 		write_default_param_file();
 //		fprintf(STREAM_RS485," complete\r\n");
 	}
-	fprintf(STREAM_RS485,"# config.modbus_address=%u\r\n",config.modbus_address);
+//	fprintf(STREAM_RS485,"# config.modbus_address=%u\r\n",config.modbus_address);
 
 	/* start Modbus slave */
 	setup_uart(TRUE);
@@ -454,7 +454,7 @@ fprintf(STREAM_RS485,"# config.modbus_address=%u\r\n",config.modbus_address);
 	current.p_on=config.power_startup;
 
 
-#if 1
+#if 0
 	/* shut off RS-485 transmit once transmit buffer is empty */
 	while ( ! TRMT2 )
 		;
