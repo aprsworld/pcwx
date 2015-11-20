@@ -1,10 +1,19 @@
-#define MAX_STATUS_REGISTER  51
+#define MAX_STATUS_REGISTER          51
 
-#define MIN_CONFIG_REGISTER  1000
-#define MAX_CONFIG_REGISTER  1012
+#define MIN_CONFIG_REGISTER          1000
+#define MAX_CONFIG_REGISTER          1012
 
-#define MIN_EE_REGISTER      2000
-#define MAX_EE_REGISTER      MIN_EE_REGISTER + 512
+#define MIN_NMEA0183_CONFIG_REGISTER 1100
+#define MAX_NMEA0183_CONFIG_REGISTER 1100 + N_NMEA0183_SENTENCES*6
+
+#define MIN_EE_REGISTER              2000
+#define MAX_EE_REGISTER              MIN_EE_REGISTER + 512
+
+#define MIN_NMEA0183_BYTE_REGISTER   5000
+#define MAX_NMEA0183_BYTE_REGISTER   MIN_NMEA0183_BYTE_REGISTER + N_NMEA0183_SENTENCES*80
+
+#define MIN_NMEA0183_WORD_REGISTER   6000
+#define MAX_NMEA0183_WORD_REGISTER   MIN_NMEA0183_WORD_REGISTER + N_NMEA0183_SENTENCES*40
 
 
 /* This function may come in handy for you since MODBUS uses MSB first. */
@@ -60,9 +69,21 @@ int32 get_pulse_sum(int8 ch) {
 
 int16 map_modbus(int16 addr) {
 	static u_lblock ps;
+	int8 n,o;
 
 	if ( addr >= MIN_EE_REGISTER && addr < MAX_EE_REGISTER ) {
 		return (int16) read_eeprom(addr - MIN_EE_REGISTER + EE_FOR_HOST_ADDRESS);
+	}
+
+	if ( addr >= MIN_NMEA0183_CONFIG_REGISTER && addr < MIN_NMEA0183_CONFIG_REGISTER ) {
+		/* get rid of our base */
+		n = (addr-MIN_NMEA0183_CONFIG_REGISTER);
+
+		/* configurable sentence parts are the first 6 characters */
+		o = n % 6; /* offset into sentence */
+		n = n / 6; /* number of sentence */
+
+		return (int16) config.nmea0183_sentence[n][o];
 	}
 
 	switch ( addr ) {
@@ -169,7 +190,9 @@ int8 modbus_valid_read_registers(int16 start, int16 end) {
 	if ( 19999==start && 20000==end)
 		return 1;
 
-	
+	if ( start >= MIN_NMEA0183_CONFIG_REGISTER && end <= MAX_NMEA0183_CONFIG_REGISTER+1 )
+		return 1;
+
 	if ( start >= MIN_CONFIG_REGISTER && end <= MAX_CONFIG_REGISTER+1 )
 		return 1;
 
@@ -189,6 +212,9 @@ int8 modbus_valid_write_registers(int16 start, int16 end) {
 		return 1;
 
 	if ( start >= MIN_EE_REGISTER && end <= MAX_EE_REGISTER+1 )
+		return 1;
+
+	if ( start >= MIN_NMEA0183_CONFIG_REGISTER && end <= MAX_NMEA0183_CONFIG_REGISTER+1 )
 		return 1;
 
 	if ( start >= MIN_CONFIG_REGISTER && end <= MAX_CONFIG_REGISTER+1 )
@@ -223,12 +249,29 @@ try to write the specified register
 if successful, return 0, otherwise return a modbus exception
 */
 exception modbus_write_register(int16 address, int16 value) {
+	int8 n,o;
 
 	if ( address >= MIN_EE_REGISTER && address < MAX_EE_REGISTER ) {
 		if ( value > 256 ) return ILLEGAL_DATA_VALUE;
 		write_eeprom(address - MIN_EE_REGISTER + EE_FOR_HOST_ADDRESS,(int8) value);
 		return 0;
 	}
+
+	if ( address >= MIN_NMEA0183_CONFIG_REGISTER && address < MAX_NMEA0183_CONFIG_REGISTER ) {
+		if ( value > 256 ) return ILLEGAL_DATA_VALUE;
+
+		/* get rid of our base */
+		n = (address-MIN_NMEA0183_CONFIG_REGISTER);
+
+		/* configurable sentence parts are the first 6 characters */
+		o = n % 6; /* offset into sentence */
+		n = n / 6; /* number of sentence */
+
+		config.nmea0183_sentence[n][o]=(int8) value;
+		
+		return 0;
+	}
+
 
 	/* if we have been unlocked, then we can modify serial number */
 	if ( current.factory_unlocked ) {

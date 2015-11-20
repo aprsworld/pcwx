@@ -4,6 +4,7 @@
 #define RS485_MODE_MODBUS_BRIDGE 1
 #define RS485_MODE_NMEA0183_RX   2
 
+#define N_NMEA0183_SENTENCES 12
 
 typedef struct {
 	int8 modbus_address;
@@ -28,6 +29,9 @@ typedef struct {
 	int16 power_on_above_adc;
 	int16 power_on_above_delay;
 	int16 power_override_timeout;
+
+	/* sentences we make available via modbus */
+	int8 nmea0183_sentence[N_NMEA0183_SENTENCES][6];
 } struct_config;
 
 
@@ -89,7 +93,8 @@ typedef struct {
 } struct_time_keep;
 
 
-#define N_NMEA0183_SENTENCES 12
+
+#define NMEA_SENTENCE_LENGTH 80
 typedef struct {
 	int8 sentence[N_NMEA0183_SENTENCES][80];
 } struct_nmea;
@@ -161,6 +166,8 @@ void init() {
 	current.bridged_uarts=0;
 	current.watchdog_seconds=0;
 
+	/* zero out NMEA structure */
+	memset(&nmea,0,sizeof(nmea));
 
 	/* power control switch */
 	current.power_on_delay=config.power_on_above_delay;

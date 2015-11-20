@@ -53,6 +53,13 @@ void write_default_param_file() {
 	config.pi_offtime_seconds=2;
 	config.power_startup=0;
 
+	/* clear NMEA0183 sentence character array */
+	memset(config.nmea0183_sentence,0,sizeof(config.nmea0183_sentence));
+	/* set defaults. Can set the first 11 this way. Have to do them in order.
+	 12th would overrun end of array */
+	strcpy(config.nmea0183_sentence[0],"$GPRMC");
+	strcpy(config.nmea0183_sentence[1],"$WIMDA");
+
 	/* write them so next time we use from EEPROM */
 	write_param_file();
 
