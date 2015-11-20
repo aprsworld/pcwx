@@ -169,6 +169,7 @@ void init() {
 	/* zero out NMEA structure */
 	memset(&nmea,0,sizeof(nmea));
 
+
 	/* power control switch */
 	current.power_on_delay=config.power_on_above_delay;
 	current.power_off_delay=config.power_off_below_delay;
@@ -176,14 +177,6 @@ void init() {
 
 
 	/* interrupts */
-
-	/* external interrupts for anemometers */
-	ext_int_edge(0,H_TO_L);
-//	enable_interrupts(INT_EXT);
-	ext_int_edge(1,H_TO_L);
-//	enable_interrupts(INT_EXT1);
-	ext_int_edge(2,H_TO_L);
-//	enable_interrupts(INT_EXT2);
 
 	/* one periodic interrupt @ 100uS. Generated from internal 16 MHz clock */
 	/* prescale=16, match=24, postscale=1. Match is 24 because when match occurs, one cycle is lost */
@@ -383,6 +376,7 @@ void rs485_to_host(void) {
 	int8 buff[sizeof(timers.rda2_buff)];
 	int8 length;
 	int16 l;
+	int8 i;
 
 	/* get a local copy of our data */
 	length=timers.rda2_buff_pos;
@@ -399,6 +393,32 @@ void rs485_to_host(void) {
 		}
 	} else if ( RS485_MODE_NMEA0183_RX==config.rs485_port_mode ) {
 		/* do something */
+		/* null terminate buff so we can treat it as a string */
+		buff[length]='\0';
+
+		/* put copy in 11th slot no mater what ... for debugging */
+		strncpy(nmea.sentence[11],buff,NMEA_SENTENCE_LENGTH-1);
+		/* always null terminate final character */
+		nmea.sentence[11][NMEA_SENTENCE_LENGTH-1]='\0';
+
+		/* too short to be a NMEA0183 sentence */
+		if ( length < 6 ) {
+			return;
+		}
+
+		/* search through list of sentences to record and see if we exist */
+		for ( i=0 ; i<N_NMEA0183_SENTENCES ; i++ ) {
+			/* compare first six characters */
+			if ( 0 != strncmp(buff,config.nmea0183_sentence[i],6) ) {
+				/* no match */
+				continue;
+			}
+
+			/* put copy in 11th slot no mater what ... for debugging */
+			strncpy(nmea.sentence[i],buff,NMEA_SENTENCE_LENGTH-1);
+			/* always null terminate final character */
+			nmea.sentence[i][NMEA_SENTENCE_LENGTH-1]='\0';
+		}
 	}
 }
 

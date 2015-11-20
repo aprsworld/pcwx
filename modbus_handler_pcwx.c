@@ -103,7 +103,7 @@ int16 map_modbus(int16 addr) {
 		addr = addr * 2;
 
  		p  = nmea.sentence[0];
-		return (int16) make16(p[addr+1],p[addr]);
+		return (int16) make16(p[addr],p[addr+1]);
 	}
 
 
@@ -212,7 +212,14 @@ int8 modbus_valid_read_registers(int16 start, int16 end) {
 	if ( 19999==start && 20000==end)
 		return 1;
 
-	if ( start >= MIN_NMEA0183_CONFIG_REGISTER && end <= MAX_NMEA0183_CONFIG_REGISTER+1 )
+
+	if ( start >= MIN_NMEA0183_WORD_REGISTER && end <= MAX_NMEA0183_WORD_REGISTER ) 
+		return 1;
+
+	if ( start >= MIN_NMEA0183_BYTE_REGISTER && end <= MAX_NMEA0183_BYTE_REGISTER ) 
+		return 1;
+
+	if ( start >= MIN_NMEA0183_CONFIG_REGISTER && end <= MAX_NMEA0183_CONFIG_REGISTER )
 		return 1;
 
 	if ( start >= MIN_CONFIG_REGISTER && end <= MAX_CONFIG_REGISTER+1 )
@@ -231,12 +238,6 @@ int8 modbus_valid_read_registers(int16 start, int16 end) {
 
 int8 modbus_valid_write_registers(int16 start, int16 end) {
 	if ( 19999==start && 20000==end)
-		return 1;
-
-	if ( start >= MIN_NMEA0183_WORD_REGISTER && end <= MAX_NMEA0183_WORD_REGISTER+1) 
-		return 1;
-
-	if ( start >= MIN_NMEA0183_BYTE_REGISTER && end <= MAX_NMEA0183_BYTE_REGISTER+1) 
 		return 1;
 
 	if ( start >= MIN_EE_REGISTER && end <= MAX_EE_REGISTER+1 )
