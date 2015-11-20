@@ -1,11 +1,11 @@
-CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
+CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 15:06
 
                Filename: C:\Users\James Jarvis\Desktop\planetPrecision\pcwx\pcwx.lst
 
                ROM used: 8942 bytes (14%)
                          Largest free fragment is 56590
-               RAM used: 970 (25%) at main() level
-                         1234 (32%) worst case
+               RAM used: 1930 (50%) at main() level
+                         2194 (56%) worst case
                Stack:    9 worst case (6 in main + 3 for interrupts)
 
 *
@@ -2030,12 +2030,12 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... #use delay(clock=12000000, restart_wdt) 
 *
 00EA8:  MOVLW  05
-00EAA:  MOVLB  3
-00EAC:  SUBWF  xD1,F
+00EAA:  MOVLB  7
+00EAC:  SUBWF  x91,F
 00EAE:  BNC   0EC4
-00EB0:  MOVLW  03
+00EB0:  MOVLW  07
 00EB2:  MOVWF  FEA
-00EB4:  MOVLW  D1
+00EB4:  MOVLW  91
 00EB6:  MOVWF  FE9
 00EB8:  MOVF   FEF,W
 00EBA:  BZ    0EC4
@@ -2237,16 +2237,19 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 	int8 rda2_buff_gap; 
 .................... } struct_time_keep; 
 ....................  
+....................  
+.................... #define N_NMEA0183_SENTENCES 12 
 .................... typedef struct { 
-.................... 	int8 buff[1024]; 
+.................... 	int8 sentence[N_NMEA0183_SENTENCES][80]; 
 .................... } struct_nmea; 
+....................  
 ....................  
 ....................  
 .................... /* global structures */ 
 .................... struct_config config; 
 .................... struct_current current; 
 .................... struct_time_keep timers; 
-.................... //struct_nmea nmea; 
+.................... struct_nmea nmea; 
 ....................  
 .................... #include "mcp3208_pcwx.c" 
 .................... #define MCP3208_CLK  ADC_CLK 
@@ -2278,95 +2281,95 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 	/* d0, d1, d2, single / !differential, start */	 
 .................... 	if ( 0 == ch )  
-00AE0:  MOVLB  3
-00AE2:  MOVF   xCD,F
+00AE0:  MOVLB  7
+00AE2:  MOVF   x8D,F
 00AE4:  BNZ   0AEC
 .................... 		c=0b00011; 
 00AE6:  MOVLW  03
-00AE8:  MOVWF  xD1
+00AE8:  MOVWF  x91
 .................... 	else if ( 1 == ch )  
 00AEA:  BRA    0B36
-00AEC:  DECFSZ xCD,W
+00AEC:  DECFSZ x8D,W
 00AEE:  BRA    0AF6
 .................... 		c=0b10011; 
 00AF0:  MOVLW  13
-00AF2:  MOVWF  xD1
+00AF2:  MOVWF  x91
 .................... 	else if ( 2 == ch )  
 00AF4:  BRA    0B36
-00AF6:  MOVF   xCD,W
+00AF6:  MOVF   x8D,W
 00AF8:  SUBLW  02
 00AFA:  BNZ   0B02
 .................... 		c=0b01011; 
 00AFC:  MOVLW  0B
-00AFE:  MOVWF  xD1
+00AFE:  MOVWF  x91
 .................... 	else if ( 3 == ch )  
 00B00:  BRA    0B36
-00B02:  MOVF   xCD,W
+00B02:  MOVF   x8D,W
 00B04:  SUBLW  03
 00B06:  BNZ   0B0E
 .................... 		c=0b11011; 
 00B08:  MOVLW  1B
-00B0A:  MOVWF  xD1
+00B0A:  MOVWF  x91
 .................... 	else if ( 4 == ch ) 
 00B0C:  BRA    0B36
-00B0E:  MOVF   xCD,W
+00B0E:  MOVF   x8D,W
 00B10:  SUBLW  04
 00B12:  BNZ   0B1A
 .................... 		c=0b00111; 
 00B14:  MOVLW  07
-00B16:  MOVWF  xD1
+00B16:  MOVWF  x91
 .................... 	else if ( 5 == ch )  
 00B18:  BRA    0B36
-00B1A:  MOVF   xCD,W
+00B1A:  MOVF   x8D,W
 00B1C:  SUBLW  05
 00B1E:  BNZ   0B26
 .................... 		c=0b10111; 
 00B20:  MOVLW  17
-00B22:  MOVWF  xD1
+00B22:  MOVWF  x91
 .................... 	else if ( 6 == ch ) 
 00B24:  BRA    0B36
-00B26:  MOVF   xCD,W
+00B26:  MOVF   x8D,W
 00B28:  SUBLW  06
 00B2A:  BNZ   0B32
 .................... 		c=0b01111; 
 00B2C:  MOVLW  0F
-00B2E:  MOVWF  xD1
+00B2E:  MOVWF  x91
 .................... 	else 
 00B30:  BRA    0B36
 .................... 		c=0b11111; 
 00B32:  MOVLW  1F
-00B34:  MOVWF  xD1
+00B34:  MOVWF  x91
 ....................  
 .................... 	/* select out channel and start the conversion */ 
 .................... 	for ( i=0 ; i<5 ; i++ ) { 
-00B36:  CLRF   xD0
-00B38:  MOVF   xD0,W
+00B36:  CLRF   x90
+00B38:  MOVF   x90,W
 00B3A:  SUBLW  04
 00B3C:  BNC   0B54
 .................... 		output_low(MCP3208_CLK); 
 00B3E:  BCF    F8B.3
 .................... 		output_bit(MCP3208_DIN,c&1); 
-00B40:  BTFSC  xD1.0
+00B40:  BTFSC  x91.0
 00B42:  BRA    0B48
 00B44:  BCF    F8B.5
 00B46:  BRA    0B4A
 00B48:  BSF    F8B.5
 .................... 		c=c>>1; 
 00B4A:  BCF    FD8.0
-00B4C:  RRCF   xD1,F
+00B4C:  RRCF   x91,F
 .................... 		output_high(MCP3208_CLK); 
 00B4E:  BSF    F8B.3
 .................... 	} 
-00B50:  INCF   xD0,F
+00B50:  INCF   x90,F
 00B52:  BRA    0B38
 ....................  
 ....................  
 .................... 	value=0; 
-00B54:  CLRF   xCF
-00B56:  CLRF   xCE
+00B54:  CLRF   x8F
+00B56:  CLRF   x8E
 .................... 	for ( i=0 ; i<14 ; i++ ) { 
-00B58:  CLRF   xD0
-00B5A:  MOVF   xD0,W
+00B58:  CLRF   x90
+00B5A:  MOVF   x90,W
 00B5C:  SUBLW  0D
 00B5E:  BNC   0B76
 .................... 		output_low(MCP3208_CLK); 
@@ -2377,26 +2380,26 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00B66:  BCF    FD8.0
 00B68:  BRA    0B6C
 00B6A:  BSF    FD8.0
-00B6C:  RLCF   xCE,F
-00B6E:  RLCF   xCF,F
+00B6C:  RLCF   x8E,F
+00B6E:  RLCF   x8F,F
 .................... 		output_high(MCP3208_CLK); 
 00B70:  BSF    F8B.3
 .................... 	} 
-00B72:  INCF   xD0,F
+00B72:  INCF   x90,F
 00B74:  BRA    0B5A
 ....................  
 .................... 	bit_clear(value,13); 
-00B76:  BCF    xCF.5
+00B76:  BCF    x8F.5
 .................... 	bit_clear(value,12); 
-00B78:  BCF    xCF.4
+00B78:  BCF    x8F.4
 ....................  
 .................... 	/* de-select ADCs */ 
 .................... 	mcp3208_init(); 
 ....................  
 .................... 	return value; 
 *
-00B7C:  MOVFF  3CE,01
-00B80:  MOVFF  3CF,02
+00B7C:  MOVFF  78E,01
+00B80:  MOVFF  78F,02
 .................... } 
 00B84:  MOVLB  0
 00B86:  GOTO   0BF6 (RETURN)
@@ -2412,12 +2415,12 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 	int16 *p; 
 .................... 	p = current.adc_buffer[ch]; 
 *
-00C80:  MOVLB  3
-00C82:  CLRF   xE5
-00C84:  MOVFF  3DE,3E4
-00C88:  CLRF   xE7
+00C80:  MOVLB  7
+00C82:  CLRF   xA5
+00C84:  MOVFF  79E,7A4
+00C88:  CLRF   xA7
 00C8A:  MOVLW  20
-00C8C:  MOVWF  xE6
+00C8C:  MOVWF  xA6
 00C8E:  MOVLB  0
 00C90:  RCALL  0742
 00C92:  MOVFF  02,03
@@ -2426,51 +2429,51 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00C9A:  MOVWF  01
 00C9C:  MOVLW  00
 00C9E:  ADDWFC 03,F
-00CA0:  MOVFF  01,3E2
-00CA4:  MOVLB  3
-00CA6:  MOVFF  03,3E3
+00CA0:  MOVFF  01,7A2
+00CA4:  MOVLB  7
+00CA6:  MOVFF  03,7A3
 ....................  
 .................... 	// Calculate the mean.  This is done by summing up the 
 .................... 	// values and dividing by the number of elements. 
 .................... 	sum = 0; 
-00CAA:  CLRF   xE0
-00CAC:  CLRF   xDF
+00CAA:  CLRF   xA0
+00CAC:  CLRF   x9F
 .................... 	for( i = 0; i < 16 ; i++ ) { 
-00CAE:  CLRF   xE1
-00CB0:  MOVF   xE1,W
+00CAE:  CLRF   xA1
+00CB0:  MOVF   xA1,W
 00CB2:  SUBLW  0F
 00CB4:  BNC   0CD8
 .................... //		sum += current.adc_buffer[ch][i]; 
 .................... 		sum += p[i]; 
 00CB6:  BCF    FD8.0
-00CB8:  RLCF   xE1,W
+00CB8:  RLCF   xA1,W
 00CBA:  CLRF   03
-00CBC:  ADDWF  xE2,W
+00CBC:  ADDWF  xA2,W
 00CBE:  MOVWF  FE9
-00CC0:  MOVF   xE3,W
+00CC0:  MOVF   xA3,W
 00CC2:  ADDWFC 03,W
 00CC4:  MOVWF  FEA
 00CC6:  MOVFF  FEC,03
 00CCA:  MOVF   FED,F
 00CCC:  MOVF   FEF,W
-00CCE:  ADDWF  xDF,F
+00CCE:  ADDWF  x9F,F
 00CD0:  MOVF   03,W
-00CD2:  ADDWFC xE0,F
+00CD2:  ADDWFC xA0,F
 .................... 	} 
-00CD4:  INCF   xE1,F
+00CD4:  INCF   xA1,F
 00CD6:  BRA    0CB0
 ....................  
 .................... 	/* divide sum by our 16 samples and round by adding 8 */ 
 .................... 	return ( (sum+8) >> 4 ); 
 00CD8:  MOVLW  08
-00CDA:  ADDWF  xDF,W
-00CDC:  MOVWF  xE4
+00CDA:  ADDWF  x9F,W
+00CDC:  MOVWF  xA4
 00CDE:  MOVLW  00
-00CE0:  ADDWFC xE0,W
-00CE2:  MOVWF  xE5
-00CE4:  RRCF   xE5,W
+00CE0:  ADDWFC xA0,W
+00CE2:  MOVWF  xA5
+00CE4:  RRCF   xA5,W
 00CE6:  MOVWF  03
-00CE8:  RRCF   xE4,W
+00CE8:  RRCF   xA4,W
 00CEA:  MOVWF  02
 00CEC:  RRCF   03,F
 00CEE:  RRCF   02,F
@@ -2504,27 +2507,27 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 ....................  
 .................... 	for ( i=0 ; i<8 ; i++ ) { 
-00B96:  MOVLB  3
-00B98:  CLRF   xCA
-00B9A:  MOVF   xCA,W
+00B96:  MOVLB  7
+00B98:  CLRF   x8A
+00B9A:  MOVF   x8A,W
 00B9C:  SUBLW  07
 00B9E:  BNC   0C2C
 .................... 		current.adc_buffer[i][current.adc_buffer_index] = mcp3208_read(i); 
-00BA0:  CLRF   xE5
-00BA2:  MOVFF  3CA,3E4
-00BA6:  CLRF   xE7
+00BA0:  CLRF   xA5
+00BA2:  MOVFF  78A,7A4
+00BA6:  CLRF   xA7
 00BA8:  MOVLW  20
-00BAA:  MOVWF  xE6
+00BAA:  MOVWF  xA6
 00BAC:  MOVLB  0
 00BAE:  RCALL  0742
 00BB0:  MOVFF  02,03
 00BB4:  MOVF   01,W
 00BB6:  ADDLW  34
-00BB8:  MOVLB  3
-00BBA:  MOVWF  xCB
+00BB8:  MOVLB  7
+00BBA:  MOVWF  x8B
 00BBC:  MOVLW  00
 00BBE:  ADDWFC 02,W
-00BC0:  MOVWF  xCC
+00BC0:  MOVWF  x8C
 00BC2:  CLRF   03
 00BC4:  MOVLB  1
 00BC6:  MOVFF  182,02
@@ -2532,30 +2535,30 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00BCC:  RLCF   02,F
 00BCE:  RLCF   03,F
 00BD0:  MOVF   02,W
-00BD2:  MOVLB  3
-00BD4:  ADDWF  xCB,W
+00BD2:  MOVLB  7
+00BD4:  ADDWF  x8B,W
 00BD6:  MOVWF  01
-00BD8:  MOVF   xCC,W
+00BD8:  MOVF   x8C,W
 00BDA:  ADDWFC 03,F
 00BDC:  MOVF   01,W
 00BDE:  ADDLW  4E
 00BE0:  MOVWF  01
 00BE2:  MOVLW  00
 00BE4:  ADDWFC 03,F
-00BE6:  MOVFF  01,3CB
-00BEA:  MOVFF  03,3CC
-00BEE:  MOVFF  3CA,3CD
+00BE6:  MOVFF  01,78B
+00BEA:  MOVFF  03,78C
+00BEE:  MOVFF  78A,78D
 00BF2:  MOVLB  0
 00BF4:  BRA    0ADA
-00BF6:  MOVFF  3CC,FEA
-00BFA:  MOVFF  3CB,FE9
+00BF6:  MOVFF  78C,FEA
+00BFA:  MOVFF  78B,FE9
 00BFE:  MOVFF  02,FEC
 00C02:  MOVF   FED,F
 00C04:  MOVFF  01,FEF
 .................... 		current.adc_std_dev[i]=0; 
 00C08:  CLRF   03
-00C0A:  MOVLB  3
-00C0C:  MOVFF  3CA,02
+00C0A:  MOVLB  7
+00C0C:  MOVFF  78A,02
 00C10:  BCF    FD8.0
 00C12:  RLCF   02,F
 00C14:  RLCF   03,F
@@ -2570,7 +2573,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00C26:  CLRF   FEF
 ....................  
 .................... 	} 
-00C28:  INCF   xCA,F
+00C28:  INCF   x8A,F
 00C2A:  BRA    0B9A
 .................... } 
 00C2C:  MOVLB  0
@@ -2581,131 +2584,131 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... char xor_crc(char oldcrc, char data) { 
 .................... 	return oldcrc ^ data; 
 *
-00920:  MOVF   xE5,W
-00922:  XORWF  xE6,W
+00920:  MOVF   xA5,W
+00922:  XORWF  xA6,W
 00924:  MOVWF  01
 *
-00972:  MOVF   xE5,W
-00974:  XORWF  xE6,W
+00972:  MOVF   xA5,W
+00974:  XORWF  xA6,W
 00976:  MOVWF  01
 .................... } 
 ....................  
 .................... char EEPROMDataRead( int16 address, int8 *data, int16 count ) { 
 *
-008AA:  MOVLB  3
-008AC:  CLRF   xD3
+008AA:  MOVLB  7
+008AC:  CLRF   x93
 .................... 	char crc=0; 
 ....................  
 .................... 	while ( count-- != 0 ) { 
-008AE:  MOVFF  3D2,03
-008B2:  MOVF   xD1,W
+008AE:  MOVFF  792,03
+008B2:  MOVF   x91,W
 008B4:  BTFSC  FD8.2
-008B6:  DECF   xD2,F
-008B8:  DECF   xD1,F
-008BA:  MOVWF  xD4
-008BC:  MOVFF  03,3D5
-008C0:  MOVF   xD4,F
+008B6:  DECF   x92,F
+008B8:  DECF   x91,F
+008BA:  MOVWF  x94
+008BC:  MOVFF  03,795
+008C0:  MOVF   x94,F
 008C2:  BNZ   08C8
-008C4:  MOVF   xD5,F
+008C4:  MOVF   x95,F
 008C6:  BZ    0932
 .................... 		*data = read_eeprom( address++ ); 
-008C8:  MOVFF  3D0,03
-008CC:  MOVF   xCF,W
+008C8:  MOVFF  790,03
+008CC:  MOVF   x8F,W
 008CE:  MOVWF  FE9
 008D0:  MOVFF  03,FEA
-008D4:  MOVF   xCE,W
+008D4:  MOVF   x8E,W
 008D6:  MOVWF  03
-008D8:  MOVF   xCD,W
-008DA:  INCF   xCD,F
+008D8:  MOVF   x8D,W
+008DA:  INCF   x8D,F
 008DC:  BTFSC  FD8.2
-008DE:  INCF   xCE,F
-008E0:  MOVWF  xD6
-008E2:  MOVFF  03,3D7
-008E6:  MOVFF  FF2,3D8
+008DE:  INCF   x8E,F
+008E0:  MOVWF  x96
+008E2:  MOVFF  03,797
+008E6:  MOVFF  FF2,798
 008EA:  BCF    FF2.6
 008EC:  BCF    FF2.7
-008EE:  MOVFF  3D7,FAA
-008F2:  MOVFF  3D6,FA9
+008EE:  MOVFF  797,FAA
+008F2:  MOVFF  796,FA9
 008F6:  BCF    FA6.6
 008F8:  BCF    FA6.7
 008FA:  BSF    FA6.0
 008FC:  MOVF   FA8,W
-008FE:  BTFSC  xD8.6
+008FE:  BTFSC  x98.6
 00900:  BSF    FF2.6
-00902:  BTFSC  xD8.7
+00902:  BTFSC  x98.7
 00904:  BSF    FF2.7
 00906:  MOVWF  FEF
 .................... 		crc = xor_crc(crc,*data); 
-00908:  MOVFF  3D0,03
-0090C:  MOVF   xCF,W
+00908:  MOVFF  790,03
+0090C:  MOVF   x8F,W
 0090E:  MOVWF  FE9
 00910:  MOVFF  03,FEA
-00914:  MOVFF  FEF,3D4
-00918:  MOVFF  3D3,3E5
-0091C:  MOVFF  3D4,3E6
+00914:  MOVFF  FEF,794
+00918:  MOVFF  793,7A5
+0091C:  MOVFF  794,7A6
 *
-00926:  MOVFF  01,3D3
+00926:  MOVFF  01,793
 .................... 		data++; 
-0092A:  INCF   xCF,F
+0092A:  INCF   x8F,F
 0092C:  BTFSC  FD8.2
-0092E:  INCF   xD0,F
+0092E:  INCF   x90,F
 .................... 	} 
 00930:  BRA    08AE
 .................... 	return crc; 
-00932:  MOVFF  3D3,01
+00932:  MOVFF  793,01
 .................... } 
 00936:  MOVLB  0
 00938:  GOTO   0A8E (RETURN)
 ....................  
 .................... char EEPROMDataWrite( int16 address, int8 *data, int16 count ) { 
-0093C:  MOVLB  3
-0093E:  CLRF   xE3
+0093C:  MOVLB  7
+0093E:  CLRF   xA3
 .................... 	char crc=0; 
 ....................  
 .................... 	while ( count-- != 0 ) { 
-00940:  MOVFF  3E2,03
-00944:  MOVF   xE1,W
+00940:  MOVFF  7A2,03
+00944:  MOVF   xA1,W
 00946:  BTFSC  FD8.2
-00948:  DECF   xE2,F
-0094A:  DECF   xE1,F
-0094C:  MOVWF  xE4
-0094E:  MOVFF  03,3E5
-00952:  MOVF   xE4,F
+00948:  DECF   xA2,F
+0094A:  DECF   xA1,F
+0094C:  MOVWF  xA4
+0094E:  MOVFF  03,7A5
+00952:  MOVF   xA4,F
 00954:  BNZ   095A
-00956:  MOVF   xE5,F
+00956:  MOVF   xA5,F
 00958:  BZ    09D8
 .................... 		/* restart_wdt() */ 
 .................... 		crc = xor_crc(crc,*data); 
-0095A:  MOVFF  3E0,03
-0095E:  MOVF   xDF,W
+0095A:  MOVFF  7A0,03
+0095E:  MOVF   x9F,W
 00960:  MOVWF  FE9
 00962:  MOVFF  03,FEA
-00966:  MOVFF  FEF,3E4
-0096A:  MOVFF  3E3,3E5
-0096E:  MOVFF  3E4,3E6
+00966:  MOVFF  FEF,7A4
+0096A:  MOVFF  7A3,7A5
+0096E:  MOVFF  7A4,7A6
 *
-00978:  MOVFF  01,3E3
+00978:  MOVFF  01,7A3
 .................... 		write_eeprom( address++, *data++ ); 
-0097C:  MOVF   xDE,W
+0097C:  MOVF   x9E,W
 0097E:  MOVWF  03
-00980:  MOVF   xDD,W
-00982:  INCF   xDD,F
+00980:  MOVF   x9D,W
+00982:  INCF   x9D,F
 00984:  BTFSC  FD8.2
-00986:  INCF   xDE,F
-00988:  MOVWF  xE4
-0098A:  MOVFF  03,3E5
-0098E:  MOVF   xE0,W
+00986:  INCF   x9E,F
+00988:  MOVWF  xA4
+0098A:  MOVFF  03,7A5
+0098E:  MOVF   xA0,W
 00990:  MOVWF  03
-00992:  MOVF   xDF,W
-00994:  INCF   xDF,F
+00992:  MOVF   x9F,W
+00994:  INCF   x9F,F
 00996:  BTFSC  FD8.2
-00998:  INCF   xE0,F
+00998:  INCF   xA0,F
 0099A:  MOVWF  FE9
 0099C:  MOVFF  03,FEA
-009A0:  MOVFF  FEF,3E6
-009A4:  MOVFF  3E5,FAA
-009A8:  MOVFF  3E4,FA9
-009AC:  MOVFF  3E6,FA8
+009A0:  MOVFF  FEF,7A6
+009A4:  MOVFF  7A5,FAA
+009A8:  MOVFF  7A4,FA9
+009AC:  MOVFF  7A6,FA8
 009B0:  BCF    FA6.6
 009B2:  BCF    FA6.7
 009B4:  BSF    FA6.2
@@ -2725,11 +2728,11 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 009D0:  MOVF   00,W
 009D2:  IORWF  FF2,F
 .................... 	} 
-009D4:  MOVLB  3
+009D4:  MOVLB  7
 009D6:  BRA    0940
 ....................  
 .................... 	return crc; 
-009D8:  MOVFF  3E3,01
+009D8:  MOVFF  7A3,01
 .................... } 
 009DC:  MOVLB  0
 009DE:  GOTO   0A02 (RETURN)
@@ -2739,26 +2742,26 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 	/* write the config structure */ 
 .................... 	crc = EEPROMDataWrite(PARAM_ADDRESS,(void *)&config,sizeof(config)); 
-009E2:  MOVLB  3
-009E4:  CLRF   xDC
+009E2:  MOVLB  7
+009E4:  CLRF   x9C
 009E6:  MOVLW  36
-009E8:  MOVWF  xDB
-009EA:  CLRF   xDE
+009E8:  MOVWF  x9B
+009EA:  CLRF   x9E
 009EC:  MOVLW  02
-009EE:  MOVWF  xDD
-009F0:  MOVFF  3DC,3E0
-009F4:  MOVFF  3DB,3DF
-009F8:  CLRF   xE2
+009EE:  MOVWF  x9D
+009F0:  MOVFF  79C,7A0
+009F4:  MOVFF  79B,79F
+009F8:  CLRF   xA2
 009FA:  MOVLW  18
-009FC:  MOVWF  xE1
+009FC:  MOVWF  xA1
 009FE:  MOVLB  0
 00A00:  BRA    093C
-00A02:  MOVFF  01,3DA
+00A02:  MOVFF  01,79A
 .................... 	/* write the CRC was calculated on the structure */ 
 .................... 	write_eeprom(PARAM_CRC_ADDRESS,crc); 
 00A06:  CLRF   FAA
 00A08:  CLRF   FA9
-00A0A:  MOVFF  3DA,FA8
+00A0A:  MOVFF  79A,FA8
 00A0E:  BCF    FA6.6
 00A10:  BCF    FA6.7
 00A12:  BSF    FA6.2
@@ -2837,24 +2840,24 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 	int8 crc; 
 ....................  
 .................... 	crc = EEPROMDataRead(PARAM_ADDRESS, (void *)&config, sizeof(config));  
-00A6E:  MOVLB  3
-00A70:  CLRF   xCC
+00A6E:  MOVLB  7
+00A70:  CLRF   x8C
 00A72:  MOVLW  36
-00A74:  MOVWF  xCB
-00A76:  CLRF   xCE
+00A74:  MOVWF  x8B
+00A76:  CLRF   x8E
 00A78:  MOVLW  02
-00A7A:  MOVWF  xCD
-00A7C:  MOVFF  3CC,3D0
-00A80:  MOVFF  3CB,3CF
-00A84:  CLRF   xD2
+00A7A:  MOVWF  x8D
+00A7C:  MOVFF  78C,790
+00A80:  MOVFF  78B,78F
+00A84:  CLRF   x92
 00A86:  MOVLW  18
-00A88:  MOVWF  xD1
+00A88:  MOVWF  x91
 00A8A:  MOVLB  0
 00A8C:  BRA    08AA
-00A8E:  MOVFF  01,3CA
+00A8E:  MOVFF  01,78A
 .................... 		 
 .................... 	if ( crc != read_eeprom(PARAM_CRC_ADDRESS) ) { 
-00A92:  MOVFF  FF2,3CB
+00A92:  MOVFF  FF2,78B
 00A96:  BCF    FF2.6
 00A98:  BCF    FF2.7
 00A9A:  CLRF   FAA
@@ -2863,17 +2866,17 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00AA0:  BCF    FA6.7
 00AA2:  BSF    FA6.0
 00AA4:  MOVF   FA8,W
-00AA6:  MOVLB  3
-00AA8:  BTFSC  xCB.6
+00AA6:  MOVLB  7
+00AA8:  BTFSC  x8B.6
 00AAA:  BSF    FF2.6
-00AAC:  BTFSC  xCB.7
+00AAC:  BTFSC  x8B.7
 00AAE:  BSF    FF2.7
-00AB0:  SUBWF  xCA,W
+00AB0:  SUBWF  x8A,W
 00AB2:  BZ    0ABA
 .................... 		write_default_param_file(); 
 00AB4:  MOVLB  0
 00AB6:  RCALL  0A36
-00AB8:  MOVLB  3
+00AB8:  MOVLB  7
 .................... 	} 
 .................... } 
 00ABA:  MOVLB  0
@@ -3156,8 +3159,8 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 *
 0039C:  BCF    FF2.5
 .................... 	if (enable) { 
-0039E:  MOVLB  4
-003A0:  MOVF   xCF,F
+0039E:  MOVLB  8
+003A0:  MOVF   x8F,F
 003A2:  BZ    03AC
 .................... 		set_timer0(0); 
 003A4:  CLRF   FD7
@@ -3178,36 +3181,36 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... void modbus_timeout_now(void) 
 .................... { 
 ....................    if((modbus_serial_state == MODBUS_GETDATA) && (modbus_serial_crc.d == 0x0000) && (!modbus_serial_new)) 
-003B0:  MOVLB  2
-003B2:  MOVF   xB5,W
+003B0:  MOVLB  6
+003B2:  MOVF   x75,W
 003B4:  SUBLW  02
 003B6:  BNZ   03CC
-003B8:  MOVF   xB6,F
+003B8:  MOVF   x76,F
 003BA:  BNZ   03CC
-003BC:  MOVF   xB7,F
+003BC:  MOVF   x77,F
 003BE:  BNZ   03CC
-003C0:  BTFSC  xB4.0
+003C0:  BTFSC  x74.0
 003C2:  BRA    03CC
 ....................    { 
 ....................       modbus_rx.len-=2; 
 003C4:  MOVLW  02
-003C6:  SUBWF  xB9,F
+003C6:  SUBWF  x79,F
 ....................       modbus_serial_new=TRUE; 
-003C8:  BSF    xB4.0
+003C8:  BSF    x74.0
 ....................    } 
 ....................    else 
 003CA:  BRA    03CE
 ....................       modbus_serial_new=FALSE; 
-003CC:  BCF    xB4.0
+003CC:  BCF    x74.0
 ....................  
 ....................    modbus_serial_crc.d=0xFFFF; 
-003CE:  SETF   xB7
-003D0:  SETF   xB6
+003CE:  SETF   x77
+003D0:  SETF   x76
 ....................    modbus_serial_state=MODBUS_GETADDY; 
-003D2:  CLRF   xB5
+003D2:  CLRF   x75
 ....................    modbus_enable_timeout(FALSE); 
-003D4:  MOVLB  4
-003D6:  CLRF   xCF
+003D4:  MOVLB  8
+003D6:  CLRF   x8F
 003D8:  MOVLB  0
 003DA:  RCALL  039C
 .................... } 
@@ -3223,28 +3226,28 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 ....................   uIndex = (modbus_serial_crc.b[1]) ^ data; // calculate the CRC 
 *
-00686:  MOVLB  2
-00688:  MOVF   xB7,W
-0068A:  MOVLB  4
-0068C:  XORWF  xCF,W
-0068E:  MOVWF  xD0
+00686:  MOVLB  6
+00688:  MOVF   x77,W
+0068A:  MOVLB  8
+0068C:  XORWF  x8F,W
+0068E:  MOVWF  x90
 ....................   modbus_serial_crc.b[1] = (modbus_serial_crc.b[0]) ^ modbus_auchCRCHi[uIndex]; 
 00690:  CLRF   03
-00692:  MOVF   xD0,W
+00692:  MOVF   x90,W
 00694:  MOVLB  0
 00696:  RCALL  017C
 00698:  MOVWF  01
-0069A:  MOVLB  2
-0069C:  MOVF   xB6,W
+0069A:  MOVLB  6
+0069C:  MOVF   x76,W
 0069E:  XORWF  01,W
-006A0:  MOVWF  xB7
+006A0:  MOVWF  x77
 ....................   modbus_serial_crc.b[0] = modbus_auchCRCLo[uIndex]; 
 006A2:  CLRF   03
-006A4:  MOVLB  4
-006A6:  MOVF   xD0,W
+006A4:  MOVLB  8
+006A6:  MOVF   x90,W
 006A8:  MOVLB  0
 006AA:  RCALL  028C
-006AC:  MOVFF  FE8,2B6
+006AC:  MOVFF  FE8,676
 .................... } 
 006B0:  RETURN 0
 ....................  
@@ -3254,8 +3257,8 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... void modbus_serial_putc(int8 c) { 
 .................... 	fputc(c, STREAM_PI); 
 *
-00F52:  MOVLB  3
-00F54:  MOVF   xDC,W
+00F52:  MOVLB  7
+00F54:  MOVF   x9C,W
 00F56:  MOVLB  0
 00F58:  RCALL  0F4A
 00F5A:  CLRF   19
@@ -3266,7 +3269,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00F64:  BSF    19.7
 00F66:  BCF    FF2.7
 .................... 	modbus_calc_crc(c); 
-00F68:  MOVFF  3DC,4CF
+00F68:  MOVFF  79C,88F
 00F6C:  CALL   0686
 00F70:  BTFSC  19.6
 00F72:  BSF    FF2.6
@@ -3298,11 +3301,11 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... void modbus_serial_send_start(int8 to, int8 func) 
 .................... { 
 ....................    modbus_serial_crc.d=0xFFFF; 
-00F86:  MOVLB  2
-00F88:  SETF   xB7
-00F8A:  SETF   xB6
+00F86:  MOVLB  6
+00F88:  SETF   x77
+00F8A:  SETF   x76
 ....................    modbus_serial_new=FALSE; 
-00F8C:  BCF    xB4.0
+00F8C:  BCF    x74.0
 ....................  
 ....................    RCV_OFF(); 
 00F8E:  BCF    F9D.5
@@ -3320,11 +3323,11 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00F9A:  NOP   
 ....................  
 ....................    modbus_serial_putc(to); 
-00F9C:  MOVFF  3DA,3DC
+00F9C:  MOVFF  79A,79C
 00FA0:  MOVLB  0
 00FA2:  RCALL  0F52
 ....................    modbus_serial_putc(func); 
-00FA4:  MOVFF  3DB,3DC
+00FA4:  MOVFF  79B,79C
 00FA8:  RCALL  0F52
 .................... } 
 00FAA:  RETURN 0
@@ -3335,15 +3338,15 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 ....................    crc_high=modbus_serial_crc.b[1]; 
 *
-00FB4:  MOVFF  2B7,3DB
+00FB4:  MOVFF  677,79B
 ....................    crc_low=modbus_serial_crc.b[0]; 
-00FB8:  MOVFF  2B6,3DA
+00FB8:  MOVFF  676,79A
 ....................  
 ....................    modbus_serial_putc(crc_high); 
-00FBC:  MOVFF  3DB,3DC
+00FBC:  MOVFF  79B,79C
 00FC0:  RCALL  0F52
 ....................    modbus_serial_putc(crc_low); 
-00FC2:  MOVFF  3DA,3DC
+00FC2:  MOVFF  79A,79C
 00FC6:  RCALL  0F52
 ....................  
 ....................    WAIT_FOR_HW_BUFFER(); 
@@ -3366,9 +3369,9 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... //	output_low(MODBUS_SERIAL_RX_ENABLE); // JJJ 
 ....................  
 ....................    modbus_serial_crc.d=0xFFFF; 
-00FD8:  MOVLB  2
-00FDA:  SETF   xB7
-00FDC:  SETF   xB6
+00FD8:  MOVLB  6
+00FDA:  SETF   x77
+00FDC:  SETF   x76
 .................... } 
 00FDE:  MOVLB  0
 00FE0:  RETURN 0
@@ -3382,8 +3385,8 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... { 
 ....................    if(!modbus_serial_new) 
 *
-00E82:  MOVLB  2
-00E84:  BTFSC  xB4.0
+00E82:  MOVLB  6
+00E84:  BTFSC  x74.0
 00E86:  BRA    0E90
 ....................       return FALSE; 
 00E88:  MOVLW  00
@@ -3391,17 +3394,17 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00E8C:  BRA    0EA2
 ....................    else if(modbus_rx.func & 0x80)           //did we receive an error? 
 00E8E:  BRA    0E9C
-00E90:  BTFSS  xBA.7
+00E90:  BTFSS  x7A.7
 00E92:  BRA    0E9C
 ....................    { 
 ....................       modbus_rx.error = modbus_rx.data[0];  //if so grab the error and return true 
-00E94:  MOVFF  2BC,2BB
+00E94:  MOVFF  67C,67B
 ....................       modbus_rx.len = 1; 
 00E98:  MOVLW  01
-00E9A:  MOVWF  xB9
+00E9A:  MOVWF  x79
 ....................    } 
 ....................    modbus_serial_new=FALSE; 
-00E9C:  BCF    xB4.0
+00E9C:  BCF    x74.0
 ....................    return TRUE; 
 00E9E:  MOVLW  01
 00EA0:  MOVWF  01
@@ -3573,29 +3576,29 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... { 
 ....................    modbus_serial_send_start(address, FUNC_WRITE_SINGLE_REGISTER); 
 *
-01DC6:  MOVFF  3D2,3DA
+01DC6:  MOVFF  792,79A
 01DCA:  MOVLW  06
-01DCC:  MOVLB  3
-01DCE:  MOVWF  xDB
+01DCC:  MOVLB  7
+01DCE:  MOVWF  x9B
 01DD0:  MOVLB  0
 01DD2:  CALL   0F86
 ....................  
 ....................    modbus_serial_putc(make8(reg_address,1)); 
-01DD6:  MOVFF  3D4,3D7
-01DDA:  MOVFF  3D4,3DC
+01DD6:  MOVFF  794,797
+01DDA:  MOVFF  794,79C
 01DDE:  CALL   0F52
 ....................    modbus_serial_putc(make8(reg_address,0)); 
-01DE2:  MOVFF  3D3,3D7
-01DE6:  MOVFF  3D3,3DC
+01DE2:  MOVFF  793,797
+01DE6:  MOVFF  793,79C
 01DEA:  CALL   0F52
 ....................  
 ....................    modbus_serial_putc(make8(reg_value,1)); 
-01DEE:  MOVFF  3D6,3D7
-01DF2:  MOVFF  3D6,3DC
+01DEE:  MOVFF  796,797
+01DF2:  MOVFF  796,79C
 01DF6:  CALL   0F52
 ....................    modbus_serial_putc(make8(reg_value,0)); 
-01DFA:  MOVFF  3D5,3D7
-01DFE:  MOVFF  3D5,3DC
+01DFA:  MOVFF  795,797
+01DFE:  MOVFF  795,79C
 01E02:  CALL   0F52
 ....................  
 ....................    modbus_serial_send_stop(); 
@@ -3725,29 +3728,29 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................                                             int16 quantity) 
 .................... { 
 ....................    modbus_serial_send_start(address, FUNC_WRITE_MULTIPLE_REGISTERS); 
-01E0E:  MOVFF  3D0,3DA
+01E0E:  MOVFF  790,79A
 01E12:  MOVLW  10
-01E14:  MOVLB  3
-01E16:  MOVWF  xDB
+01E14:  MOVLB  7
+01E16:  MOVWF  x9B
 01E18:  MOVLB  0
 01E1A:  CALL   0F86
 ....................  
 ....................    modbus_serial_putc(make8(start_address,1)); 
-01E1E:  MOVFF  3D2,3D5
-01E22:  MOVFF  3D2,3DC
+01E1E:  MOVFF  792,795
+01E22:  MOVFF  792,79C
 01E26:  CALL   0F52
 ....................    modbus_serial_putc(make8(start_address,0)); 
-01E2A:  MOVFF  3D1,3D5
-01E2E:  MOVFF  3D1,3DC
+01E2A:  MOVFF  791,795
+01E2E:  MOVFF  791,79C
 01E32:  CALL   0F52
 ....................  
 ....................    modbus_serial_putc(make8(quantity,1)); 
-01E36:  MOVFF  3D4,3D5
-01E3A:  MOVFF  3D4,3DC
+01E36:  MOVFF  794,795
+01E3A:  MOVFF  794,79C
 01E3E:  CALL   0F52
 ....................    modbus_serial_putc(make8(quantity,0)); 
-01E42:  MOVFF  3D3,3D5
-01E46:  MOVFF  3D3,3DC
+01E42:  MOVFF  793,795
+01E46:  MOVFF  793,79C
 01E4A:  CALL   0F52
 ....................  
 ....................    modbus_serial_send_stop(); 
@@ -3943,17 +3946,17 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... { 
 ....................    modbus_serial_send_start(address, func|0x80); 
 *
-00FE2:  MOVLB  3
-00FE4:  MOVF   xD1,W
+00FE2:  MOVLB  7
+00FE4:  MOVF   x91,W
 00FE6:  IORLW  80
-00FE8:  MOVWF  xD4
-00FEA:  MOVFF  3D2,3D5
-00FEE:  MOVFF  3D0,3DA
-00FF2:  MOVWF  xDB
+00FE8:  MOVWF  x94
+00FEA:  MOVFF  792,795
+00FEE:  MOVFF  790,79A
+00FF2:  MOVWF  x9B
 00FF4:  MOVLB  0
 00FF6:  RCALL  0F86
 ....................    modbus_serial_putc(error); 
-00FF8:  MOVFF  3D3,3DC
+00FF8:  MOVFF  793,79C
 00FFC:  RCALL  0F52
 ....................    modbus_serial_send_stop(); 
 00FFE:  RCALL  0FB4
@@ -4081,12 +4084,12 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01006:  BTFSC  FF2.7
 01008:  BRA    1004
 .................... 	l=current.pulse_sum[ch]; 
-0100A:  MOVLB  3
-0100C:  CLRF   xE5
-0100E:  MOVFF  3DE,3E4
-01012:  CLRF   xE7
+0100A:  MOVLB  7
+0100C:  CLRF   xA5
+0100E:  MOVFF  79E,7A4
+01012:  CLRF   xA7
 01014:  MOVLW  04
-01016:  MOVWF  xE6
+01016:  MOVWF  xA6
 01018:  MOVLB  0
 0101A:  CALL   0742
 0101E:  MOVFF  02,03
@@ -4100,19 +4103,19 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01032:  MOVFF  FEC,01
 01036:  MOVFF  FEC,02
 0103A:  MOVFF  FEC,03
-0103E:  MOVFF  03,3E2
-01042:  MOVFF  02,3E1
-01046:  MOVFF  01,3E0
-0104A:  MOVFF  00,3DF
+0103E:  MOVFF  03,7A2
+01042:  MOVFF  02,7A1
+01046:  MOVFF  01,7A0
+0104A:  MOVFF  00,79F
 .................... 	enable_interrupts(GLOBAL); 
 0104E:  MOVLW  C0
 01050:  IORWF  FF2,F
 ....................  
 .................... 	return l; 
-01052:  MOVFF  3DF,00
-01056:  MOVFF  3E0,01
-0105A:  MOVFF  3E1,02
-0105E:  MOVFF  3E2,03
+01052:  MOVFF  79F,00
+01056:  MOVFF  7A0,01
+0105A:  MOVFF  7A1,02
+0105E:  MOVFF  7A2,03
 .................... } 
 01062:  RETURN 0
 ....................  
@@ -4121,43 +4124,43 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 	if ( addr >= MIN_EE_REGISTER && addr < MAX_EE_REGISTER ) { 
 *
-010DC:  MOVLB  3
-010DE:  MOVF   xDD,W
+010DC:  MOVLB  7
+010DE:  MOVF   x9D,W
 010E0:  SUBLW  06
 010E2:  BC    1138
 010E4:  XORLW  FF
 010E6:  BNZ   10EE
-010E8:  MOVF   xDC,W
+010E8:  MOVF   x9C,W
 010EA:  SUBLW  CF
 010EC:  BC    1138
-010EE:  MOVF   xDD,W
+010EE:  MOVF   x9D,W
 010F0:  SUBLW  09
 010F2:  BNC   1138
 010F4:  BNZ   10FC
-010F6:  MOVF   xDC,W
+010F6:  MOVF   x9C,W
 010F8:  SUBLW  CF
 010FA:  BNC   1138
 .................... 		return (int16) read_eeprom(addr - MIN_EE_REGISTER + EE_FOR_HOST_ADDRESS); 
 010FC:  MOVLW  D0
-010FE:  SUBWF  xDC,W
-01100:  MOVWF  xDE
+010FE:  SUBWF  x9C,W
+01100:  MOVWF  x9E
 01102:  MOVLW  07
-01104:  SUBWFB xDD,W
-01106:  MOVWF  xDF
+01104:  SUBWFB x9D,W
+01106:  MOVWF  x9F
 01108:  MOVLW  02
-0110A:  ADDWF  xDF,F
-0110C:  MOVFF  FF2,3E0
+0110A:  ADDWF  x9F,F
+0110C:  MOVFF  FF2,7A0
 01110:  BCF    FF2.6
 01112:  BCF    FF2.7
-01114:  MOVFF  3DF,FAA
-01118:  MOVFF  3DE,FA9
+01114:  MOVFF  79F,FAA
+01118:  MOVFF  79E,FA9
 0111C:  BCF    FA6.6
 0111E:  BCF    FA6.7
 01120:  BSF    FA6.0
 01122:  MOVF   FA8,W
-01124:  BTFSC  xE0.6
+01124:  BTFSC  xA0.6
 01126:  BSF    FF2.6
-01128:  BTFSC  xE0.7
+01128:  BTFSC  xA0.7
 0112A:  BSF    FF2.7
 0112C:  CLRF   03
 0112E:  MOVWF  01
@@ -4167,9 +4170,9 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 	} 
 ....................  
 .................... 	switch ( addr ) { 
-01138:  MOVF   xDC,W
+01138:  MOVF   x9C,W
 0113A:  MOVWF  00
-0113C:  MOVF   xDD,W
+0113C:  MOVF   x9D,W
 0113E:  MOVWF  03
 01140:  MOVF   03,W
 01142:  BNZ   114E
@@ -4177,7 +4180,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01146:  MOVLB  0
 01148:  BTFSC  FD8.2
 0114A:  BRA    156A
-0114C:  MOVLB  3
+0114C:  MOVLB  7
 0114E:  MOVF   03,W
 01150:  BNZ   115E
 01152:  MOVLW  01
@@ -4185,7 +4188,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01156:  MOVLB  0
 01158:  BTFSC  FD8.2
 0115A:  BRA    1578
-0115C:  MOVLB  3
+0115C:  MOVLB  7
 0115E:  MOVF   03,W
 01160:  BNZ   116E
 01162:  MOVLW  02
@@ -4193,7 +4196,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01166:  MOVLB  0
 01168:  BTFSC  FD8.2
 0116A:  BRA    1586
-0116C:  MOVLB  3
+0116C:  MOVLB  7
 0116E:  MOVF   03,W
 01170:  BNZ   117E
 01172:  MOVLW  03
@@ -4201,7 +4204,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01176:  MOVLB  0
 01178:  BTFSC  FD8.2
 0117A:  BRA    1594
-0117C:  MOVLB  3
+0117C:  MOVLB  7
 0117E:  MOVF   03,W
 01180:  BNZ   118E
 01182:  MOVLW  04
@@ -4209,7 +4212,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01186:  MOVLB  0
 01188:  BTFSC  FD8.2
 0118A:  BRA    15A2
-0118C:  MOVLB  3
+0118C:  MOVLB  7
 0118E:  MOVF   03,W
 01190:  BNZ   119E
 01192:  MOVLW  05
@@ -4217,7 +4220,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01196:  MOVLB  0
 01198:  BTFSC  FD8.2
 0119A:  BRA    15C8
-0119C:  MOVLB  3
+0119C:  MOVLB  7
 0119E:  MOVF   03,W
 011A0:  BNZ   11AE
 011A2:  MOVLW  06
@@ -4225,7 +4228,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 011A6:  MOVLB  0
 011A8:  BTFSC  FD8.2
 011AA:  BRA    15D6
-011AC:  MOVLB  3
+011AC:  MOVLB  7
 011AE:  MOVF   03,W
 011B0:  BNZ   11BE
 011B2:  MOVLW  07
@@ -4233,7 +4236,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 011B6:  MOVLB  0
 011B8:  BTFSC  FD8.2
 011BA:  BRA    15E4
-011BC:  MOVLB  3
+011BC:  MOVLB  7
 011BE:  MOVF   03,W
 011C0:  BNZ   11CE
 011C2:  MOVLW  08
@@ -4241,7 +4244,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 011C6:  MOVLB  0
 011C8:  BTFSC  FD8.2
 011CA:  BRA    15F2
-011CC:  MOVLB  3
+011CC:  MOVLB  7
 011CE:  MOVF   03,W
 011D0:  BNZ   11DE
 011D2:  MOVLW  09
@@ -4249,7 +4252,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 011D6:  MOVLB  0
 011D8:  BTFSC  FD8.2
 011DA:  BRA    1600
-011DC:  MOVLB  3
+011DC:  MOVLB  7
 011DE:  MOVF   03,W
 011E0:  BNZ   11EE
 011E2:  MOVLW  0A
@@ -4257,7 +4260,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 011E6:  MOVLB  0
 011E8:  BTFSC  FD8.2
 011EA:  BRA    160E
-011EC:  MOVLB  3
+011EC:  MOVLB  7
 011EE:  MOVF   03,W
 011F0:  BNZ   11FE
 011F2:  MOVLW  0B
@@ -4265,7 +4268,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 011F6:  MOVLB  0
 011F8:  BTFSC  FD8.2
 011FA:  BRA    1636
-011FC:  MOVLB  3
+011FC:  MOVLB  7
 011FE:  MOVF   03,W
 01200:  BNZ   120E
 01202:  MOVLW  0C
@@ -4273,7 +4276,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01206:  MOVLB  0
 01208:  BTFSC  FD8.2
 0120A:  BRA    1644
-0120C:  MOVLB  3
+0120C:  MOVLB  7
 0120E:  MOVF   03,W
 01210:  BNZ   121E
 01212:  MOVLW  0D
@@ -4281,7 +4284,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01216:  MOVLB  0
 01218:  BTFSC  FD8.2
 0121A:  BRA    1652
-0121C:  MOVLB  3
+0121C:  MOVLB  7
 0121E:  MOVF   03,W
 01220:  BNZ   122E
 01222:  MOVLW  0E
@@ -4289,7 +4292,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01226:  MOVLB  0
 01228:  BTFSC  FD8.2
 0122A:  BRA    1660
-0122C:  MOVLB  3
+0122C:  MOVLB  7
 0122E:  MOVF   03,W
 01230:  BNZ   123E
 01232:  MOVLW  0F
@@ -4297,7 +4300,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01236:  MOVLB  0
 01238:  BTFSC  FD8.2
 0123A:  BRA    166E
-0123C:  MOVLB  3
+0123C:  MOVLB  7
 0123E:  MOVF   03,W
 01240:  BNZ   124E
 01242:  MOVLW  10
@@ -4305,7 +4308,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01246:  MOVLB  0
 01248:  BTFSC  FD8.2
 0124A:  BRA    167C
-0124C:  MOVLB  3
+0124C:  MOVLB  7
 0124E:  MOVF   03,W
 01250:  BNZ   125E
 01252:  MOVLW  11
@@ -4313,7 +4316,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01256:  MOVLB  0
 01258:  BTFSC  FD8.2
 0125A:  BRA    16A4
-0125C:  MOVLB  3
+0125C:  MOVLB  7
 0125E:  MOVF   03,W
 01260:  BNZ   126E
 01262:  MOVLW  12
@@ -4321,7 +4324,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01266:  MOVLB  0
 01268:  BTFSC  FD8.2
 0126A:  BRA    16B2
-0126C:  MOVLB  3
+0126C:  MOVLB  7
 0126E:  MOVF   03,W
 01270:  BNZ   127E
 01272:  MOVLW  13
@@ -4329,7 +4332,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01276:  MOVLB  0
 01278:  BTFSC  FD8.2
 0127A:  BRA    16E0
-0127C:  MOVLB  3
+0127C:  MOVLB  7
 0127E:  MOVF   03,W
 01280:  BNZ   128E
 01282:  MOVLW  14
@@ -4337,7 +4340,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01286:  MOVLB  0
 01288:  BTFSC  FD8.2
 0128A:  BRA    16F8
-0128C:  MOVLB  3
+0128C:  MOVLB  7
 0128E:  MOVF   03,W
 01290:  BNZ   129E
 01292:  MOVLW  15
@@ -4345,7 +4348,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01296:  MOVLB  0
 01298:  BTFSC  FD8.2
 0129A:  BRA    1706
-0129C:  MOVLB  3
+0129C:  MOVLB  7
 0129E:  MOVF   03,W
 012A0:  BNZ   12AE
 012A2:  MOVLW  16
@@ -4353,7 +4356,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 012A6:  MOVLB  0
 012A8:  BTFSC  FD8.2
 012AA:  BRA    1734
-012AC:  MOVLB  3
+012AC:  MOVLB  7
 012AE:  MOVF   03,W
 012B0:  BNZ   12BE
 012B2:  MOVLW  17
@@ -4361,7 +4364,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 012B6:  MOVLB  0
 012B8:  BTFSC  FD8.2
 012BA:  BRA    174E
-012BC:  MOVLB  3
+012BC:  MOVLB  7
 012BE:  MOVF   03,W
 012C0:  BNZ   12CE
 012C2:  MOVLW  18
@@ -4369,7 +4372,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 012C6:  MOVLB  0
 012C8:  BTFSC  FD8.2
 012CA:  BRA    175C
-012CC:  MOVLB  3
+012CC:  MOVLB  7
 012CE:  MOVF   03,W
 012D0:  BNZ   12DE
 012D2:  MOVLW  19
@@ -4377,7 +4380,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 012D6:  MOVLB  0
 012D8:  BTFSC  FD8.2
 012DA:  BRA    178A
-012DC:  MOVLB  3
+012DC:  MOVLB  7
 012DE:  MOVF   03,W
 012E0:  BNZ   12EE
 012E2:  MOVLW  1A
@@ -4385,7 +4388,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 012E6:  MOVLB  0
 012E8:  BTFSC  FD8.2
 012EA:  BRA    17A4
-012EC:  MOVLB  3
+012EC:  MOVLB  7
 012EE:  MOVF   03,W
 012F0:  BNZ   12FE
 012F2:  MOVLW  1B
@@ -4393,7 +4396,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 012F6:  MOVLB  0
 012F8:  BTFSC  FD8.2
 012FA:  BRA    17B2
-012FC:  MOVLB  3
+012FC:  MOVLB  7
 012FE:  MOVF   03,W
 01300:  BNZ   130E
 01302:  MOVLW  1C
@@ -4401,7 +4404,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01306:  MOVLB  0
 01308:  BTFSC  FD8.2
 0130A:  BRA    17E0
-0130C:  MOVLB  3
+0130C:  MOVLB  7
 0130E:  MOVF   03,W
 01310:  BNZ   131E
 01312:  MOVLW  1D
@@ -4409,7 +4412,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01316:  MOVLB  0
 01318:  BTFSC  FD8.2
 0131A:  BRA    17FA
-0131C:  MOVLB  3
+0131C:  MOVLB  7
 0131E:  MOVF   03,W
 01320:  BNZ   132E
 01322:  MOVLW  1E
@@ -4417,7 +4420,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01326:  MOVLB  0
 01328:  BTFSC  FD8.2
 0132A:  BRA    1808
-0132C:  MOVLB  3
+0132C:  MOVLB  7
 0132E:  MOVF   03,W
 01330:  BNZ   133E
 01332:  MOVLW  1F
@@ -4425,7 +4428,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01336:  MOVLB  0
 01338:  BTFSC  FD8.2
 0133A:  BRA    1836
-0133C:  MOVLB  3
+0133C:  MOVLB  7
 0133E:  MOVF   03,W
 01340:  BNZ   134E
 01342:  MOVLW  20
@@ -4433,7 +4436,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01346:  MOVLB  0
 01348:  BTFSC  FD8.2
 0134A:  BRA    1850
-0134C:  MOVLB  3
+0134C:  MOVLB  7
 0134E:  MOVF   03,W
 01350:  BNZ   135E
 01352:  MOVLW  21
@@ -4441,7 +4444,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01356:  MOVLB  0
 01358:  BTFSC  FD8.2
 0135A:  BRA    185E
-0135C:  MOVLB  3
+0135C:  MOVLB  7
 0135E:  MOVF   03,W
 01360:  BNZ   136E
 01362:  MOVLW  22
@@ -4449,7 +4452,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01366:  MOVLB  0
 01368:  BTFSC  FD8.2
 0136A:  BRA    188C
-0136C:  MOVLB  3
+0136C:  MOVLB  7
 0136E:  MOVF   03,W
 01370:  BNZ   137E
 01372:  MOVLW  23
@@ -4457,7 +4460,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01376:  MOVLB  0
 01378:  BTFSC  FD8.2
 0137A:  BRA    18A6
-0137C:  MOVLB  3
+0137C:  MOVLB  7
 0137E:  MOVF   03,W
 01380:  BNZ   138E
 01382:  MOVLW  24
@@ -4465,7 +4468,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01386:  MOVLB  0
 01388:  BTFSC  FD8.2
 0138A:  BRA    18B4
-0138C:  MOVLB  3
+0138C:  MOVLB  7
 0138E:  MOVF   03,W
 01390:  BNZ   139E
 01392:  MOVLW  25
@@ -4473,7 +4476,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01396:  MOVLB  0
 01398:  BTFSC  FD8.2
 0139A:  BRA    18E2
-0139C:  MOVLB  3
+0139C:  MOVLB  7
 0139E:  MOVF   03,W
 013A0:  BNZ   13AE
 013A2:  MOVLW  26
@@ -4481,7 +4484,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 013A6:  MOVLB  0
 013A8:  BTFSC  FD8.2
 013AA:  BRA    18FC
-013AC:  MOVLB  3
+013AC:  MOVLB  7
 013AE:  MOVF   03,W
 013B0:  BNZ   13BE
 013B2:  MOVLW  27
@@ -4489,7 +4492,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 013B6:  MOVLB  0
 013B8:  BTFSC  FD8.2
 013BA:  BRA    190A
-013BC:  MOVLB  3
+013BC:  MOVLB  7
 013BE:  MOVF   03,W
 013C0:  BNZ   13CE
 013C2:  MOVLW  28
@@ -4497,7 +4500,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 013C6:  MOVLB  0
 013C8:  BTFSC  FD8.2
 013CA:  BRA    1938
-013CC:  MOVLB  3
+013CC:  MOVLB  7
 013CE:  MOVF   03,W
 013D0:  BNZ   13DE
 013D2:  MOVLW  29
@@ -4505,7 +4508,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 013D6:  MOVLB  0
 013D8:  BTFSC  FD8.2
 013DA:  BRA    1952
-013DC:  MOVLB  3
+013DC:  MOVLB  7
 013DE:  MOVF   03,W
 013E0:  BNZ   13EE
 013E2:  MOVLW  2A
@@ -4513,7 +4516,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 013E6:  MOVLB  0
 013E8:  BTFSC  FD8.2
 013EA:  BRA    1960
-013EC:  MOVLB  3
+013EC:  MOVLB  7
 013EE:  MOVF   03,W
 013F0:  BNZ   13FE
 013F2:  MOVLW  2B
@@ -4521,7 +4524,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 013F6:  MOVLB  0
 013F8:  BTFSC  FD8.2
 013FA:  BRA    197A
-013FC:  MOVLB  3
+013FC:  MOVLB  7
 013FE:  MOVF   03,W
 01400:  BNZ   140E
 01402:  MOVLW  2C
@@ -4529,7 +4532,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01406:  MOVLB  0
 01408:  BTFSC  FD8.2
 0140A:  BRA    198A
-0140C:  MOVLB  3
+0140C:  MOVLB  7
 0140E:  MOVF   03,W
 01410:  BNZ   141E
 01412:  MOVLW  2D
@@ -4537,7 +4540,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01416:  MOVLB  0
 01418:  BTFSC  FD8.2
 0141A:  BRA    199A
-0141C:  MOVLB  3
+0141C:  MOVLB  7
 0141E:  MOVF   03,W
 01420:  BNZ   142E
 01422:  MOVLW  2E
@@ -4545,7 +4548,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01426:  MOVLB  0
 01428:  BTFSC  FD8.2
 0142A:  BRA    19AA
-0142C:  MOVLB  3
+0142C:  MOVLB  7
 0142E:  MOVF   03,W
 01430:  BNZ   143E
 01432:  MOVLW  2F
@@ -4553,7 +4556,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01436:  MOVLB  0
 01438:  BTFSC  FD8.2
 0143A:  BRA    19BA
-0143C:  MOVLB  3
+0143C:  MOVLB  7
 0143E:  MOVF   03,W
 01440:  BNZ   144E
 01442:  MOVLW  30
@@ -4561,7 +4564,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01446:  MOVLB  0
 01448:  BTFSC  FD8.2
 0144A:  BRA    19CA
-0144C:  MOVLB  3
+0144C:  MOVLB  7
 0144E:  MOVF   03,W
 01450:  BNZ   145E
 01452:  MOVLW  31
@@ -4569,7 +4572,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01456:  MOVLB  0
 01458:  BTFSC  FD8.2
 0145A:  BRA    19DA
-0145C:  MOVLB  3
+0145C:  MOVLB  7
 0145E:  MOVF   03,W
 01460:  BNZ   146E
 01462:  MOVLW  32
@@ -4577,7 +4580,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01466:  MOVLB  0
 01468:  BTFSC  FD8.2
 0146A:  BRA    19EA
-0146C:  MOVLB  3
+0146C:  MOVLB  7
 0146E:  MOVF   03,W
 01470:  BNZ   147E
 01472:  MOVLW  33
@@ -4585,7 +4588,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01476:  MOVLB  0
 01478:  BTFSC  FD8.2
 0147A:  BRA    19FA
-0147C:  MOVLB  3
+0147C:  MOVLB  7
 0147E:  MOVLW  03
 01480:  SUBWF  03,W
 01482:  BNZ   1490
@@ -4594,7 +4597,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01488:  MOVLB  0
 0148A:  BTFSC  FD8.2
 0148C:  BRA    1A0A
-0148E:  MOVLB  3
+0148E:  MOVLB  7
 01490:  MOVLW  03
 01492:  SUBWF  03,W
 01494:  BNZ   14A2
@@ -4603,7 +4606,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0149A:  MOVLB  0
 0149C:  BTFSC  FD8.2
 0149E:  BRA    1A1A
-014A0:  MOVLB  3
+014A0:  MOVLB  7
 014A2:  MOVLW  03
 014A4:  SUBWF  03,W
 014A6:  BNZ   14B4
@@ -4612,7 +4615,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 014AC:  MOVLB  0
 014AE:  BTFSC  FD8.2
 014B0:  BRA    1A28
-014B2:  MOVLB  3
+014B2:  MOVLB  7
 014B4:  MOVLW  03
 014B6:  SUBWF  03,W
 014B8:  BNZ   14C6
@@ -4621,7 +4624,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 014BE:  MOVLB  0
 014C0:  BTFSC  FD8.2
 014C2:  BRA    1A36
-014C4:  MOVLB  3
+014C4:  MOVLB  7
 014C6:  MOVLW  03
 014C8:  SUBWF  03,W
 014CA:  BNZ   14D8
@@ -4630,7 +4633,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 014D0:  MOVLB  0
 014D2:  BTFSC  FD8.2
 014D4:  BRA    1A44
-014D6:  MOVLB  3
+014D6:  MOVLB  7
 014D8:  MOVLW  03
 014DA:  SUBWF  03,W
 014DC:  BNZ   14EA
@@ -4639,7 +4642,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 014E2:  MOVLB  0
 014E4:  BTFSC  FD8.2
 014E6:  BRA    1A52
-014E8:  MOVLB  3
+014E8:  MOVLB  7
 014EA:  MOVLW  03
 014EC:  SUBWF  03,W
 014EE:  BNZ   14FC
@@ -4648,7 +4651,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 014F4:  MOVLB  0
 014F6:  BTFSC  FD8.2
 014F8:  BRA    1A60
-014FA:  MOVLB  3
+014FA:  MOVLB  7
 014FC:  MOVLW  03
 014FE:  SUBWF  03,W
 01500:  BNZ   150E
@@ -4657,7 +4660,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01506:  MOVLB  0
 01508:  BTFSC  FD8.2
 0150A:  BRA    1A70
-0150C:  MOVLB  3
+0150C:  MOVLB  7
 0150E:  MOVLW  03
 01510:  SUBWF  03,W
 01512:  BNZ   1520
@@ -4666,7 +4669,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01518:  MOVLB  0
 0151A:  BTFSC  FD8.2
 0151C:  BRA    1A7E
-0151E:  MOVLB  3
+0151E:  MOVLB  7
 01520:  MOVLW  03
 01522:  SUBWF  03,W
 01524:  BNZ   1532
@@ -4675,7 +4678,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0152A:  MOVLB  0
 0152C:  BTFSC  FD8.2
 0152E:  BRA    1A8E
-01530:  MOVLB  3
+01530:  MOVLB  7
 01532:  MOVLW  03
 01534:  SUBWF  03,W
 01536:  BNZ   1544
@@ -4684,7 +4687,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0153C:  MOVLB  0
 0153E:  BTFSC  FD8.2
 01540:  BRA    1A9C
-01542:  MOVLB  3
+01542:  MOVLB  7
 01544:  MOVLW  03
 01546:  SUBWF  03,W
 01548:  BNZ   1556
@@ -4693,7 +4696,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0154E:  MOVLB  0
 01550:  BTFSC  FD8.2
 01552:  BRA    1AAA
-01554:  MOVLB  3
+01554:  MOVLB  7
 01556:  MOVLW  03
 01558:  SUBWF  03,W
 0155A:  BNZ   1568
@@ -4702,13 +4705,13 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01560:  MOVLB  0
 01562:  BTFSC  FD8.2
 01564:  BRA    1ABA
-01566:  MOVLB  3
+01566:  MOVLB  7
 01568:  BRA    1AC8
 .................... 		/* counters */ 
 .................... 		case 0:  return (int16) current.pulse_count[0]; 
 0156A:  MOVFF  60,01
 0156E:  MOVFF  61,02
-01572:  MOVLB  3
+01572:  MOVLB  7
 01574:  BRA    1AD0
 01576:  MOVLB  0
 .................... 		case 1:  return (int16) current.pulse_period[0]; 
@@ -4716,7 +4719,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0157A:  MOVWF  01
 0157C:  MOVF   4F,W
 0157E:  MOVWF  02
-01580:  MOVLB  3
+01580:  MOVLB  7
 01582:  BRA    1AD0
 01584:  MOVLB  0
 .................... 		case 2:  return (int16) current.pulse_min_period[0]; 
@@ -4724,7 +4727,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01588:  MOVWF  01
 0158A:  MOVF   55,W
 0158C:  MOVWF  02
-0158E:  MOVLB  3
+0158E:  MOVLB  7
 01590:  BRA    1AD0
 01592:  MOVLB  0
 .................... 		case 3:  return (int16) current.pulse_max_period[0]; 
@@ -4732,30 +4735,30 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01596:  MOVWF  01
 01598:  MOVF   5B,W
 0159A:  MOVWF  02
-0159C:  MOVLB  3
+0159C:  MOVLB  7
 0159E:  BRA    1AD0
 015A0:  MOVLB  0
 .................... 		case 4:  ps.word=get_pulse_sum(0); return (int16) ps.l[0]; 
-015A2:  MOVLB  3
-015A4:  CLRF   xDE
+015A2:  MOVLB  7
+015A4:  CLRF   x9E
 015A6:  MOVLB  0
 015A8:  RCALL  1002
-015AA:  MOVFF  03,3BE
-015AE:  MOVFF  02,3BD
-015B2:  MOVFF  01,3BC
-015B6:  MOVFF  00,3BB
-015BA:  MOVLB  3
-015BC:  MOVF   xBB,W
+015AA:  MOVFF  03,77E
+015AE:  MOVFF  02,77D
+015B2:  MOVFF  01,77C
+015B6:  MOVFF  00,77B
+015BA:  MOVLB  7
+015BC:  MOVF   x7B,W
 015BE:  MOVWF  01
-015C0:  MOVF   xBC,W
+015C0:  MOVF   x7C,W
 015C2:  MOVWF  02
 015C4:  BRA    1AD0
 015C6:  MOVLB  0
 .................... 		case 5:  return (int16) ps.l[1]; 
-015C8:  MOVLB  3
-015CA:  MOVF   xBD,W
+015C8:  MOVLB  7
+015CA:  MOVF   x7D,W
 015CC:  MOVWF  01
-015CE:  MOVF   xBE,W
+015CE:  MOVF   x7E,W
 015D0:  MOVWF  02
 015D2:  BRA    1AD0
 015D4:  MOVLB  0
@@ -4765,7 +4768,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 015D8:  MOVWF  01
 015DA:  MOVF   x63,W
 015DC:  MOVWF  02
-015DE:  MOVLB  3
+015DE:  MOVLB  7
 015E0:  BRA    1AD0
 015E2:  MOVLB  0
 .................... 		case 7:  return (int16) current.pulse_period[1]; 
@@ -4773,7 +4776,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 015E6:  MOVWF  01
 015E8:  MOVF   51,W
 015EA:  MOVWF  02
-015EC:  MOVLB  3
+015EC:  MOVLB  7
 015EE:  BRA    1AD0
 015F0:  MOVLB  0
 .................... 		case 8:  return (int16) current.pulse_min_period[1]; 
@@ -4781,7 +4784,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 015F4:  MOVWF  01
 015F6:  MOVF   57,W
 015F8:  MOVWF  02
-015FA:  MOVLB  3
+015FA:  MOVLB  7
 015FC:  BRA    1AD0
 015FE:  MOVLB  0
 .................... 		case 9:  return (int16) current.pulse_max_period[1]; 
@@ -4789,31 +4792,31 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01602:  MOVWF  01
 01604:  MOVF   5D,W
 01606:  MOVWF  02
-01608:  MOVLB  3
+01608:  MOVLB  7
 0160A:  BRA    1AD0
 0160C:  MOVLB  0
 .................... 		case 10: ps.word=get_pulse_sum(1); return (int16) ps.l[0]; 
 0160E:  MOVLW  01
-01610:  MOVLB  3
-01612:  MOVWF  xDE
+01610:  MOVLB  7
+01612:  MOVWF  x9E
 01614:  MOVLB  0
 01616:  RCALL  1002
-01618:  MOVFF  03,3BE
-0161C:  MOVFF  02,3BD
-01620:  MOVFF  01,3BC
-01624:  MOVFF  00,3BB
-01628:  MOVLB  3
-0162A:  MOVF   xBB,W
+01618:  MOVFF  03,77E
+0161C:  MOVFF  02,77D
+01620:  MOVFF  01,77C
+01624:  MOVFF  00,77B
+01628:  MOVLB  7
+0162A:  MOVF   x7B,W
 0162C:  MOVWF  01
-0162E:  MOVF   xBC,W
+0162E:  MOVF   x7C,W
 01630:  MOVWF  02
 01632:  BRA    1AD0
 01634:  MOVLB  0
 .................... 		case 11: return (int16) ps.l[1]; 
-01636:  MOVLB  3
-01638:  MOVF   xBD,W
+01636:  MOVLB  7
+01638:  MOVF   x7D,W
 0163A:  MOVWF  01
-0163C:  MOVF   xBE,W
+0163C:  MOVF   x7E,W
 0163E:  MOVWF  02
 01640:  BRA    1AD0
 01642:  MOVLB  0
@@ -4824,7 +4827,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01646:  MOVWF  01
 01648:  MOVF   x65,W
 0164A:  MOVWF  02
-0164C:  MOVLB  3
+0164C:  MOVLB  7
 0164E:  BRA    1AD0
 01650:  MOVLB  0
 .................... 		case 13: return (int16) current.pulse_period[2]; 
@@ -4832,7 +4835,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01654:  MOVWF  01
 01656:  MOVF   53,W
 01658:  MOVWF  02
-0165A:  MOVLB  3
+0165A:  MOVLB  7
 0165C:  BRA    1AD0
 0165E:  MOVLB  0
 .................... 		case 14: return (int16) current.pulse_min_period[2]; 
@@ -4840,7 +4843,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01662:  MOVWF  01
 01664:  MOVF   59,W
 01666:  MOVWF  02
-01668:  MOVLB  3
+01668:  MOVLB  7
 0166A:  BRA    1AD0
 0166C:  MOVLB  0
 .................... 		case 15: return (int16) current.pulse_max_period[2]; 
@@ -4848,31 +4851,31 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01670:  MOVWF  01
 01672:  MOVF   5F,W
 01674:  MOVWF  02
-01676:  MOVLB  3
+01676:  MOVLB  7
 01678:  BRA    1AD0
 0167A:  MOVLB  0
 .................... 		case 16: ps.word=get_pulse_sum(2); return (int16) ps.l[0]; 
 0167C:  MOVLW  02
-0167E:  MOVLB  3
-01680:  MOVWF  xDE
+0167E:  MOVLB  7
+01680:  MOVWF  x9E
 01682:  MOVLB  0
 01684:  RCALL  1002
-01686:  MOVFF  03,3BE
-0168A:  MOVFF  02,3BD
-0168E:  MOVFF  01,3BC
-01692:  MOVFF  00,3BB
-01696:  MOVLB  3
-01698:  MOVF   xBB,W
+01686:  MOVFF  03,77E
+0168A:  MOVFF  02,77D
+0168E:  MOVFF  01,77C
+01692:  MOVFF  00,77B
+01696:  MOVLB  7
+01698:  MOVF   x7B,W
 0169A:  MOVWF  01
-0169C:  MOVF   xBC,W
+0169C:  MOVF   x7C,W
 0169E:  MOVWF  02
 016A0:  BRA    1AD0
 016A2:  MOVLB  0
 .................... 		case 17: return (int16) ps.l[1]; 
-016A4:  MOVLB  3
-016A6:  MOVF   xBD,W
+016A4:  MOVLB  7
+016A6:  MOVF   x7D,W
 016A8:  MOVWF  01
-016AA:  MOVF   xBE,W
+016AA:  MOVF   x7E,W
 016AC:  MOVWF  02
 016AE:  BRA    1AD0
 016B0:  MOVLB  0
@@ -4900,19 +4903,19 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 016D4:  MOVWF  01
 016D6:  MOVF   03,W
 016D8:  MOVWF  02
-016DA:  MOVLB  3
+016DA:  MOVLB  7
 016DC:  BRA    1AD0
 016DE:  MOVLB  0
 .................... 		case 19: return (int16) adc_get(0); 
-016E0:  MOVLB  3
-016E2:  CLRF   xDE
+016E0:  MOVLB  7
+016E2:  CLRF   x9E
 016E4:  MOVLB  0
 016E6:  CALL   0C80
 016EA:  MOVF   01,W
 016EC:  MOVWF  01
 016EE:  MOVF   02,W
 016F0:  MOVWF  02
-016F2:  MOVLB  3
+016F2:  MOVLB  7
 016F4:  BRA    1AD0
 016F6:  MOVLB  0
 .................... 		case 20: return (int16) current.adc_std_dev[0]; 
@@ -4920,7 +4923,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 016FA:  MOVWF  01
 016FC:  MOVF   x73,W
 016FE:  MOVWF  02
-01700:  MOVLB  3
+01700:  MOVLB  7
 01702:  BRA    1AD0
 01704:  MOVLB  0
 .................... 		/* wind dir 0 */ 
@@ -4944,20 +4947,20 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01728:  MOVWF  01
 0172A:  MOVF   03,W
 0172C:  MOVWF  02
-0172E:  MOVLB  3
+0172E:  MOVLB  7
 01730:  BRA    1AD0
 01732:  MOVLB  0
 .................... 		case 22: return (int16) adc_get(1); 
 01734:  MOVLW  01
-01736:  MOVLB  3
-01738:  MOVWF  xDE
+01736:  MOVLB  7
+01738:  MOVWF  x9E
 0173A:  MOVLB  0
 0173C:  CALL   0C80
 01740:  MOVF   01,W
 01742:  MOVWF  01
 01744:  MOVF   02,W
 01746:  MOVWF  02
-01748:  MOVLB  3
+01748:  MOVLB  7
 0174A:  BRA    1AD0
 0174C:  MOVLB  0
 .................... 		case 23: return (int16) current.adc_std_dev[1]; 
@@ -4965,7 +4968,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01750:  MOVWF  01
 01752:  MOVF   x75,W
 01754:  MOVWF  02
-01756:  MOVLB  3
+01756:  MOVLB  7
 01758:  BRA    1AD0
 0175A:  MOVLB  0
 .................... 		/* wind dir 1 */ 
@@ -4989,20 +4992,20 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0177E:  MOVWF  01
 01780:  MOVF   03,W
 01782:  MOVWF  02
-01784:  MOVLB  3
+01784:  MOVLB  7
 01786:  BRA    1AD0
 01788:  MOVLB  0
 .................... 		case 25: return (int16) adc_get(2); 
 0178A:  MOVLW  02
-0178C:  MOVLB  3
-0178E:  MOVWF  xDE
+0178C:  MOVLB  7
+0178E:  MOVWF  x9E
 01790:  MOVLB  0
 01792:  CALL   0C80
 01796:  MOVF   01,W
 01798:  MOVWF  01
 0179A:  MOVF   02,W
 0179C:  MOVWF  02
-0179E:  MOVLB  3
+0179E:  MOVLB  7
 017A0:  BRA    1AD0
 017A2:  MOVLB  0
 .................... 		case 26: return (int16) current.adc_std_dev[2]; 
@@ -5010,7 +5013,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 017A6:  MOVWF  01
 017A8:  MOVF   x77,W
 017AA:  MOVWF  02
-017AC:  MOVLB  3
+017AC:  MOVLB  7
 017AE:  BRA    1AD0
 017B0:  MOVLB  0
 .................... 		/* temperature */ 
@@ -5034,20 +5037,20 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 017D4:  MOVWF  01
 017D6:  MOVF   03,W
 017D8:  MOVWF  02
-017DA:  MOVLB  3
+017DA:  MOVLB  7
 017DC:  BRA    1AD0
 017DE:  MOVLB  0
 .................... 		case 28: return (int16) adc_get(3); 
 017E0:  MOVLW  03
-017E2:  MOVLB  3
-017E4:  MOVWF  xDE
+017E2:  MOVLB  7
+017E4:  MOVWF  x9E
 017E6:  MOVLB  0
 017E8:  CALL   0C80
 017EC:  MOVF   01,W
 017EE:  MOVWF  01
 017F0:  MOVF   02,W
 017F2:  MOVWF  02
-017F4:  MOVLB  3
+017F4:  MOVLB  7
 017F6:  BRA    1AD0
 017F8:  MOVLB  0
 .................... 		case 29: return (int16) current.adc_std_dev[3]; 
@@ -5055,7 +5058,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 017FC:  MOVWF  01
 017FE:  MOVF   x79,W
 01800:  MOVWF  02
-01802:  MOVLB  3
+01802:  MOVLB  7
 01804:  BRA    1AD0
 01806:  MOVLB  0
 .................... 		/* user ADC 0 to 3 */ 
@@ -5079,20 +5082,20 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0182A:  MOVWF  01
 0182C:  MOVF   03,W
 0182E:  MOVWF  02
-01830:  MOVLB  3
+01830:  MOVLB  7
 01832:  BRA    1AD0
 01834:  MOVLB  0
 .................... 		case 31: return (int16) adc_get(4); 
 01836:  MOVLW  04
-01838:  MOVLB  3
-0183A:  MOVWF  xDE
+01838:  MOVLB  7
+0183A:  MOVWF  x9E
 0183C:  MOVLB  0
 0183E:  CALL   0C80
 01842:  MOVF   01,W
 01844:  MOVWF  01
 01846:  MOVF   02,W
 01848:  MOVWF  02
-0184A:  MOVLB  3
+0184A:  MOVLB  7
 0184C:  BRA    1AD0
 0184E:  MOVLB  0
 .................... 		case 32: return (int16) current.adc_std_dev[4]; 
@@ -5100,7 +5103,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01852:  MOVWF  01
 01854:  MOVF   x7B,W
 01856:  MOVWF  02
-01858:  MOVLB  3
+01858:  MOVLB  7
 0185A:  BRA    1AD0
 0185C:  MOVLB  0
 ....................  
@@ -5124,20 +5127,20 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01880:  MOVWF  01
 01882:  MOVF   03,W
 01884:  MOVWF  02
-01886:  MOVLB  3
+01886:  MOVLB  7
 01888:  BRA    1AD0
 0188A:  MOVLB  0
 .................... 		case 34: return (int16) adc_get(5); 
 0188C:  MOVLW  05
-0188E:  MOVLB  3
-01890:  MOVWF  xDE
+0188E:  MOVLB  7
+01890:  MOVWF  x9E
 01892:  MOVLB  0
 01894:  CALL   0C80
 01898:  MOVF   01,W
 0189A:  MOVWF  01
 0189C:  MOVF   02,W
 0189E:  MOVWF  02
-018A0:  MOVLB  3
+018A0:  MOVLB  7
 018A2:  BRA    1AD0
 018A4:  MOVLB  0
 .................... 		case 35: return (int16) current.adc_std_dev[5]; 
@@ -5145,7 +5148,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 018A8:  MOVWF  01
 018AA:  MOVF   x7D,W
 018AC:  MOVWF  02
-018AE:  MOVLB  3
+018AE:  MOVLB  7
 018B0:  BRA    1AD0
 018B2:  MOVLB  0
 ....................  
@@ -5169,20 +5172,20 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 018D6:  MOVWF  01
 018D8:  MOVF   03,W
 018DA:  MOVWF  02
-018DC:  MOVLB  3
+018DC:  MOVLB  7
 018DE:  BRA    1AD0
 018E0:  MOVLB  0
 .................... 		case 37: return (int16) adc_get(6); 
 018E2:  MOVLW  06
-018E4:  MOVLB  3
-018E6:  MOVWF  xDE
+018E4:  MOVLB  7
+018E6:  MOVWF  x9E
 018E8:  MOVLB  0
 018EA:  CALL   0C80
 018EE:  MOVF   01,W
 018F0:  MOVWF  01
 018F2:  MOVF   02,W
 018F4:  MOVWF  02
-018F6:  MOVLB  3
+018F6:  MOVLB  7
 018F8:  BRA    1AD0
 018FA:  MOVLB  0
 .................... 		case 38: return (int16) current.adc_std_dev[6]; 
@@ -5190,7 +5193,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 018FE:  MOVWF  01
 01900:  MOVF   x7F,W
 01902:  MOVWF  02
-01904:  MOVLB  3
+01904:  MOVLB  7
 01906:  BRA    1AD0
 01908:  MOVLB  0
 ....................  
@@ -5214,20 +5217,20 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0192C:  MOVWF  01
 0192E:  MOVF   03,W
 01930:  MOVWF  02
-01932:  MOVLB  3
+01932:  MOVLB  7
 01934:  BRA    1AD0
 01936:  MOVLB  0
 .................... 		case 40: return (int16) adc_get(7); 
 01938:  MOVLW  07
-0193A:  MOVLB  3
-0193C:  MOVWF  xDE
+0193A:  MOVLB  7
+0193C:  MOVWF  x9E
 0193E:  MOVLB  0
 01940:  CALL   0C80
 01944:  MOVF   01,W
 01946:  MOVWF  01
 01948:  MOVF   02,W
 0194A:  MOVWF  02
-0194C:  MOVLB  3
+0194C:  MOVLB  7
 0194E:  BRA    1AD0
 01950:  MOVLB  0
 .................... 		case 41: return (int16) current.adc_std_dev[7]; 
@@ -5235,7 +5238,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01954:  MOVWF  01
 01956:  MOVF   x81,W
 01958:  MOVWF  02
-0195A:  MOVLB  3
+0195A:  MOVLB  7
 0195C:  BRA    1AD0
 0195E:  MOVLB  0
 ....................  
@@ -5251,7 +5254,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0196E:  MOVWF  01
 01970:  MOVF   03,W
 01972:  MOVWF  02
-01974:  MOVLB  3
+01974:  MOVLB  7
 01976:  BRA    1AD0
 01978:  MOVLB  0
 .................... 		case 43: return (int16) current.interval_milliseconds; /* milliseconds since last query */ 
@@ -5260,7 +5263,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0197E:  MOVWF  01
 01980:  MOVF   x8E,W
 01982:  MOVWF  02
-01984:  MOVLB  3
+01984:  MOVLB  7
 01986:  BRA    1AD0
 01988:  MOVLB  0
 .................... 		case 44: return (int16) current.uptime_minutes;  
@@ -5269,7 +5272,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0198E:  MOVWF  01
 01990:  MOVF   x8C,W
 01992:  MOVWF  02
-01994:  MOVLB  3
+01994:  MOVLB  7
 01996:  BRA    1AD0
 01998:  MOVLB  0
 .................... 		case 45: return (int16) current.watchdog_seconds;  
@@ -5278,7 +5281,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0199E:  MOVWF  01
 019A0:  MOVF   x92,W
 019A2:  MOVWF  02
-019A4:  MOVLB  3
+019A4:  MOVLB  7
 019A6:  BRA    1AD0
 019A8:  MOVLB  0
 ....................  
@@ -5288,7 +5291,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 019AE:  MOVLW  00
 019B0:  MOVWF  01
 019B2:  MOVWF  02
-019B4:  MOVLB  3
+019B4:  MOVLB  7
 019B6:  BRA    1AD0
 019B8:  MOVLB  0
 .................... 		/* triggers a reset of pulse sum */ 
@@ -5297,7 +5300,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 019BE:  MOVLW  00
 019C0:  MOVWF  01
 019C2:  MOVWF  02
-019C4:  MOVLB  3
+019C4:  MOVLB  7
 019C6:  BRA    1AD0
 019C8:  MOVLB  0
 .................... 		/* modbus statistics */ 
@@ -5307,7 +5310,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 019CE:  MOVWF  01
 019D0:  MOVF   x84,W
 019D2:  MOVWF  02
-019D4:  MOVLB  3
+019D4:  MOVLB  7
 019D6:  BRA    1AD0
 019D8:  MOVLB  0
 .................... 		case 49: return (int16) current.modbus_other_packets; 
@@ -5316,7 +5319,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 019DE:  MOVWF  01
 019E0:  MOVF   x86,W
 019E2:  MOVWF  02
-019E4:  MOVLB  3
+019E4:  MOVLB  7
 019E6:  BRA    1AD0
 019E8:  MOVLB  0
 .................... 		case 50: return (int16) current.modbus_last_error; 
@@ -5325,7 +5328,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 019EE:  MOVWF  01
 019F0:  MOVF   x88,W
 019F2:  MOVWF  02
-019F4:  MOVLB  3
+019F4:  MOVLB  7
 019F6:  BRA    1AD0
 019F8:  MOVLB  0
 .................... 		/* triggers a modbus statistics reset */ 
@@ -5334,7 +5337,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 019FE:  MOVLW  00
 01A00:  MOVWF  01
 01A02:  MOVWF  02
-01A04:  MOVLB  3
+01A04:  MOVLB  7
 01A06:  BRA    1AD0
 01A08:  MOVLB  0
 ....................  
@@ -5347,7 +5350,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A0E:  MOVWF  01
 01A10:  MOVF   03,W
 01A12:  MOVWF  02
-01A14:  MOVLB  3
+01A14:  MOVLB  7
 01A16:  BRA    1AD0
 01A18:  MOVLB  0
 .................... 		case 1001: return (int16) config.serial_number; 
@@ -5355,7 +5358,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A1C:  MOVWF  01
 01A1E:  MOVF   3B,W
 01A20:  MOVWF  02
-01A22:  MOVLB  3
+01A22:  MOVLB  7
 01A24:  BRA    1AD0
 01A26:  MOVLB  0
 .................... 		case 1002: return (int16) 'P'; 
@@ -5363,7 +5366,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A2A:  MOVWF  01
 01A2C:  MOVLW  00
 01A2E:  MOVWF  02
-01A30:  MOVLB  3
+01A30:  MOVLB  7
 01A32:  BRA    1AD0
 01A34:  MOVLB  0
 .................... 		case 1003: return (int16) 'W'; 
@@ -5371,7 +5374,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A38:  MOVWF  01
 01A3A:  MOVLW  00
 01A3C:  MOVWF  02
-01A3E:  MOVLB  3
+01A3E:  MOVLB  7
 01A40:  BRA    1AD0
 01A42:  MOVLB  0
 .................... 		case 1004: return (int16) 'X'; 
@@ -5379,7 +5382,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A46:  MOVWF  01
 01A48:  MOVLW  00
 01A4A:  MOVWF  02
-01A4C:  MOVLB  3
+01A4C:  MOVLB  7
 01A4E:  BRA    1AD0
 01A50:  MOVLB  0
 .................... 		case 1005: return (int16) 1; 
@@ -5387,7 +5390,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A54:  MOVWF  01
 01A56:  MOVLW  00
 01A58:  MOVWF  02
-01A5A:  MOVLB  3
+01A5A:  MOVLB  7
 01A5C:  BRA    1AD0
 01A5E:  MOVLB  0
 .................... 		case 1006: return (int16) config.modbus_address; 
@@ -5396,7 +5399,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A64:  MOVWF  01
 01A66:  MOVF   03,W
 01A68:  MOVWF  02
-01A6A:  MOVLB  3
+01A6A:  MOVLB  7
 01A6C:  BRA    1AD0
 01A6E:  MOVLB  0
 .................... 		case 1007: return (int16) config.adc_sample_ticks; 
@@ -5404,7 +5407,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A72:  MOVWF  01
 01A74:  MOVF   3D,W
 01A76:  MOVWF  02
-01A78:  MOVLB  3
+01A78:  MOVLB  7
 01A7A:  BRA    1AD0
 01A7C:  MOVLB  0
 .................... 		case 1008: return (int16) config.allow_bootload_request; 
@@ -5413,7 +5416,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A82:  MOVWF  01
 01A84:  MOVF   03,W
 01A86:  MOVWF  02
-01A88:  MOVLB  3
+01A88:  MOVLB  7
 01A8A:  BRA    1AD0
 01A8C:  MOVLB  0
 .................... 		case 1009: return (int16) config.watchdog_seconds_max; 
@@ -5421,7 +5424,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A90:  MOVWF  01
 01A92:  MOVF   40,W
 01A94:  MOVWF  02
-01A96:  MOVLB  3
+01A96:  MOVLB  7
 01A98:  BRA    1AD0
 01A9A:  MOVLB  0
 .................... 		case 1010: return (int16) config.pi_offtime_seconds; 
@@ -5429,7 +5432,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01A9E:  MOVWF  01
 01AA0:  MOVF   42,W
 01AA2:  MOVWF  02
-01AA4:  MOVLB  3
+01AA4:  MOVLB  7
 01AA6:  BRA    1AD0
 01AA8:  MOVLB  0
 .................... 		case 1011: return (int16) config.power_startup; 
@@ -5438,7 +5441,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01AAE:  MOVWF  01
 01AB0:  MOVF   03,W
 01AB2:  MOVWF  02
-01AB4:  MOVLB  3
+01AB4:  MOVLB  7
 01AB6:  BRA    1AD0
 01AB8:  MOVLB  0
 .................... 		case 1012: return (int16) config.rs485_port_mode; 
@@ -5447,7 +5450,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01ABE:  MOVWF  01
 01AC0:  MOVF   03,W
 01AC2:  MOVWF  02
-01AC4:  MOVLB  3
+01AC4:  MOVLB  7
 01AC6:  BRA    1AD0
 ....................  
 .................... 		/* we should have range checked, and never gotten here */ 
@@ -5466,17 +5469,17 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... int8 modbus_valid_read_registers(int16 start, int16 end) { 
 .................... 	if ( 19999==start && 20000==end) 
 *
-00EC8:  MOVLB  3
-00ECA:  MOVF   xD2,W
+00EC8:  MOVLB  7
+00ECA:  MOVF   x92,W
 00ECC:  SUBLW  1F
 00ECE:  BNZ   0EE8
-00ED0:  MOVF   xD3,W
+00ED0:  MOVF   x93,W
 00ED2:  SUBLW  4E
 00ED4:  BNZ   0EE8
-00ED6:  MOVF   xD4,W
+00ED6:  MOVF   x94,W
 00ED8:  SUBLW  20
 00EDA:  BNZ   0EE8
-00EDC:  MOVF   xD5,W
+00EDC:  MOVF   x95,W
 00EDE:  SUBLW  4E
 00EE0:  BNZ   0EE8
 .................... 		return 1; 
@@ -5486,19 +5489,19 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 	 
 .................... 	if ( start >= MIN_CONFIG_REGISTER && end <= MAX_CONFIG_REGISTER+1 ) 
-00EE8:  MOVF   xD3,W
+00EE8:  MOVF   x93,W
 00EEA:  SUBLW  02
 00EEC:  BC    0F0C
 00EEE:  XORLW  FF
 00EF0:  BNZ   0EF8
-00EF2:  MOVF   xD2,W
+00EF2:  MOVF   x92,W
 00EF4:  SUBLW  E7
 00EF6:  BC    0F0C
-00EF8:  MOVF   xD5,W
+00EF8:  MOVF   x95,W
 00EFA:  SUBLW  03
 00EFC:  BNC   0F0C
 00EFE:  BNZ   0F06
-00F00:  MOVF   xD4,W
+00F00:  MOVF   x94,W
 00F02:  SUBLW  F5
 00F04:  BNC   0F0C
 .................... 		return 1; 
@@ -5507,19 +5510,19 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00F0A:  BRA    0F44
 ....................  
 .................... 	if ( start >= MIN_EE_REGISTER && end <= MAX_EE_REGISTER+1 ) 
-00F0C:  MOVF   xD3,W
+00F0C:  MOVF   x93,W
 00F0E:  SUBLW  06
 00F10:  BC    0F30
 00F12:  XORLW  FF
 00F14:  BNZ   0F1C
-00F16:  MOVF   xD2,W
+00F16:  MOVF   x92,W
 00F18:  SUBLW  CF
 00F1A:  BC    0F30
-00F1C:  MOVF   xD5,W
+00F1C:  MOVF   x95,W
 00F1E:  SUBLW  09
 00F20:  BNC   0F30
 00F22:  BNZ   0F2A
-00F24:  MOVF   xD4,W
+00F24:  MOVF   x94,W
 00F26:  SUBLW  D1
 00F28:  BNC   0F30
 .................... 		return 1; 
@@ -5530,9 +5533,9 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 	/* end is always start + at least one ... so no need to test for range starting at 0 */ 
 .................... 	if ( end <= MAX_STATUS_REGISTER+1) 
-00F30:  MOVF   xD5,F
+00F30:  MOVF   x95,F
 00F32:  BNZ   0F40
-00F34:  MOVF   xD4,W
+00F34:  MOVF   x94,W
 00F36:  SUBLW  34
 00F38:  BNC   0F40
 .................... 		return 1; 
@@ -5570,58 +5573,58 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 	modbus_serial_send_start(address, func); // FUNC_READ_HOLDING_REGISTERS); 
 *
-01AD6:  MOVFF  3D1,3DA
-01ADA:  MOVFF  3D0,3DB
+01AD6:  MOVFF  791,79A
+01ADA:  MOVFF  790,79B
 01ADE:  CALL   0F86
 .................... 	modbus_serial_putc(register_count*2); 
 01AE2:  BCF    FD8.0
-01AE4:  MOVLB  3
-01AE6:  RLCF   xD4,W
-01AE8:  MOVWF  xDA
-01AEA:  RLCF   xD5,W
-01AEC:  MOVWF  xDB
-01AEE:  MOVFF  3DA,3DC
+01AE4:  MOVLB  7
+01AE6:  RLCF   x94,W
+01AE8:  MOVWF  x9A
+01AEA:  RLCF   x95,W
+01AEC:  MOVWF  x9B
+01AEE:  MOVFF  79A,79C
 01AF2:  MOVLB  0
 01AF4:  CALL   0F52
 ....................  
 ....................  
 .................... 	for( i=0 ; i<register_count ; i++ ) { 
-01AF8:  MOVLB  3
-01AFA:  CLRF   xD7
-01AFC:  CLRF   xD6
-01AFE:  MOVF   xD7,W
-01B00:  SUBWF  xD5,W
+01AF8:  MOVLB  7
+01AFA:  CLRF   x97
+01AFC:  CLRF   x96
+01AFE:  MOVF   x97,W
+01B00:  SUBWF  x95,W
 01B02:  BNC   1B4E
 01B04:  BNZ   1B0C
-01B06:  MOVF   xD4,W
-01B08:  SUBWF  xD6,W
+01B06:  MOVF   x94,W
+01B08:  SUBWF  x96,W
 01B0A:  BC    1B4E
 .................... 		l=map_modbus(start_address+i); 
-01B0C:  MOVF   xD6,W
-01B0E:  ADDWF  xD2,W
-01B10:  MOVWF  xDA
-01B12:  MOVF   xD7,W
-01B14:  ADDWFC xD3,W
-01B16:  MOVWF  xDB
-01B18:  MOVWF  xDD
-01B1A:  MOVFF  3DA,3DC
+01B0C:  MOVF   x96,W
+01B0E:  ADDWF  x92,W
+01B10:  MOVWF  x9A
+01B12:  MOVF   x97,W
+01B14:  ADDWFC x93,W
+01B16:  MOVWF  x9B
+01B18:  MOVWF  x9D
+01B1A:  MOVFF  79A,79C
 01B1E:  MOVLB  0
 01B20:  GOTO   10DC
-01B24:  MOVFF  02,3D9
-01B28:  MOVFF  01,3D8
+01B24:  MOVFF  02,799
+01B28:  MOVFF  01,798
 .................... 		modbus_serial_putc(make8(l,1)); 
-01B2C:  MOVFF  3D9,3DA
-01B30:  MOVFF  3D9,3DC
+01B2C:  MOVFF  799,79A
+01B30:  MOVFF  799,79C
 01B34:  CALL   0F52
 ....................   		modbus_serial_putc(make8(l,0)); 
-01B38:  MOVFF  3D8,3DA
-01B3C:  MOVFF  3D8,3DC
+01B38:  MOVFF  798,79A
+01B3C:  MOVFF  798,79C
 01B40:  CALL   0F52
 .................... 	} 
-01B44:  MOVLB  3
-01B46:  INCF   xD6,F
+01B44:  MOVLB  7
+01B46:  INCF   x96,F
 01B48:  BTFSC  FD8.2
-01B4A:  INCF   xD7,F
+01B4A:  INCF   x97,F
 01B4C:  BRA    1AFE
 ....................  
 .................... 	modbus_serial_send_stop(); 
@@ -5637,29 +5640,29 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... exception modbus_write_register(int16 address, int16 value) { 
 ....................  
 .................... 	if ( address >= MIN_EE_REGISTER && address < MAX_EE_REGISTER ) { 
-01B58:  MOVLB  3
-01B5A:  MOVF   xD7,W
+01B58:  MOVLB  7
+01B5A:  MOVF   x97,W
 01B5C:  SUBLW  06
 01B5E:  BC    1BD6
 01B60:  XORLW  FF
 01B62:  BNZ   1B6A
-01B64:  MOVF   xD6,W
+01B64:  MOVF   x96,W
 01B66:  SUBLW  CF
 01B68:  BC    1BD6
-01B6A:  MOVF   xD7,W
+01B6A:  MOVF   x97,W
 01B6C:  SUBLW  09
 01B6E:  BNC   1BD6
 01B70:  BNZ   1B78
-01B72:  MOVF   xD6,W
+01B72:  MOVF   x96,W
 01B74:  SUBLW  CF
 01B76:  BNC   1BD6
 .................... 		if ( value > 256 ) return ILLEGAL_DATA_VALUE; 
-01B78:  MOVF   xD9,W
+01B78:  MOVF   x99,W
 01B7A:  SUBLW  00
 01B7C:  BC    1B8E
 01B7E:  XORLW  FF
 01B80:  BNZ   1B88
-01B82:  MOVF   xD8,W
+01B82:  MOVF   x98,W
 01B84:  SUBLW  00
 01B86:  BC    1B8E
 01B88:  MOVLW  03
@@ -5667,16 +5670,16 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01B8C:  BRA    1DC2
 .................... 		write_eeprom(address - MIN_EE_REGISTER + EE_FOR_HOST_ADDRESS,(int8) value); 
 01B8E:  MOVLW  D0
-01B90:  SUBWF  xD6,W
-01B92:  MOVWF  xDA
+01B90:  SUBWF  x96,W
+01B92:  MOVWF  x9A
 01B94:  MOVLW  07
-01B96:  SUBWFB xD7,W
-01B98:  MOVWF  xDB
+01B96:  SUBWFB x97,W
+01B98:  MOVWF  x9B
 01B9A:  MOVLW  02
-01B9C:  ADDWF  xDB,F
-01B9E:  MOVFF  3DB,FAA
-01BA2:  MOVFF  3DA,FA9
-01BA6:  MOVFF  3D8,FA8
+01B9C:  ADDWF  x9B,F
+01B9E:  MOVFF  79B,FAA
+01BA2:  MOVFF  79A,FA9
+01BA6:  MOVFF  798,FA8
 01BAA:  BCF    FA6.6
 01BAC:  BCF    FA6.7
 01BAE:  BSF    FA6.2
@@ -5698,7 +5701,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 		return 0; 
 01BCE:  MOVLW  00
 01BD0:  MOVWF  01
-01BD2:  MOVLB  3
+01BD2:  MOVLB  7
 01BD4:  BRA    1DC2
 .................... 	} 
 ....................  
@@ -5708,30 +5711,30 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01BD8:  MOVF   x8F,F
 01BDA:  BZ    1C12
 .................... 		if ( 1000 == address ) { 
-01BDC:  MOVLB  3
-01BDE:  MOVF   xD6,W
+01BDC:  MOVLB  7
+01BDE:  MOVF   x96,W
 01BE0:  SUBLW  E8
 01BE2:  BNZ   1BF6
-01BE4:  MOVF   xD7,W
+01BE4:  MOVF   x97,W
 01BE6:  SUBLW  03
 01BE8:  BNZ   1BF6
 .................... 			config.serial_prefix=value; 
-01BEA:  MOVFF  3D8,39
+01BEA:  MOVFF  798,39
 .................... 			return 0; 
 01BEE:  MOVLW  00
 01BF0:  MOVWF  01
 01BF2:  BRA    1DC2
 .................... 		} else if ( 1001 == address ) { 
 01BF4:  BRA    1C10
-01BF6:  MOVF   xD6,W
+01BF6:  MOVF   x96,W
 01BF8:  SUBLW  E9
 01BFA:  BNZ   1C10
-01BFC:  MOVF   xD7,W
+01BFC:  MOVF   x97,W
 01BFE:  SUBLW  03
 01C00:  BNZ   1C10
 .................... 			config.serial_number=value; 
-01C02:  MOVFF  3D9,3B
-01C06:  MOVFF  3D8,3A
+01C02:  MOVFF  799,3B
+01C06:  MOVFF  798,3A
 .................... 			return 0; 
 01C0A:  MOVLW  00
 01C0C:  MOVWF  01
@@ -5742,10 +5745,10 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 	/* publicly writeable addresses */ 
 .................... 	switch ( address ) { 
-01C12:  MOVLB  3
-01C14:  MOVF   xD6,W
+01C12:  MOVLB  7
+01C14:  MOVF   x96,W
 01C16:  MOVWF  00
-01C18:  MOVF   xD7,W
+01C18:  MOVF   x97,W
 01C1A:  MOVWF  03
 01C1C:  MOVLW  03
 01C1E:  SUBWF  03,W
@@ -5754,7 +5757,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01C24:  SUBWF  00,W
 01C26:  MOVLB  0
 01C28:  BZ    1CC6
-01C2A:  MOVLB  3
+01C2A:  MOVLB  7
 01C2C:  MOVLW  03
 01C2E:  SUBWF  03,W
 01C30:  BNZ   1C3C
@@ -5762,7 +5765,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01C34:  SUBWF  00,W
 01C36:  MOVLB  0
 01C38:  BZ    1CDE
-01C3A:  MOVLB  3
+01C3A:  MOVLB  7
 01C3C:  MOVLW  03
 01C3E:  SUBWF  03,W
 01C40:  BNZ   1C4C
@@ -5770,7 +5773,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01C44:  SUBWF  00,W
 01C46:  MOVLB  0
 01C48:  BZ    1CEE
-01C4A:  MOVLB  3
+01C4A:  MOVLB  7
 01C4C:  MOVLW  03
 01C4E:  SUBWF  03,W
 01C50:  BNZ   1C5C
@@ -5778,7 +5781,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01C54:  SUBWF  00,W
 01C56:  MOVLB  0
 01C58:  BZ    1D06
-01C5A:  MOVLB  3
+01C5A:  MOVLB  7
 01C5C:  MOVLW  03
 01C5E:  SUBWF  03,W
 01C60:  BNZ   1C6C
@@ -5786,7 +5789,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01C64:  SUBWF  00,W
 01C66:  MOVLB  0
 01C68:  BZ    1D12
-01C6A:  MOVLB  3
+01C6A:  MOVLB  7
 01C6C:  MOVLW  03
 01C6E:  SUBWF  03,W
 01C70:  BNZ   1C7C
@@ -5794,7 +5797,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01C74:  SUBWF  00,W
 01C76:  MOVLB  0
 01C78:  BZ    1D2C
-01C7A:  MOVLB  3
+01C7A:  MOVLB  7
 01C7C:  MOVLW  03
 01C7E:  SUBWF  03,W
 01C80:  BNZ   1C8E
@@ -5803,7 +5806,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01C86:  MOVLB  0
 01C88:  BTFSC  FD8.2
 01C8A:  BRA    1D44
-01C8C:  MOVLB  3
+01C8C:  MOVLB  7
 01C8E:  MOVLW  07
 01C90:  SUBWF  03,W
 01C92:  BNZ   1CA0
@@ -5812,7 +5815,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01C98:  MOVLB  0
 01C9A:  BTFSC  FD8.2
 01C9C:  BRA    1D5C
-01C9E:  MOVLB  3
+01C9E:  MOVLB  7
 01CA0:  MOVLW  07
 01CA2:  SUBWF  03,W
 01CA4:  BNZ   1CB2
@@ -5821,7 +5824,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01CAA:  MOVLB  0
 01CAC:  BTFSC  FD8.2
 01CAE:  BRA    1D76
-01CB0:  MOVLB  3
+01CB0:  MOVLB  7
 01CB2:  MOVLW  4E
 01CB4:  SUBWF  03,W
 01CB6:  BNZ   1CC4
@@ -5830,24 +5833,24 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01CBC:  MOVLB  0
 01CBE:  BTFSC  FD8.2
 01CC0:  BRA    1D90
-01CC2:  MOVLB  3
+01CC2:  MOVLB  7
 01CC4:  BRA    1DB8
 .................... 			 
 ....................  
 .................... 		case 1006: 
 .................... 			/* Modbus address {0 to 127 or 128 for respond to any} */ 
 .................... 			if ( value > 128 ) return ILLEGAL_DATA_VALUE; 
-01CC6:  MOVLB  3
-01CC8:  MOVF   xD9,F
+01CC6:  MOVLB  7
+01CC8:  MOVF   x99,F
 01CCA:  BNZ   1CD2
-01CCC:  MOVF   xD8,W
+01CCC:  MOVF   x98,W
 01CCE:  SUBLW  80
 01CD0:  BC    1CD8
 01CD2:  MOVLW  03
 01CD4:  MOVWF  01
 01CD6:  BRA    1DC2
 .................... 			config.modbus_address=value; 
-01CD8:  MOVFF  3D8,36
+01CD8:  MOVFF  798,36
 .................... 			break; 
 01CDC:  BRA    1DBE
 ....................  
@@ -5857,82 +5860,82 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01CDE:  MOVLB  1
 01CE0:  BSF    xAE.1
 .................... 			config.adc_sample_ticks=value; 
-01CE2:  MOVFF  3D9,3D
-01CE6:  MOVFF  3D8,3C
+01CE2:  MOVFF  799,3D
+01CE6:  MOVFF  798,3C
 .................... 			break; 
-01CEA:  MOVLB  3
+01CEA:  MOVLB  7
 01CEC:  BRA    1DBE
 ....................  
 .................... 		case 1008: 
 .................... 			/* allow this processor to follow requests of the PIC BOOTLOAD REQUEST line to reset ourselves */ 
 .................... 			if ( value > 1 ) return ILLEGAL_DATA_VALUE; 
-01CEE:  MOVLB  3
-01CF0:  MOVF   xD9,F
+01CEE:  MOVLB  7
+01CF0:  MOVF   x99,F
 01CF2:  BNZ   1CFA
-01CF4:  MOVF   xD8,W
+01CF4:  MOVF   x98,W
 01CF6:  SUBLW  01
 01CF8:  BC    1D00
 01CFA:  MOVLW  03
 01CFC:  MOVWF  01
 01CFE:  BRA    1DC2
 .................... 			config.allow_bootload_request=value; 
-01D00:  MOVFF  3D8,3E
+01D00:  MOVFF  798,3E
 .................... 			break; 
 01D04:  BRA    1DBE
 ....................  
 .................... 		case 1009: 
 .................... 			config.watchdog_seconds_max=value; 
-01D06:  MOVFF  3D9,40
-01D0A:  MOVFF  3D8,3F
+01D06:  MOVFF  799,40
+01D0A:  MOVFF  798,3F
 .................... 			break; 
-01D0E:  MOVLB  3
+01D0E:  MOVLB  7
 01D10:  BRA    1DBE
 ....................  
 .................... 		case 1010: 
 .................... 			if ( value < 1 ) return ILLEGAL_DATA_VALUE; 
-01D12:  MOVLB  3
-01D14:  MOVF   xD8,F
+01D12:  MOVLB  7
+01D14:  MOVF   x98,F
 01D16:  BNZ   1D22
-01D18:  MOVF   xD9,F
+01D18:  MOVF   x99,F
 01D1A:  BNZ   1D22
 01D1C:  MOVLW  03
 01D1E:  MOVWF  01
 01D20:  BRA    1DC2
 .................... 			config.pi_offtime_seconds=value; 
-01D22:  MOVFF  3D9,42
-01D26:  MOVFF  3D8,41
+01D22:  MOVFF  799,42
+01D26:  MOVFF  798,41
 .................... 			break; 
 01D2A:  BRA    1DBE
 .................... 		 
 .................... 		case 1011: 
 .................... 			if ( value > 1 ) return ILLEGAL_DATA_VALUE; 
-01D2C:  MOVLB  3
-01D2E:  MOVF   xD9,F
+01D2C:  MOVLB  7
+01D2E:  MOVF   x99,F
 01D30:  BNZ   1D38
-01D32:  MOVF   xD8,W
+01D32:  MOVF   x98,W
 01D34:  SUBLW  01
 01D36:  BC    1D3E
 01D38:  MOVLW  03
 01D3A:  MOVWF  01
 01D3C:  BRA    1DC2
 .................... 			config.power_startup=value; 
-01D3E:  MOVFF  3D8,43
+01D3E:  MOVFF  798,43
 .................... 			break; 
 01D42:  BRA    1DBE
 ....................  
 .................... 		case 1012: 
 .................... 			if ( value > 2 ) return ILLEGAL_DATA_VALUE; 
-01D44:  MOVLB  3
-01D46:  MOVF   xD9,F
+01D44:  MOVLB  7
+01D46:  MOVF   x99,F
 01D48:  BNZ   1D50
-01D4A:  MOVF   xD8,W
+01D4A:  MOVF   x98,W
 01D4C:  SUBLW  02
 01D4E:  BC    1D56
 01D50:  MOVLW  03
 01D52:  MOVWF  01
 01D54:  BRA    1DC2
 .................... 			config.rs485_port_mode=value; 
-01D56:  MOVFF  3D8,38
+01D56:  MOVFF  798,38
 .................... 			break; 
 01D5A:  BRA    1DBE
 .................... 		 
@@ -5940,10 +5943,10 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 		case 1998: 
 .................... 			/* write default config to EEPROM */ 
 .................... 			if ( 1 != value ) return ILLEGAL_DATA_VALUE; 
-01D5C:  MOVLB  3
-01D5E:  DECFSZ xD8,W
+01D5C:  MOVLB  7
+01D5E:  DECFSZ x98,W
 01D60:  BRA    1D66
-01D62:  MOVF   xD9,F
+01D62:  MOVF   x99,F
 01D64:  BZ    1D6C
 01D66:  MOVLW  03
 01D68:  MOVWF  01
@@ -5952,15 +5955,15 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01D6C:  MOVLB  0
 01D6E:  CALL   0A36
 .................... 			break; 
-01D72:  MOVLB  3
+01D72:  MOVLB  7
 01D74:  BRA    1DBE
 .................... 		case 1999: 
 .................... 			/* write config to EEPROM */ 
 .................... 			if ( 1 != value ) return ILLEGAL_DATA_VALUE; 
-01D76:  MOVLB  3
-01D78:  DECFSZ xD8,W
+01D76:  MOVLB  7
+01D78:  DECFSZ x98,W
 01D7A:  BRA    1D80
-01D7C:  MOVF   xD9,F
+01D7C:  MOVF   x99,F
 01D7E:  BZ    1D86
 01D80:  MOVLW  03
 01D82:  MOVWF  01
@@ -5969,16 +5972,16 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01D86:  MOVLB  0
 01D88:  CALL   09E2
 .................... 			break; 
-01D8C:  MOVLB  3
+01D8C:  MOVLB  7
 01D8E:  BRA    1DBE
 .................... 		case 19999: 
 .................... 			/* unlock factory programming registers when we get 1802 in passcode register */ 
 .................... 			if ( 1802 != value ) { 
-01D90:  MOVLB  3
-01D92:  MOVF   xD8,W
+01D90:  MOVLB  7
+01D92:  MOVF   x98,W
 01D94:  SUBLW  0A
 01D96:  BNZ   1D9E
-01D98:  MOVF   xD9,W
+01D98:  MOVF   x99,W
 01D9A:  SUBLW  07
 01D9C:  BZ    1DAA
 .................... 				current.factory_unlocked=0; 
@@ -5987,7 +5990,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 				return ILLEGAL_DATA_VALUE; 
 01DA2:  MOVLW  03
 01DA4:  MOVWF  01
-01DA6:  MOVLB  3
+01DA6:  MOVLB  7
 01DA8:  BRA    1DC2
 .................... 			} 
 .................... 			current.factory_unlocked=1; 
@@ -5999,7 +6002,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01DB0:  MOVLW  C8
 01DB2:  MOVWF  xAB
 .................... 			break; 
-01DB4:  MOVLB  3
+01DB4:  MOVLB  7
 01DB6:  BRA    1DBE
 .................... 		default: 
 .................... 			return ILLEGAL_DATA_ADDRESS; 
@@ -6038,8 +6041,8 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01E60:  DECFSZ 38,W
 01E62:  BRA    1F16
 01E64:  MOVF   36,W
-01E66:  MOVLB  2
-01E68:  SUBWF  xB8,W
+01E66:  MOVLB  6
+01E68:  SUBWF  x78,W
 01E6A:  BTFSS  FD8.2
 01E6C:  BRA    1E72
 01E6E:  MOVLB  0
@@ -6055,20 +6058,20 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 			delay_us(365); /* 9600 */ 
 01E76:  CLRWDT
 01E78:  MOVLW  02
-01E7A:  MOVLB  3
-01E7C:  MOVWF  xD0
+01E7A:  MOVLB  7
+01E7C:  MOVWF  x90
 01E7E:  MOVLW  B5
-01E80:  MOVWF  xD1
+01E80:  MOVWF  x91
 01E82:  MOVLB  0
 01E84:  CALL   0EA8
-01E88:  MOVLB  3
-01E8A:  DECFSZ xD0,F
+01E88:  MOVLB  7
+01E8A:  DECFSZ x90,F
 01E8C:  BRA    1E7E
 ....................  
 .................... 			/* address */ 
 .................... 			fputc(modbus_rx.address,STREAM_RS485); 
-01E8E:  MOVLB  2
-01E90:  MOVF   xB8,W
+01E8E:  MOVLB  6
+01E90:  MOVF   x78,W
 01E92:  MOVLB  0
 01E94:  CALL   067E
 .................... 			delay_us(104); //one stop bit @ 9600 baud 
@@ -6081,8 +6084,8 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 			/* function */ 
 .................... 			fputc(modbus_rx.func,STREAM_RS485); 
-01EA4:  MOVLB  2
-01EA6:  MOVF   xBA,W
+01EA4:  MOVLB  6
+01EA6:  MOVF   x7A,W
 01EA8:  MOVLB  0
 01EAA:  CALL   067E
 .................... 			delay_us(104); //one stop bit @ 9600 baud 
@@ -6095,24 +6098,24 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 			/* data and (hopefully) CRC */ 
 .................... 			for ( i=0 ; i<modbus_rx.len+2 ; i++ ) { 
-01EBA:  MOVLB  3
-01EBC:  CLRF   xCF
+01EBA:  MOVLB  7
+01EBC:  CLRF   x8F
 01EBE:  MOVLW  02
-01EC0:  MOVLB  2
-01EC2:  ADDWF  xB9,W
-01EC4:  MOVLB  3
-01EC6:  SUBWF  xCF,W
+01EC0:  MOVLB  6
+01EC2:  ADDWF  x79,W
+01EC4:  MOVLB  7
+01EC6:  SUBWF  x8F,W
 01EC8:  BC    1EF6
 .................... 				fputc(modbus_rx.data[i],STREAM_RS485); 
-01ECA:  MOVLW  BC
-01ECC:  ADDWF  xCF,W
+01ECA:  MOVLW  7C
+01ECC:  ADDWF  x8F,W
 01ECE:  MOVWF  FE9
-01ED0:  MOVLW  02
+01ED0:  MOVLW  06
 01ED2:  MOVWF  FEA
 01ED4:  BTFSC  FD8.0
 01ED6:  INCF   FEA,F
-01ED8:  MOVFF  FEF,3D0
-01EDC:  MOVF   xD0,W
+01ED8:  MOVFF  FEF,790
+01EDC:  MOVF   x90,W
 01EDE:  MOVLB  0
 01EE0:  CALL   067E
 .................... 				delay_us(104); //one stop bit @ 9600 baud 
@@ -6123,8 +6126,8 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01EEC:  BRA    1EEA
 01EEE:  NOP   
 .................... 			} 
-01EF0:  MOVLB  3
-01EF2:  INCF   xCF,F
+01EF0:  MOVLB  7
+01EF2:  INCF   x8F,F
 01EF4:  BRA    1EBE
 ....................  
 .................... 			/* wait for transmitter buffer to empty */ 
@@ -6136,13 +6139,13 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 			delay_us(365); /* 9600 */ 
 01EFA:  CLRWDT
 01EFC:  MOVLW  02
-01EFE:  MOVWF  xD0
+01EFE:  MOVWF  x90
 01F00:  MOVLW  B5
-01F02:  MOVWF  xD1
+01F02:  MOVWF  x91
 01F04:  MOVLB  0
 01F06:  CALL   0EA8
-01F0A:  MOVLB  3
-01F0C:  DECFSZ xD0,F
+01F0A:  MOVLB  7
+01F0C:  DECFSZ x90,F
 01F0E:  BRA    1F00
 .................... 			/* shut off transmitter */ 
 .................... 			output_low(RS485_DE); 
@@ -6158,8 +6161,8 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01F18:  SUBLW  80
 01F1A:  BZ    1F28
 01F1C:  MOVF   36,W
-01F1E:  MOVLB  2
-01F20:  SUBWF  xB8,W
+01F1E:  MOVLB  6
+01F20:  SUBWF  x78,W
 01F22:  BTFSS  FD8.2
 01F24:  BRA    212C
 01F26:  MOVLB  0
@@ -6182,8 +6185,8 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01F3C:  MOVWF  xAB
 ....................  
 .................... 			switch(modbus_rx.func) { 
-01F3E:  MOVLB  2
-01F40:  MOVF   xBA,W
+01F3E:  MOVLB  6
+01F40:  MOVF   x7A,W
 01F42:  XORLW  03
 01F44:  MOVLB  0
 01F46:  BZ    1F58
@@ -6198,36 +6201,36 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 				case FUNC_READ_HOLDING_REGISTERS: /* 3 */ 
 .................... 				case FUNC_READ_INPUT_REGISTERS:   /* 4 */ 
 .................... 					start_addr=make16(modbus_rx.data[0],modbus_rx.data[1]); 
-01F58:  MOVFF  2BC,3CB
-01F5C:  MOVFF  2BD,3CA
+01F58:  MOVFF  67C,78B
+01F5C:  MOVFF  67D,78A
 .................... 					num_registers=make16(modbus_rx.data[2],modbus_rx.data[3]); 
-01F60:  MOVFF  2BE,3CD
-01F64:  MOVFF  2BF,3CC
+01F60:  MOVFF  67E,78D
+01F64:  MOVFF  67F,78C
 .................... 	 
 .................... 					/* make sure our address is within range */ 
 .................... 					if ( ! modbus_valid_read_registers(start_addr,start_addr+num_registers) ) { 
-01F68:  MOVLB  3
-01F6A:  MOVF   xCC,W
-01F6C:  ADDWF  xCA,W
-01F6E:  MOVWF  xD0
-01F70:  MOVF   xCD,W
-01F72:  ADDWFC xCB,W
-01F74:  MOVWF  xD1
-01F76:  MOVFF  3CB,3D3
-01F7A:  MOVFF  3CA,3D2
-01F7E:  MOVWF  xD5
-01F80:  MOVFF  3D0,3D4
+01F68:  MOVLB  7
+01F6A:  MOVF   x8C,W
+01F6C:  ADDWF  x8A,W
+01F6E:  MOVWF  x90
+01F70:  MOVF   x8D,W
+01F72:  ADDWFC x8B,W
+01F74:  MOVWF  x91
+01F76:  MOVFF  78B,793
+01F7A:  MOVFF  78A,792
+01F7E:  MOVWF  x95
+01F80:  MOVFF  790,794
 01F84:  MOVLB  0
 01F86:  GOTO   0EC8
 01F8A:  MOVF   01,F
 01F8C:  BNZ   1FB2
 .................... 					    modbus_exception_rsp(modbus_rx.address,modbus_rx.func,ILLEGAL_DATA_ADDRESS); 
-01F8E:  MOVFF  2B8,3D0
-01F92:  MOVLB  3
-01F94:  CLRF   xD2
-01F96:  MOVFF  2BA,3D1
+01F8E:  MOVFF  678,790
+01F92:  MOVLB  7
+01F94:  CLRF   x92
+01F96:  MOVFF  67A,791
 01F9A:  MOVLW  02
-01F9C:  MOVWF  xD3
+01F9C:  MOVWF  x93
 01F9E:  MOVLB  0
 01FA0:  CALL   0FE2
 .................... 						current.modbus_last_error=ILLEGAL_DATA_ADDRESS; 
@@ -6243,12 +6246,12 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01FAE:  BRA    1FCE
 01FB0:  MOVLB  0
 .................... 						modbus_read_register_response(modbus_rx.func,modbus_rx.address,start_addr,num_registers); 
-01FB2:  MOVFF  2BA,3D0
-01FB6:  MOVFF  2B8,3D1
-01FBA:  MOVFF  3CB,3D3
-01FBE:  MOVFF  3CA,3D2
-01FC2:  MOVFF  3CD,3D5
-01FC6:  MOVFF  3CC,3D4
+01FB2:  MOVFF  67A,790
+01FB6:  MOVFF  678,791
+01FBA:  MOVFF  78B,793
+01FBE:  MOVFF  78A,792
+01FC2:  MOVFF  78D,795
+01FC6:  MOVFF  78C,794
 01FCA:  BRA    1AD6
 01FCC:  MOVLB  1
 .................... 					} 
@@ -6256,55 +6259,55 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 01FCE:  BRA    2124
 .................... 				case FUNC_WRITE_SINGLE_REGISTER: /* 6 */ 
 .................... 					start_addr=make16(modbus_rx.data[0],modbus_rx.data[1]); 
-01FD0:  MOVFF  2BC,3CB
-01FD4:  MOVFF  2BD,3CA
+01FD0:  MOVFF  67C,78B
+01FD4:  MOVFF  67D,78A
 ....................  
 .................... 					/* try the write */ 
 .................... 					result=modbus_write_register(start_addr,make16(modbus_rx.data[2],modbus_rx.data[3])); 
-01FD8:  MOVFF  2BE,3D1
-01FDC:  MOVFF  2BF,3D0
-01FE0:  MOVFF  3CB,3D7
-01FE4:  MOVFF  3CA,3D6
-01FE8:  MOVFF  2BE,3D9
-01FEC:  MOVFF  2BF,3D8
+01FD8:  MOVFF  67E,791
+01FDC:  MOVFF  67F,790
+01FE0:  MOVFF  78B,797
+01FE4:  MOVFF  78A,796
+01FE8:  MOVFF  67E,799
+01FEC:  MOVFF  67F,798
 01FF0:  RCALL  1B58
-01FF2:  MOVFF  01,3CE
+01FF2:  MOVFF  01,78E
 ....................  
 .................... 					if ( result ) { 
-01FF6:  MOVLB  3
-01FF8:  MOVF   xCE,F
+01FF6:  MOVLB  7
+01FF8:  MOVF   x8E,F
 01FFA:  BZ    201E
 .................... 						/* exception */ 
 .................... 						modbus_exception_rsp(modbus_rx.address,modbus_rx.func,result); 
-01FFC:  MOVFF  2B8,3D0
-02000:  CLRF   xD2
-02002:  MOVFF  2BA,3D1
-02006:  MOVFF  3CE,3D3
+01FFC:  MOVFF  678,790
+02000:  CLRF   x92
+02002:  MOVFF  67A,791
+02006:  MOVFF  78E,793
 0200A:  MOVLB  0
 0200C:  CALL   0FE2
 .................... 						current.modbus_last_error=result; 
 02010:  MOVLB  1
 02012:  CLRF   x88
-02014:  MOVFF  3CE,187
+02014:  MOVFF  78E,187
 ....................  
 .................... 						/* red LED for 1 second */ 
 .................... 						timers.led_on_green=0; 
 02018:  CLRF   xAB
 .................... 					}  else { 
 0201A:  BRA    2040
-0201C:  MOVLB  3
+0201C:  MOVLB  7
 .................... 						/* no exception, send ack */ 
 .................... 						modbus_write_single_register_rsp(modbus_rx.address, 
 .................... 							start_addr, 
 .................... 							make16(modbus_rx.data[2],modbus_rx.data[3]) 
 .................... 						); 
-0201E:  MOVFF  2BE,3D1
-02022:  MOVFF  2BF,3D0
-02026:  MOVFF  2B8,3D2
-0202A:  MOVFF  3CB,3D4
-0202E:  MOVFF  3CA,3D3
-02032:  MOVFF  2BE,3D6
-02036:  MOVFF  2BF,3D5
+0201E:  MOVFF  67E,791
+02022:  MOVFF  67F,790
+02026:  MOVFF  678,792
+0202A:  MOVFF  78B,794
+0202E:  MOVFF  78A,793
+02032:  MOVFF  67E,796
+02036:  MOVFF  67F,795
 0203A:  MOVLB  0
 0203C:  BRA    1DC6
 0203E:  MOVLB  1
@@ -6313,98 +6316,98 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 02040:  BRA    2124
 .................... 				case FUNC_WRITE_MULTIPLE_REGISTERS: /* 16 */ 
 .................... 					start_addr=make16(modbus_rx.data[0],modbus_rx.data[1]); 
-02042:  MOVFF  2BC,3CB
-02046:  MOVFF  2BD,3CA
+02042:  MOVFF  67C,78B
+02046:  MOVFF  67D,78A
 .................... 					num_registers=make16(modbus_rx.data[2],modbus_rx.data[3]); 
-0204A:  MOVFF  2BE,3CD
-0204E:  MOVFF  2BF,3CC
+0204A:  MOVFF  67E,78D
+0204E:  MOVFF  67F,78C
 ....................  
 .................... 					/* attempt to write each register. Stop if exception */ 
 .................... 					for ( i=0 ; i<num_registers ; i++ ) { 
-02052:  MOVLB  3
-02054:  CLRF   xCF
-02056:  MOVF   xCD,F
+02052:  MOVLB  7
+02054:  CLRF   x8F
+02056:  MOVF   x8D,F
 02058:  BNZ   2060
-0205A:  MOVF   xCC,W
-0205C:  SUBWF  xCF,W
+0205A:  MOVF   x8C,W
+0205C:  SUBWF  x8F,W
 0205E:  BC    20E4
 .................... 						result=modbus_write_register(start_addr+i,make16(modbus_rx.data[5+i*2],modbus_rx.data[6+i*2])); 
-02060:  MOVF   xCF,W
-02062:  ADDWF  xCA,W
-02064:  MOVWF  xD0
+02060:  MOVF   x8F,W
+02062:  ADDWF  x8A,W
+02064:  MOVWF  x90
 02066:  MOVLW  00
-02068:  ADDWFC xCB,W
-0206A:  MOVWF  xD1
+02068:  ADDWFC x8B,W
+0206A:  MOVWF  x91
 0206C:  BCF    FD8.0
-0206E:  RLCF   xCF,W
+0206E:  RLCF   x8F,W
 02070:  ADDLW  05
-02072:  ADDLW  BC
+02072:  ADDLW  7C
 02074:  MOVWF  FE9
-02076:  MOVLW  02
+02076:  MOVLW  06
 02078:  MOVWF  FEA
 0207A:  BTFSC  FD8.0
 0207C:  INCF   FEA,F
-0207E:  MOVFF  FEF,3D2
+0207E:  MOVFF  FEF,792
 02082:  BCF    FD8.0
-02084:  RLCF   xCF,W
+02084:  RLCF   x8F,W
 02086:  ADDLW  06
-02088:  ADDLW  BC
+02088:  ADDLW  7C
 0208A:  MOVWF  FE9
-0208C:  MOVLW  02
+0208C:  MOVLW  06
 0208E:  MOVWF  FEA
 02090:  BTFSC  FD8.0
 02092:  INCF   FEA,F
-02094:  MOVFF  FEF,3D3
-02098:  MOVFF  3D2,3D5
-0209C:  MOVFF  3D3,3D4
-020A0:  MOVFF  3D1,3D7
-020A4:  MOVFF  3D0,3D6
-020A8:  MOVFF  3D2,3D9
-020AC:  MOVFF  3D3,3D8
+02094:  MOVFF  FEF,793
+02098:  MOVFF  792,795
+0209C:  MOVFF  793,794
+020A0:  MOVFF  791,797
+020A4:  MOVFF  790,796
+020A8:  MOVFF  792,799
+020AC:  MOVFF  793,798
 020B0:  MOVLB  0
 020B2:  RCALL  1B58
-020B4:  MOVFF  01,3CE
+020B4:  MOVFF  01,78E
 ....................  
 .................... 						if ( result ) { 
-020B8:  MOVLB  3
-020BA:  MOVF   xCE,F
+020B8:  MOVLB  7
+020BA:  MOVF   x8E,F
 020BC:  BZ    20E0
 .................... 							/* exception */ 
 .................... 							modbus_exception_rsp(modbus_rx.address,modbus_rx.func,result); 
-020BE:  MOVFF  2B8,3D0
-020C2:  CLRF   xD2
-020C4:  MOVFF  2BA,3D1
-020C8:  MOVFF  3CE,3D3
+020BE:  MOVFF  678,790
+020C2:  CLRF   x92
+020C4:  MOVFF  67A,791
+020C8:  MOVFF  78E,793
 020CC:  MOVLB  0
 020CE:  CALL   0FE2
 .................... 							current.modbus_last_error=result; 
 020D2:  MOVLB  1
 020D4:  CLRF   x88
-020D6:  MOVFF  3CE,187
+020D6:  MOVFF  78E,187
 .................... 	 
 .................... 							/* red LED for 1 second */ 
 .................... 							timers.led_on_green=0; 
 020DA:  CLRF   xAB
 .................... 			 
 .................... 							break; 
-020DC:  MOVLB  3
+020DC:  MOVLB  7
 020DE:  BRA    20E4
 .................... 						} 
 .................... 					} 
-020E0:  INCF   xCF,F
+020E0:  INCF   x8F,F
 020E2:  BRA    2056
 .................... 		 
 .................... 					/* we could have gotten here with an exception already send, so only send if no exception */ 
 .................... 					if ( 0 == result ) { 
-020E4:  MOVF   xCE,F
+020E4:  MOVF   x8E,F
 020E6:  BNZ   2100
 .................... 						/* no exception, send ack */ 
 .................... 						modbus_write_multiple_registers_rsp(modbus_rx.address,start_addr,num_registers); 
-020E8:  MOVFF  2B8,3D0
-020EC:  MOVFF  3CB,3D2
-020F0:  MOVFF  3CA,3D1
-020F4:  MOVFF  3CD,3D4
-020F8:  MOVFF  3CC,3D3
+020E8:  MOVFF  678,790
+020EC:  MOVFF  78B,792
+020F0:  MOVFF  78A,791
+020F4:  MOVFF  78D,794
+020F8:  MOVFF  78C,793
 020FC:  MOVLB  0
 020FE:  BRA    1E0E
 .................... 					} 
@@ -6415,12 +6418,12 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 				default: 
 .................... 					/* we don't support most operations, so return ILLEGAL_FUNCTION exception */ 
 .................... 					modbus_exception_rsp(modbus_rx.address,modbus_rx.func,ILLEGAL_FUNCTION); 
-02104:  MOVFF  2B8,3D0
-02108:  MOVLB  3
-0210A:  CLRF   xD2
-0210C:  MOVFF  2BA,3D1
+02104:  MOVFF  678,790
+02108:  MOVLB  7
+0210A:  CLRF   x92
+0210C:  MOVFF  67A,791
 02110:  MOVLW  01
-02112:  MOVWF  xD3
+02112:  MOVWF  x93
 02114:  MOVLB  0
 02116:  CALL   0FE2
 .................... 					current.modbus_last_error=ILLEGAL_FUNCTION; 
@@ -6440,7 +6443,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 		} else { 
 02128:  BRA    2142
-0212A:  MOVLB  2
+0212A:  MOVLB  6
 .................... 			/* MODBUS packet for somebody else */ 
 .................... 			if ( current.modbus_other_packets < 65535 ) 
 0212C:  MOVLB  1
@@ -6502,67 +6505,67 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 	/* count time between falling edges */ 
 .................... 	if ( ext0_count && 0xffff != timers.pulse_period[0] ) 
 *
-003E2:  MOVLB  4
-003E4:  BTFSS  xD1.0
+003E2:  MOVLB  8
+003E4:  BTFSS  x91.0
 003E6:  BRA    0400
 003E8:  MOVLB  1
 003EA:  INCFSZ x9A,W
 003EC:  BRA    03F8
 003EE:  INCFSZ x9B,W
 003F0:  BRA    03F8
-003F2:  MOVLB  4
+003F2:  MOVLB  8
 003F4:  BRA    0400
 003F6:  MOVLB  1
 .................... 		timers.pulse_period[0]++; 
 003F8:  INCF   x9A,F
 003FA:  BTFSC  FD8.2
 003FC:  INCF   x9B,F
-003FE:  MOVLB  4
+003FE:  MOVLB  8
 .................... 	if ( ext1_count && 0xffff != timers.pulse_period[1] ) 
-00400:  BTFSS  xD1.2
+00400:  BTFSS  x91.2
 00402:  BRA    041C
 00404:  MOVLB  1
 00406:  INCFSZ x9C,W
 00408:  BRA    0414
 0040A:  INCFSZ x9D,W
 0040C:  BRA    0414
-0040E:  MOVLB  4
+0040E:  MOVLB  8
 00410:  BRA    041C
 00412:  MOVLB  1
 .................... 		timers.pulse_period[1]++; 
 00414:  INCF   x9C,F
 00416:  BTFSC  FD8.2
 00418:  INCF   x9D,F
-0041A:  MOVLB  4
+0041A:  MOVLB  8
 .................... 	if ( ext2_count && 0xffff != timers.pulse_period[2] ) 
-0041C:  BTFSS  xD1.4
+0041C:  BTFSS  x91.4
 0041E:  BRA    0438
 00420:  MOVLB  1
 00422:  INCFSZ x9E,W
 00424:  BRA    0430
 00426:  INCFSZ x9F,W
 00428:  BRA    0430
-0042A:  MOVLB  4
+0042A:  MOVLB  8
 0042C:  BRA    0438
 0042E:  MOVLB  1
 .................... 		timers.pulse_period[2]++; 
 00430:  INCF   x9E,F
 00432:  BTFSC  FD8.2
 00434:  INCF   x9F,F
-00436:  MOVLB  4
+00436:  MOVLB  8
 ....................  
 .................... 	/* anemometer 0 / PIN_B0 trigger on falling edge */ 
 .................... 	ext0_now=input(PIN_B0); 
-00438:  BCF    xD1.1
+00438:  BCF    x91.1
 0043A:  BTFSC  F81.0
-0043C:  BSF    xD1.1
+0043C:  BSF    x91.1
 .................... 	if ( 0 == ext0_now && 1 == ext0_last ) { 
-0043E:  BTFSC  xD1.1
+0043E:  BTFSC  x91.1
 00440:  BRA    04C2
-00442:  MOVLB  2
-00444:  BTFSC  xB4.1
+00442:  MOVLB  6
+00444:  BTFSC  x74.1
 00446:  BRA    044C
-00448:  MOVLB  4
+00448:  MOVLB  8
 0044A:  BRA    04C2
 .................... 		current.pulse_count[0]++; 
 0044C:  MOVLB  0
@@ -6579,13 +6582,13 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00460:  BTFSC  FD8.2
 00462:  INCF   x69,F
 .................... 		if ( 1 == ext0_state ) { 
-00464:  MOVLB  2
-00466:  BTFSS  xB4.2
+00464:  MOVLB  6
+00466:  BTFSS  x74.2
 00468:  BRA    04B0
 .................... 			/* currently counting, time to finish */ 
 .................... 			ext0_count=0; 
-0046A:  MOVLB  4
-0046C:  BCF    xD1.0
+0046A:  MOVLB  8
+0046C:  BCF    x91.0
 .................... 			current.pulse_period[0]=timers.pulse_period[0]; 
 0046E:  MOVFF  19B,4F
 00472:  MOVFF  19A,4E
@@ -6619,11 +6622,11 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 004A8:  MOVFF  4E,5A
 .................... 			} 
 .................... 			ext0_state=0; 
-004AC:  MOVLB  2
-004AE:  BCF    xB4.2
+004AC:  MOVLB  6
+004AE:  BCF    x74.2
 .................... 		} 
 .................... 		if ( 0 == ext0_state ) { 
-004B0:  BTFSC  xB4.2
+004B0:  BTFSC  x74.2
 004B2:  BRA    04C2
 .................... 			/* not counting, time to start */ 
 .................... 			timers.pulse_period[0]=0; 
@@ -6631,35 +6634,35 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 004B6:  CLRF   x9B
 004B8:  CLRF   x9A
 .................... 			ext0_count=1; 
-004BA:  MOVLB  4
-004BC:  BSF    xD1.0
+004BA:  MOVLB  8
+004BC:  BSF    x91.0
 .................... 			ext0_state=1; 
-004BE:  MOVLB  2
-004C0:  BSF    xB4.2
+004BE:  MOVLB  6
+004C0:  BSF    x74.2
 .................... 		} 
 .................... 	} 
 .................... 	ext0_last = ext0_now; 
-004C2:  MOVLB  2
-004C4:  BCF    xB4.1
-004C6:  MOVLB  4
-004C8:  BTFSS  xD1.1
+004C2:  MOVLB  6
+004C4:  BCF    x74.1
+004C6:  MOVLB  8
+004C8:  BTFSS  x91.1
 004CA:  BRA    04D2
-004CC:  MOVLB  2
-004CE:  BSF    xB4.1
-004D0:  MOVLB  4
+004CC:  MOVLB  6
+004CE:  BSF    x74.1
+004D0:  MOVLB  8
 ....................  
 .................... 	/* anemometer 1 / PIN_B1 trigger on falling edge */ 
 .................... 	ext1_now=input(PIN_B1); 
-004D2:  BCF    xD1.3
+004D2:  BCF    x91.3
 004D4:  BTFSC  F81.1
-004D6:  BSF    xD1.3
+004D6:  BSF    x91.3
 .................... 	if ( 0 == ext1_now && 1 == ext1_last ) { 
-004D8:  BTFSC  xD1.3
+004D8:  BTFSC  x91.3
 004DA:  BRA    055C
-004DC:  MOVLB  2
-004DE:  BTFSC  xB4.3
+004DC:  MOVLB  6
+004DE:  BTFSC  x74.3
 004E0:  BRA    04E6
-004E2:  MOVLB  4
+004E2:  MOVLB  8
 004E4:  BRA    055C
 .................... 		current.pulse_count[1]++; 
 004E6:  MOVLB  0
@@ -6676,13 +6679,13 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 004FA:  BTFSC  FD8.2
 004FC:  INCF   x6D,F
 .................... 		if ( 1 == ext1_state ) { 
-004FE:  MOVLB  2
-00500:  BTFSS  xB4.4
+004FE:  MOVLB  6
+00500:  BTFSS  x74.4
 00502:  BRA    054A
 .................... 			/* currently counting, time to finish */ 
 .................... 			ext1_count=0; 
-00504:  MOVLB  4
-00506:  BCF    xD1.2
+00504:  MOVLB  8
+00506:  BCF    x91.2
 .................... 			current.pulse_period[1]=timers.pulse_period[1]; 
 00508:  MOVFF  19D,51
 0050C:  MOVFF  19C,50
@@ -6716,11 +6719,11 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00542:  MOVFF  50,5C
 .................... 			} 
 .................... 			ext1_state=0; 
-00546:  MOVLB  2
-00548:  BCF    xB4.4
+00546:  MOVLB  6
+00548:  BCF    x74.4
 .................... 		} 
 .................... 		if ( 0 == ext1_state ) { 
-0054A:  BTFSC  xB4.4
+0054A:  BTFSC  x74.4
 0054C:  BRA    055C
 .................... 			/* not counting, time to start */ 
 .................... 			timers.pulse_period[1]=0; 
@@ -6728,35 +6731,35 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00550:  CLRF   x9D
 00552:  CLRF   x9C
 .................... 			ext1_count=1; 
-00554:  MOVLB  4
-00556:  BSF    xD1.2
+00554:  MOVLB  8
+00556:  BSF    x91.2
 .................... 			ext1_state=1; 
-00558:  MOVLB  2
-0055A:  BSF    xB4.4
+00558:  MOVLB  6
+0055A:  BSF    x74.4
 .................... 		} 
 .................... 	} 
 .................... 	ext1_last = ext1_now; 
-0055C:  MOVLB  2
-0055E:  BCF    xB4.3
-00560:  MOVLB  4
-00562:  BTFSS  xD1.3
+0055C:  MOVLB  6
+0055E:  BCF    x74.3
+00560:  MOVLB  8
+00562:  BTFSS  x91.3
 00564:  BRA    056C
-00566:  MOVLB  2
-00568:  BSF    xB4.3
-0056A:  MOVLB  4
+00566:  MOVLB  6
+00568:  BSF    x74.3
+0056A:  MOVLB  8
 ....................  
 .................... 	/* anemometer 2 / PIN_B2 trigger on falling edge */ 
 .................... 	ext2_now=input(PIN_B2); 
-0056C:  BCF    xD1.5
+0056C:  BCF    x91.5
 0056E:  BTFSC  F81.2
-00570:  BSF    xD1.5
+00570:  BSF    x91.5
 .................... 	if ( 0 == ext2_now && 1 == ext2_last ) { 
-00572:  BTFSC  xD1.5
+00572:  BTFSC  x91.5
 00574:  BRA    05F6
-00576:  MOVLB  2
-00578:  BTFSC  xB4.5
+00576:  MOVLB  6
+00578:  BTFSC  x74.5
 0057A:  BRA    0580
-0057C:  MOVLB  4
+0057C:  MOVLB  8
 0057E:  BRA    05F6
 .................... 		current.pulse_count[2]++; 
 00580:  MOVLB  0
@@ -6773,13 +6776,13 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00594:  BTFSC  FD8.2
 00596:  INCF   x71,F
 .................... 		if ( 1 == ext2_state ) { 
-00598:  MOVLB  2
-0059A:  BTFSS  xB4.6
+00598:  MOVLB  6
+0059A:  BTFSS  x74.6
 0059C:  BRA    05E4
 .................... 			/* currently counting, time to finish */ 
 .................... 			ext2_count=0; 
-0059E:  MOVLB  4
-005A0:  BCF    xD1.4
+0059E:  MOVLB  8
+005A0:  BCF    x91.4
 .................... 			current.pulse_period[2]=timers.pulse_period[2]; 
 005A2:  MOVFF  19F,53
 005A6:  MOVFF  19E,52
@@ -6813,11 +6816,11 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 005DC:  MOVFF  52,5E
 .................... 			} 
 .................... 			ext2_state=0; 
-005E0:  MOVLB  2
-005E2:  BCF    xB4.6
+005E0:  MOVLB  6
+005E2:  BCF    x74.6
 .................... 		} 
 .................... 		if ( 0 == ext2_state ) { 
-005E4:  BTFSC  xB4.6
+005E4:  BTFSC  x74.6
 005E6:  BRA    05F6
 .................... 			/* not counting, time to start */ 
 .................... 			timers.pulse_period[2]=0; 
@@ -6825,38 +6828,38 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 005EA:  CLRF   x9F
 005EC:  CLRF   x9E
 .................... 			ext2_count=1; 
-005EE:  MOVLB  4
-005F0:  BSF    xD1.4
+005EE:  MOVLB  8
+005F0:  BSF    x91.4
 .................... 			ext2_state=1; 
-005F2:  MOVLB  2
-005F4:  BSF    xB4.6
+005F2:  MOVLB  6
+005F4:  BSF    x74.6
 .................... 		} 
 .................... 	} 
 .................... 	ext2_last = ext2_now; 
-005F6:  MOVLB  2
-005F8:  BCF    xB4.5
-005FA:  MOVLB  4
-005FC:  BTFSS  xD1.5
+005F6:  MOVLB  6
+005F8:  BCF    x74.5
+005FA:  MOVLB  8
+005FC:  BTFSS  x91.5
 005FE:  BRA    0606
-00600:  MOVLB  2
-00602:  BSF    xB4.5
-00604:  MOVLB  4
+00600:  MOVLB  6
+00602:  BSF    x74.5
+00604:  MOVLB  8
 ....................  
 ....................  
 .................... 	/* every 10 cycles we tell main() loop to do milisecond activities */ 
 .................... 	tick++; 
-00606:  MOVLB  3
-00608:  INCF   xBF,F
+00606:  MOVLB  7
+00608:  INCF   x7F,F
 .................... 	if ( 10 == tick ) { 
-0060A:  MOVF   xBF,W
+0060A:  MOVF   x7F,W
 0060C:  SUBLW  0A
 0060E:  BNZ   0618
 .................... 		tick=0; 
-00610:  CLRF   xBF
+00610:  CLRF   x7F
 .................... 		timers.now_millisecond=1; 
 00612:  MOVLB  1
 00614:  BSF    xAE.2
-00616:  MOVLB  3
+00616:  MOVLB  7
 .................... 	} 
 ....................  
 .................... //	output_low(TP_RED); 
@@ -6872,7 +6875,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 	c=fgetc(STREAM_RS485); 
 *
 00638:  BRA    0620
-0063A:  MOVFF  01,4CE
+0063A:  MOVFF  01,88E
 ....................  
 .................... 	if ( RS485_MODE_OFF != config.rs485_port_mode ) { 
 0063E:  MOVF   38,F
@@ -6895,7 +6898,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00654:  MOVWF  FEA
 00656:  BTFSC  FD8.0
 00658:  INCF   FEA,F
-0065A:  MOVFF  4CE,FEF
+0065A:  MOVFF  88E,FEF
 .................... 			timers.rda2_buff_pos++; 
 0065E:  INCF   xB2,F
 00660:  MOVLB  0
@@ -6913,7 +6916,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 	c=fgetc(STREAM_PI); 
 *
 006B2:  RCALL  0668
-006B4:  MOVFF  01,4CE
+006B4:  MOVFF  01,88E
 ....................  
 .................... 	if ( current.bridged_uarts ) { 
 006B8:  MOVLB  1
@@ -6921,8 +6924,8 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 006BC:  BRA    06C8
 .................... 		/* from PI to debugging cable */ 
 .................... 		fputc(c,STREAM_RS485); 
-006BE:  MOVLB  4
-006C0:  MOVF   xCE,W
+006BE:  MOVLB  8
+006C0:  MOVF   x8E,W
 006C2:  MOVLB  0
 006C4:  RCALL  067E
 .................... 		return; 
@@ -6931,67 +6934,67 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 	/* Modbus */ 
 .................... 	if (!modbus_serial_new) { 
-006C8:  MOVLB  2
-006CA:  BTFSC  xB4.0
+006C8:  MOVLB  6
+006CA:  BTFSC  x74.0
 006CC:  BRA    0724
 .................... 		if(modbus_serial_state == MODBUS_GETADDY) { 
-006CE:  MOVF   xB5,F
+006CE:  MOVF   x75,F
 006D0:  BNZ   06E2
 .................... 			modbus_serial_crc.d = 0xFFFF; 
-006D2:  SETF   xB7
-006D4:  SETF   xB6
+006D2:  SETF   x77
+006D4:  SETF   x76
 .................... 			modbus_rx.address = c; 
-006D6:  MOVFF  4CE,2B8
+006D6:  MOVFF  88E,678
 .................... 			modbus_serial_state++; 
-006DA:  INCF   xB5,F
+006DA:  INCF   x75,F
 .................... 			modbus_rx.len = 0; 
-006DC:  CLRF   xB9
+006DC:  CLRF   x79
 .................... 			modbus_rx.error=0; 
-006DE:  CLRF   xBB
+006DE:  CLRF   x7B
 .................... 		} else if(modbus_serial_state == MODBUS_GETFUNC) { 
 006E0:  BRA    0710
-006E2:  DECFSZ xB5,W
+006E2:  DECFSZ x75,W
 006E4:  BRA    06EE
 .................... 			modbus_rx.func = c; 
-006E6:  MOVFF  4CE,2BA
+006E6:  MOVFF  88E,67A
 .................... 			modbus_serial_state++; 
-006EA:  INCF   xB5,F
+006EA:  INCF   x75,F
 .................... 		} else if(modbus_serial_state == MODBUS_GETDATA) { 
 006EC:  BRA    0710
-006EE:  MOVF   xB5,W
+006EE:  MOVF   x75,W
 006F0:  SUBLW  02
 006F2:  BNZ   0710
 .................... 			if (modbus_rx.len>=MODBUS_SERIAL_RX_BUFFER_SIZE) { 
-006F4:  INCFSZ xB9,W
+006F4:  INCFSZ x79,W
 006F6:  BRA    06FC
 .................... 				modbus_rx.len=MODBUS_SERIAL_RX_BUFFER_SIZE-1; 
 006F8:  MOVLW  FE
-006FA:  MOVWF  xB9
+006FA:  MOVWF  x79
 .................... 			} 
 .................... 			modbus_rx.data[modbus_rx.len]=c; 
-006FC:  MOVLW  BC
-006FE:  ADDWF  xB9,W
+006FC:  MOVLW  7C
+006FE:  ADDWF  x79,W
 00700:  MOVWF  FE9
-00702:  MOVLW  02
+00702:  MOVLW  06
 00704:  MOVWF  FEA
 00706:  BTFSC  FD8.0
 00708:  INCF   FEA,F
-0070A:  MOVFF  4CE,FEF
+0070A:  MOVFF  88E,FEF
 .................... 			modbus_rx.len++; 
-0070E:  INCF   xB9,F
+0070E:  INCF   x79,F
 .................... 		} 
 ....................  
 .................... 		modbus_calc_crc(c); 
-00710:  MOVFF  4CE,4CF
+00710:  MOVFF  88E,88F
 00714:  MOVLB  0
 00716:  RCALL  0686
 .................... 		modbus_enable_timeout(TRUE); 
 00718:  MOVLW  01
-0071A:  MOVLB  4
-0071C:  MOVWF  xCF
+0071A:  MOVLB  8
+0071C:  MOVWF  x8F
 0071E:  MOVLB  0
 00720:  RCALL  039C
-00722:  MOVLB  2
+00722:  MOVLB  6
 .................... 	} 
 .................... } 
 ....................  
@@ -7063,14 +7066,14 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 007A0:  BCF    xB1.0
 ....................  
 .................... 	for ( i=0 ; i<3 ; i++ ) { 
-007A2:  MOVLB  3
-007A4:  CLRF   xCA
-007A6:  MOVF   xCA,W
+007A2:  MOVLB  7
+007A4:  CLRF   x8A
+007A6:  MOVF   x8A,W
 007A8:  SUBLW  02
 007AA:  BNC   0858
 .................... 		current.pulse_period[i]=0; 
 007AC:  CLRF   03
-007AE:  MOVFF  3CA,02
+007AE:  MOVFF  78A,02
 007B2:  BCF    FD8.0
 007B4:  RLCF   02,F
 007B6:  RLCF   03,F
@@ -7085,7 +7088,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 007C8:  CLRF   FEF
 .................... 		current.pulse_min_period[i]=65535; 
 007CA:  CLRF   03
-007CC:  MOVFF  3CA,02
+007CC:  MOVFF  78A,02
 007D0:  BCF    FD8.0
 007D2:  RLCF   02,F
 007D4:  RLCF   03,F
@@ -7100,7 +7103,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 007E6:  SETF   FEF
 .................... 		current.pulse_max_period[i]=0; 
 007E8:  CLRF   03
-007EA:  MOVFF  3CA,02
+007EA:  MOVFF  78A,02
 007EE:  BCF    FD8.0
 007F0:  RLCF   02,F
 007F2:  RLCF   03,F
@@ -7115,7 +7118,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00804:  CLRF   FEF
 .................... 		current.pulse_count[i]=0; 
 00806:  CLRF   03
-00808:  MOVFF  3CA,02
+00808:  MOVFF  78A,02
 0080C:  BCF    FD8.0
 0080E:  RLCF   02,F
 00810:  RLCF   03,F
@@ -7129,11 +7132,11 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00820:  MOVF   FED,F
 00822:  CLRF   FEF
 .................... 		current.pulse_sum[i]=0; 
-00824:  CLRF   xE5
-00826:  MOVFF  3CA,3E4
-0082A:  CLRF   xE7
+00824:  CLRF   xA5
+00826:  MOVFF  78A,7A4
+0082A:  CLRF   xA7
 0082C:  MOVLW  04
-0082E:  MOVWF  xE6
+0082E:  MOVWF  xA6
 00830:  MOVLB  0
 00832:  RCALL  0742
 00834:  MOVF   01,W
@@ -7152,8 +7155,8 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 0084E:  MOVF   FED,F
 00850:  CLRF   FEF
 .................... 	} 
-00852:  MOVLB  3
-00854:  INCF   xCA,F
+00852:  MOVLB  7
+00854:  INCF   x8A,F
 00856:  BRA    07A6
 ....................  
 .................... 	current.modbus_our_packets=0; 
@@ -7282,25 +7285,25 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 	/* watchdog must be down for 12 milliseconds for hit to register */ 
 .................... 	b2_state=(b2_state<<1) | !bit_test(timers.port_c,WATCHDOG_FROM_PI_BIT) | 0xe000; 
 00D0C:  BCF    FD8.0
-00D0E:  MOVLB  3
-00D10:  RLCF   xC5,W
-00D12:  MOVWF  xCA
-00D14:  RLCF   xC6,W
-00D16:  MOVWF  xCB
+00D0E:  MOVLB  7
+00D10:  RLCF   x85,W
+00D12:  MOVWF  x8A
+00D14:  RLCF   x86,W
+00D16:  MOVWF  x8B
 00D18:  MOVLW  00
 00D1A:  MOVLB  1
 00D1C:  BTFSS  xB0.5
 00D1E:  MOVLW  01
-00D20:  MOVLB  3
-00D22:  IORWF  xCA,F
-00D24:  MOVFF  3CA,3C5
-00D28:  MOVF   xCB,W
+00D20:  MOVLB  7
+00D22:  IORWF  x8A,F
+00D24:  MOVFF  78A,785
+00D28:  MOVF   x8B,W
 00D2A:  IORLW  E0
-00D2C:  MOVWF  xC6
+00D2C:  MOVWF  x86
 .................... 	if ( b2_state==0xf000) { 
-00D2E:  MOVF   xC5,F
+00D2E:  MOVF   x85,F
 00D30:  BNZ   0D38
-00D32:  MOVF   xC6,W
+00D32:  MOVF   x86,W
 00D34:  SUBLW  F0
 00D36:  BNZ   0D38
 .................... 		/* watchdog hit */ 
@@ -7383,20 +7386,20 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 	/* seconds */ 
 .................... 	ticks++; 
-00D8A:  MOVLB  3
-00D8C:  INCF   xC3,F
+00D8A:  MOVLB  7
+00D8C:  INCF   x83,F
 00D8E:  BTFSC  FD8.2
-00D90:  INCF   xC4,F
+00D90:  INCF   x84,F
 .................... 	if ( 1000 == ticks ) { 
-00D92:  MOVF   xC3,W
+00D92:  MOVF   x83,W
 00D94:  SUBLW  E8
 00D96:  BNZ   0E1C
-00D98:  MOVF   xC4,W
+00D98:  MOVF   x84,W
 00D9A:  SUBLW  03
 00D9C:  BNZ   0E1C
 .................... 		ticks=0; 
-00D9E:  CLRF   xC4
-00DA0:  CLRF   xC3
+00D9E:  CLRF   x84
+00DA0:  CLRF   x83
 ....................  
 .................... 		/* watchdog power control of pi */ 
 .................... 		if ( current.watchdog_seconds != 65535 ) { 
@@ -7469,14 +7472,14 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 		 
 .................... 		/* uptime counter */ 
 .................... 		uptimeTicks++; 
-00DFC:  MOVLB  3
-00DFE:  INCF   xC0,F
+00DFC:  MOVLB  7
+00DFE:  INCF   x80,F
 .................... 		if ( 60 == uptimeTicks ) { 
-00E00:  MOVF   xC0,W
+00E00:  MOVF   x80,W
 00E02:  SUBLW  3C
 00E04:  BNZ   0E1C
 .................... 			uptimeTicks=0; 
-00E06:  CLRF   xC0
+00E06:  CLRF   x80
 .................... 			if ( current.uptime_minutes < 65535 )  
 00E08:  MOVLB  1
 00E0A:  INCFSZ x8B,W
@@ -7488,24 +7491,24 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 00E14:  INCF   x8B,F
 00E16:  BTFSC  FD8.2
 00E18:  INCF   x8C,F
-00E1A:  MOVLB  3
+00E1A:  MOVLB  7
 .................... 		} 
 .................... 	} 
 ....................  
 ....................  
 .................... 	if ( 65535 == adcValue ) { 
-00E1C:  INCFSZ xC7,W
+00E1C:  INCFSZ x87,W
 00E1E:  BRA    0E32
-00E20:  INCFSZ xC8,W
+00E20:  INCFSZ x88,W
 00E22:  BRA    0E32
 .................... 		/* signaled that a new ADC sample was taken and we need to run again */ 
 .................... 		/* read current ADC value */	 
 .................... 		adcValue=adc_get(0); 
-00E24:  CLRF   xDE
+00E24:  CLRF   x9E
 00E26:  MOVLB  0
 00E28:  RCALL  0C80
-00E2A:  MOVFF  02,3C8
-00E2E:  MOVFF  01,3C7
+00E2A:  MOVFF  02,788
+00E2E:  MOVFF  01,787
 .................... 	} 
 ....................  
 .................... #if 0 
@@ -7539,34 +7542,34 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 		timers.now_adc_reset_count=0; 
 00E38:  BCF    xAE.1
 .................... 		adcTicks=0; 
-00E3A:  MOVLB  3
-00E3C:  CLRF   xC2
-00E3E:  CLRF   xC1
+00E3A:  MOVLB  7
+00E3C:  CLRF   x82
+00E3E:  CLRF   x81
 .................... 	} 
 ....................  
 .................... 	/* ADC sampling trigger */ 
 .................... 	adcTicks++; 
-00E40:  MOVLB  3
-00E42:  INCF   xC1,F
+00E40:  MOVLB  7
+00E42:  INCF   x81,F
 00E44:  BTFSC  FD8.2
-00E46:  INCF   xC2,F
+00E46:  INCF   x82,F
 .................... 	if ( adcTicks == config.adc_sample_ticks ) { 
 00E48:  MOVF   3C,W
-00E4A:  SUBWF  xC1,W
+00E4A:  SUBWF  x81,W
 00E4C:  BNZ   0E62
 00E4E:  MOVF   3D,W
-00E50:  SUBWF  xC2,W
+00E50:  SUBWF  x82,W
 00E52:  BNZ   0E62
 .................... 		adcTicks=0; 
-00E54:  CLRF   xC2
-00E56:  CLRF   xC1
+00E54:  CLRF   x82
+00E56:  CLRF   x81
 .................... 		timers.now_adc_sample=1; 
 00E58:  MOVLB  1
 00E5A:  BSF    xAE.0
 .................... 		adcValue=65535; /* signal power control (above) on next pass to resample */ 
-00E5C:  MOVLB  3
-00E5E:  SETF   xC8
-00E60:  SETF   xC7
+00E5C:  MOVLB  7
+00E5E:  SETF   x88
+00E60:  SETF   x87
 .................... 	} 
 ....................  
 .................... 	/* for RS-485 port */ 
@@ -7604,21 +7607,21 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 .................... 	/* get a local copy of our data */ 
 .................... 	length=timers.rda2_buff_pos; 
 *
-02148:  MOVFF  2B2,4CA
+02148:  MOVFF  2B2,88A
 .................... 	timers.rda2_buff_pos=255; /* stop getting more data for a second */ 
 0214C:  MOVLB  2
 0214E:  SETF   xB2
 .................... 	memcpy(buff,timers.rda2_buff,length); 
-02150:  MOVLW  03
+02150:  MOVLW  07
 02152:  MOVWF  FEA
-02154:  MOVLW  CA
+02154:  MOVLW  8A
 02156:  MOVWF  FE9
 02158:  MOVLW  01
 0215A:  MOVWF  FE2
 0215C:  MOVLW  B2
 0215E:  MOVWF  FE1
-02160:  MOVLB  4
-02162:  MOVF   xCA,W
+02160:  MOVLB  8
+02162:  MOVF   x8A,W
 02164:  MOVWF  01
 02166:  BZ    2170
 02168:  MOVFF  FE6,FEE
@@ -7636,30 +7639,30 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 02178:  BRA    21B0
 .................... 		/* transmit back out to the PI */ 
 .................... 		for ( l=0 ; l<length ; l++ ) { 
-0217A:  MOVLB  4
-0217C:  CLRF   xCC
-0217E:  CLRF   xCB
-02180:  MOVF   xCC,F
+0217A:  MOVLB  8
+0217C:  CLRF   x8C
+0217E:  CLRF   x8B
+02180:  MOVF   x8C,F
 02182:  BNZ   21AC
-02184:  MOVF   xCA,W
-02186:  SUBWF  xCB,W
+02184:  MOVF   x8A,W
+02186:  SUBWF  x8B,W
 02188:  BC    21AC
 .................... 			fputc(buff[l],STREAM_PI); 
-0218A:  MOVLW  CA
-0218C:  ADDWF  xCB,W
+0218A:  MOVLW  8A
+0218C:  ADDWF  x8B,W
 0218E:  MOVWF  FE9
-02190:  MOVLW  03
-02192:  ADDWFC xCC,W
+02190:  MOVLW  07
+02192:  ADDWFC x8C,W
 02194:  MOVWF  FEA
-02196:  MOVFF  FEF,4CD
-0219A:  MOVF   xCD,W
+02196:  MOVFF  FEF,88D
+0219A:  MOVF   x8D,W
 0219C:  MOVLB  0
 0219E:  CALL   0F4A
 .................... 		} 
-021A2:  MOVLB  4
-021A4:  INCF   xCB,F
+021A2:  MOVLB  8
+021A4:  INCF   x8B,F
 021A6:  BTFSC  FD8.2
-021A8:  INCF   xCC,F
+021A8:  INCF   x8C,F
 021AA:  BRA    2180
 .................... 	} else if ( RS485_MODE_NMEA0183_RX==config.rs485_port_mode ) { 
 021AC:  BRA    21B8
@@ -7667,7 +7670,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 021B0:  MOVF   38,W
 021B2:  SUBLW  02
 021B4:  BNZ   21B6
-021B6:  MOVLB  4
+021B6:  MOVLB  8
 .................... 		/* do something */ 
 .................... 	} 
 .................... } 
@@ -7700,26 +7703,26 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 021E8:  MOVWF  F72
 021EA:  MOVLW  90
 021EC:  MOVWF  F71
-021EE:  MOVLB  2
-021F0:  BCF    xB4.0
-021F2:  CLRF   xB5
-021F4:  MOVLB  3
-021F6:  CLRF   xBF
-021F8:  MOVLB  2
-021FA:  BCF    xB4.1
-021FC:  BCF    xB4.2
-021FE:  BCF    xB4.3
-02200:  BCF    xB4.4
-02202:  BCF    xB4.5
-02204:  BCF    xB4.6
-02206:  MOVLB  3
-02208:  CLRF   xC0
-0220A:  CLRF   xC2
-0220C:  CLRF   xC1
-0220E:  CLRF   xC4
-02210:  CLRF   xC3
-02212:  CLRF   xC6
-02214:  CLRF   xC5
+021EE:  MOVLB  6
+021F0:  BCF    x74.0
+021F2:  CLRF   x75
+021F4:  MOVLB  7
+021F6:  CLRF   x7F
+021F8:  MOVLB  6
+021FA:  BCF    x74.1
+021FC:  BCF    x74.2
+021FE:  BCF    x74.3
+02200:  BCF    x74.4
+02202:  BCF    x74.5
+02204:  BCF    x74.6
+02206:  MOVLB  7
+02208:  CLRF   x80
+0220A:  CLRF   x82
+0220C:  CLRF   x81
+0220E:  CLRF   x84
+02210:  CLRF   x83
+02212:  CLRF   x86
+02214:  CLRF   x85
 02216:  MOVF   FC1,W
 02218:  ANDLW  F0
 0221A:  MOVWF  FC1
@@ -7737,13 +7740,13 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 02232:  CLRF   F79
 02234:  CLRF   2F
 02236:  CLRF   30
-02238:  MOVLB  3
-0223A:  CLRF   xBB
-0223C:  CLRF   xBC
-0223E:  CLRF   xBD
-02240:  CLRF   xBE
-02242:  CLRF   xC7
-02244:  CLRF   xC8
+02238:  MOVLB  7
+0223A:  CLRF   x7B
+0223C:  CLRF   x7C
+0223E:  CLRF   x7D
+02240:  CLRF   x7E
+02242:  CLRF   x87
+02244:  CLRF   x88
 .................... 	int8 i; 
 ....................  
 .................... 	i=restart_cause(); 
@@ -7756,7 +7759,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 02252:  BSF    FD0.4
 02254:  BSF    FD8.3
 02256:  BSF    FD8.4
-02258:  MOVWF  xC9
+02258:  MOVWF  x89
 ....................  
 .................... 	init(); 
 0225A:  MOVLB  0
@@ -7816,17 +7819,17 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 ....................  
 .................... 	/* Prime ADC filter */ 
 .................... 	for ( i=0 ; i<30 ; i++ ) { 
-02276:  MOVLB  3
-02278:  CLRF   xC9
-0227A:  MOVF   xC9,W
+02276:  MOVLB  7
+02278:  CLRF   x89
+0227A:  MOVF   x89,W
 0227C:  SUBLW  1D
 0227E:  BNC   228C
 .................... 		adc_update(); 
 02280:  MOVLB  0
 02282:  CALL   0B8A
 .................... 	} 
-02286:  MOVLB  3
-02288:  INCF   xC9,F
+02286:  MOVLB  7
+02288:  INCF   x89,F
 0228A:  BRA    227A
 ....................  
 .................... 	/* set power switch to initial state */ 
@@ -7849,7 +7852,7 @@ CCS PCH C Compiler, Version 4.135, 4375               20-Nov-15 13:34
 02294:  MOVLW  07
 02296:  MOVWF  FF7
 02298:  MOVLW  07
-0229A:  MOVWF  xCA
+0229A:  MOVWF  x8A
 0229C:  MOVLB  0
 0229E:  GOTO   0C30
 022A2:  MOVLW  38

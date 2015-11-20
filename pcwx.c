@@ -88,16 +88,19 @@ typedef struct {
 	int8 rda2_buff_gap;
 } struct_time_keep;
 
+
+#define N_NMEA0183_SENTENCES 12
 typedef struct {
-	int8 buff[1024];
+	int8 sentence[N_NMEA0183_SENTENCES][80];
 } struct_nmea;
+
 
 
 /* global structures */
 struct_config config;
 struct_current current;
 struct_time_keep timers;
-//struct_nmea nmea;
+struct_nmea nmea;
 
 #include "mcp3208_pcwx.c"
 #include "adc_pcwx.c"
