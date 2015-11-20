@@ -82,11 +82,6 @@ typedef struct {
 	int8 port_b;
 	int8 port_c;
 
-	short now_parse_rda;
-	int8 rda_buff[256];
-	int8 rda_buff_pos;
-	int8 rda_buff_gap;
-
 	short now_parse_rda2;
 	int8 rda2_buff[256];
 	int8 rda2_buff_pos;
@@ -102,7 +97,7 @@ typedef struct {
 struct_config config;
 struct_current current;
 struct_time_keep timers;
-struct_nmea nmea;
+//struct_nmea nmea;
 
 #include "mcp3208_pcwx.c"
 #include "adc_pcwx.c"
@@ -139,10 +134,6 @@ void init() {
 	timers.now_millisecond=0;
 	timers.port_b=0b11111111;
 	timers.port_c=0b11111111;
-
-	timers.rda_buff_pos=0;
-	timers.rda_buff_gap=255;
-	timers.now_parse_rda=0;
 
 	timers.rda2_buff_pos=0;
 	timers.rda2_buff_gap=255;
@@ -366,20 +357,12 @@ void periodic_millisecond(void) {
 		adcValue=65535; /* signal power control (above) on next pass to resample */
 	}
 
-	/* for xbee */		
-	if ( timers.rda_buff_gap < 255 ) {
-		timers.rda_buff_gap++;
-	}
-	/* for bluetooth */
+	/* for RS-485 port */
 	if ( timers.rda2_buff_gap < 255 ) {
 		timers.rda2_buff_gap++;
 	}
 
-	/* xbee: if we have data and we have >=10 miliseconds gap, we parse */
-	if ( timers.rda_buff_gap >= 10 && timers.rda_buff_pos>0 ) {
-		timers.now_parse_rda=1;	
-	}
-	/* bluetooth: if we have data and we have >=3 miliseconds gap, we parse */
+	/* RS-485: if we have data and we have >=3 miliseconds gap, we parse */
 	if ( timers.rda2_buff_gap >= 10 && timers.rda2_buff_pos>0 ) {
 		timers.now_parse_rda2=1;	
 	}
@@ -398,9 +381,14 @@ void rs485_to_host(void) {
 	timers.rda2_buff_gap=0;
 	timers.rda2_buff_pos=0;
 
-	/* transmit back out to the PI */
-	for ( l=0 ; l<length ; l++ ) {
-		fputc(buff[l],STREAM_PI);
+
+	if ( RS485_MODE_MODBUS_BRIDGE==config.rs485_port_mode ) {
+		/* transmit back out to the PI */
+		for ( l=0 ; l<length ; l++ ) {
+			fputc(buff[l],STREAM_PI);
+		}
+	} else if ( RS485_MODE_NMEA0183_RX==config.rs485_port_mode ) {
+		/* do something */
 	}
 }
 
