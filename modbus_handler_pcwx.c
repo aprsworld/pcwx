@@ -70,12 +70,13 @@ int32 get_pulse_sum(int8 ch) {
 int16 map_modbus(int16 addr) {
 	static u_lblock ps;
 	int8 n,o;
+	int8 *p;
 
 	if ( addr >= MIN_EE_REGISTER && addr < MAX_EE_REGISTER ) {
 		return (int16) read_eeprom(addr - MIN_EE_REGISTER + EE_FOR_HOST_ADDRESS);
 	}
 
-	if ( addr >= MIN_NMEA0183_CONFIG_REGISTER && addr < MIN_NMEA0183_CONFIG_REGISTER ) {
+	if ( addr >= MIN_NMEA0183_CONFIG_REGISTER && addr < MAX_NMEA0183_CONFIG_REGISTER ) {
 		/* get rid of our base */
 		n = (addr-MIN_NMEA0183_CONFIG_REGISTER);
 
@@ -85,6 +86,27 @@ int16 map_modbus(int16 addr) {
 
 		return (int16) config.nmea0183_sentence[n][o];
 	}
+
+	/* one byte per register for NMEA0183 sentences */
+	if ( addr >= MIN_NMEA0183_BYTE_REGISTER && addr < MAX_NMEA0183_BYTE_REGISTER ) {
+		/* get rid of our base */
+		addr = (addr-MIN_NMEA0183_BYTE_REGISTER);
+
+ 		p  = nmea.sentence[0];
+		return (int16) p[addr];
+	}
+
+	/* two bytes per register for NMEA0183 sentences */
+	if ( addr >= MIN_NMEA0183_WORD_REGISTER && addr < MAX_NMEA0183_WORD_REGISTER ) {
+		/* get rid of our base */
+		addr = (addr-MIN_NMEA0183_WORD_REGISTER);
+		addr = addr * 2;
+
+ 		p  = nmea.sentence[0];
+		return (int16) make16(p[addr+1],p[addr]);
+	}
+
+
 
 	switch ( addr ) {
 		/* counters */
@@ -209,6 +231,12 @@ int8 modbus_valid_read_registers(int16 start, int16 end) {
 
 int8 modbus_valid_write_registers(int16 start, int16 end) {
 	if ( 19999==start && 20000==end)
+		return 1;
+
+	if ( start >= MIN_NMEA0183_WORD_REGISTER && end <= MAX_NMEA0183_WORD_REGISTER+1) 
+		return 1;
+
+	if ( start >= MIN_NMEA0183_BYTE_REGISTER && end <= MAX_NMEA0183_BYTE_REGISTER+1) 
 		return 1;
 
 	if ( start >= MIN_EE_REGISTER && end <= MAX_EE_REGISTER+1 )
