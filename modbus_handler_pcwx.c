@@ -156,7 +156,7 @@ int16 map_modbus(int16 addr) {
 		case 1009: return (int16) config.watchdog_seconds_max;
 		case 1010: return (int16) config.pi_offtime_seconds;
 		case 1011: return (int16) config.power_startup;
-		case 1012: return (int16) config.modbus_bridge;
+		case 1012: return (int16) config.rs485_port_mode;
 
 		/* we should have range checked, and never gotten here */
 		default: return (int16) 65535;
@@ -278,8 +278,8 @@ exception modbus_write_register(int16 address, int16 value) {
 			break;
 
 		case 1012:
-			if ( value > 1 ) return ILLEGAL_DATA_VALUE;
-			config.modbus_bridge=value;
+			if ( value > 2 ) return ILLEGAL_DATA_VALUE;
+			config.rs485_port_mode=value;
 			break;
 		
 		
@@ -324,7 +324,7 @@ void modbus_process(void) {
 	if ( modbus_kbhit() ) {
 //		output_high(TP_RED);
 
-		if ( 1==config.modbus_bridge && modbus_rx.address!=config.modbus_address ) {
+		if ( RS485_MODE_MODBUS_BRIDGE==config.rs485_port_mode && modbus_rx.address!=config.modbus_address ) {
 			/* rebuld modbus packet and send to RS-485 port */
 
 			/* start transmitting */

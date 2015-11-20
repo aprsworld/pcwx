@@ -40,7 +40,7 @@ void write_default_param_file() {
 	timers.led_on_green=150;
 
 	config.modbus_address=38;
-	config.modbus_bridge=1;
+	config.rs485_port_mode=RS485_MODE_MODBUS_BRIDGE;
 //	config.modbus_address=128; /* use any address */
 
 	config.serial_prefix='P';

@@ -132,7 +132,7 @@ void isr_rda2() {
 
 	c=fgetc(STREAM_RS485);
 
-	if ( config.modbus_bridge) {
+	if ( RS485_MODE_OFF != config.rs485_port_mode ) {
 		/* add to buffer to send to PI */
 
 		timers.rda2_buff_gap=0;

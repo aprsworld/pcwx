@@ -1,9 +1,15 @@
 #include "pcwx.h"
 
+#define RS485_MODE_OFF           0
+#define RS485_MODE_MODBUS_BRIDGE 1
+#define RS485_MODE_NMEA0183_RX   2
+
+
 typedef struct {
 	int8 modbus_address;
 	int8 modbus_mode;
-	int8 modbus_bridge;
+
+	int8 rs485_port_mode;
 
 	int8 serial_prefix;
 	int16 serial_number;
@@ -87,11 +93,16 @@ typedef struct {
 	int8 rda2_buff_gap;
 } struct_time_keep;
 
+typedef struct {
+	int8 buff[1024];
+} struct_nmea;
+
 
 /* global structures */
 struct_config config;
 struct_current current;
 struct_time_keep timers;
+struct_nmea nmea;
 
 #include "mcp3208_pcwx.c"
 #include "adc_pcwx.c"
