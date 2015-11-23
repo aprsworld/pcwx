@@ -239,10 +239,7 @@ void modbus_init() {
 
 	RCV_ON();
 
-//	setup_timer_2(T2_DIV_BY_16,249,5);  //~4ms interrupts
-//	setup_timer_0(RTCC_INTERNAL | RTCC_DIV_32 | RTCC_8_BIT); /* ~1.024 ms @ 8 MHz ... 0.686 ms @ 12 MHz */
-
-	setup_timer_0(T0_INTERNAL | T0_DIV_128 | T0_8_BIT); /* ~4.096 ms @ 8 MHz ... 2.73 ms @ 12 MHz */
+	setup_timer_0(T0_INTERNAL | T0_DIV_8 | T0_8_BIT); /* 0.683 ms @ 12 MHz. Use fosc/4 not fosc */
 	enable_interrupts(GLOBAL);
 }
 

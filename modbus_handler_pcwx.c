@@ -424,6 +424,7 @@ void modbus_process(void) {
 
 	/* check for message */
 	if ( modbus_kbhit() ) {
+output_low(_PIC_TO_PI);
 //		output_high(TP_RED);
 
 		if ( RS485_MODE_MODBUS_BRIDGE==config.rs485_port_mode && modbus_rx.address!=config.modbus_address ) {

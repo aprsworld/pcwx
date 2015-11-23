@@ -163,11 +163,9 @@ void isr_rda2() {
 	}
 }
 
-#if 1
 /* transmit buffer empty for Modbus to raspberry pi buffer */
 #int_tbe
 void isr_uart1_tbe() {
-	output_high(_PIC_TO_PI);
 	if ( timers.rda_tx_pos >= timers.rda_tx_length ) {
 		/* done transmitting */
 		timers.now_rda_tx_done=1;
@@ -177,9 +175,7 @@ void isr_uart1_tbe() {
 		fputc(timers.rda_tx_buff[timers.rda_tx_pos], STREAM_PI);
 		timers.rda_tx_pos++;
 	}
-	output_low(_PIC_TO_PI);
 }
-#endif
 
 /*  Raspberry PI connected serial port*/
 #int_rda
@@ -193,6 +189,7 @@ void isr_uart1_rx() {
 	/* Modbus */
 	if (!modbus_serial_new) {
 		if(modbus_serial_state == MODBUS_GETADDY) {
+output_high(_PIC_TO_PI);
 			modbus_serial_crc.d = 0xFFFF;
 			modbus_rx.address = c;
 			modbus_serial_state++;
