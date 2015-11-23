@@ -102,6 +102,11 @@ typedef struct {
 	int8 rda2_buff[256];
 	int8 rda2_buff_pos;
 	int8 rda2_buff_gap;
+
+	/* transmit buffer for PIC to PI */
+	int8 rda_tx_buff[256];
+	int8 rda_tx_length;
+	int8 rda_tx_pos;
 } struct_time_keep;
 
 
@@ -147,9 +152,6 @@ void set_rs485_speed(void) {
 void init() {
 	int8 i;
 
-//	setup_adc_ports(AN0_TO_AN7,VSS_VREF);
-//	setup_adc(ADC_CLOCK_DIV_16 | ADC_TAD_MUL_20 );
-
 	setup_adc(ADC_OFF);
 
 	port_b_pullups(0b00001000);
@@ -173,6 +175,9 @@ void init() {
 	timers.rda2_buff_pos=0;
 	timers.rda2_buff_gap=255;
 	timers.now_parse_rda2=0;
+
+	timers.rda_tx_length=0;
+	timers.rda_tx_pos=0;
 
 	for ( i=0 ; i<3 ; i++ ) {
 		current.pulse_period[i]=0;
@@ -208,10 +213,6 @@ void init() {
 
 
 	/* interrupts */
-
-	/* one periodic interrupt @ 100uS. Generated from internal 16 MHz clock */
-	/* prescale=16, match=24, postscale=1. Match is 24 because when match occurs, one cycle is lost */
-	// setup_timer_2(T2_DIV_BY_16,24,1); 
 
 	/* one periodic interrupt @ 100uS. Generated from system 12 MHz clock */
 	/* prescale=4, match=74, postscale=1. Match is 74 because when match occurs, one cycle is lost */
@@ -342,14 +343,14 @@ void periodic_millisecond(void) {
 		}
 	}
 
-
+#if 0
+	LVD code 
 	if ( 65535 == adcValue ) {
 		/* signaled that a new ADC sample was taken and we need to run again */
 		/* read current ADC value */	
 		adcValue=adc_get(0);
 	}
 
-#if 0
 	if ( adcValue > config.power_on_above_adc ) {
 		if ( current.power_on_delay > 0 ) {
 			current.power_on_delay--;

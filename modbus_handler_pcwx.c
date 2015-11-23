@@ -379,11 +379,6 @@ exception modbus_write_register(int16 address, int16 value) {
 			}  else {
 				return ILLEGAL_DATA_VALUE;
 			}
-
-		case 1996:
-			/* zero out NMEA structure */
-			memset(&nmea,0,sizeof(nmea));
-			memset(timers.rda2_buff,0,256);
 			break;
 
 		case 1997:

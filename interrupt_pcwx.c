@@ -163,9 +163,22 @@ void isr_rda2() {
 	}
 }
 
+#if 0
+/* transmit buffer empty for Modbus to raspberry pi buffer */
+#int_tbe
+void isr_uart1_tbe() {
+	if ( timers.rda_tx_pos == timers.rda_tx_length ) {
+		/* done transmitting */
+	} else {
+		/* put another character into TX buffer */
+	}
+
+}
+#endif
+
 /*  Raspberry PI connected serial port*/
 #int_rda
-void isr_rda() {
+void isr_uart1_rx() {
 	int8 c;
 
 	c=fgetc(STREAM_PI);

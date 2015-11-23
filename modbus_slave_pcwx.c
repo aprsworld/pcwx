@@ -297,7 +297,7 @@ void modbus_serial_putc(int8 c) {
 	modbus_calc_crc(c);
 
 	/* one stop bit delay */
-	delay_us(9);
+//	delay_us(9);
 
 	//delay_us(1000000/MODBUS_SERIAL_BAUD); //one stop bit.  not exact
 }
@@ -313,6 +313,7 @@ void modbus_serial_putc(int8 c) {
 // Note:       Format:  source | destination | data-length | data | checksum
 void modbus_serial_send_start(int8 to, int8 func)
 {
+	output_high(_PIC_TO_PI);
    modbus_serial_crc.d=0xFFFF;
    modbus_serial_new=FALSE;
 
@@ -350,6 +351,7 @@ void modbus_serial_send_stop()
 //	output_low(MODBUS_SERIAL_RX_ENABLE); // JJJ
 
    modbus_serial_crc.d=0xFFFF;
+	output_low(_PIC_TO_PI);
 }
 
 // Purpose:    Get a message from the RS485 bus and store it in a buffer
