@@ -371,21 +371,21 @@ void periodic_millisecond(void) {
 }
 
 /* copy up to n characters, stopping at \0 or \n or \r. Due to int8s, we are limited to < 255 characters */
-void strncpy_terminate_trim(int8 *dest, int8 *src, int8 n) {
+void strncpy_terminate_trim(int8 *dest, int8 *src, int8 validLength, int8 maxLength) {
 	int8 i;
 
 	/* copy until we get to \0 or \n or \r */
-	for (i = 0 ; i < n && src[i] != '\0' && src[i] != '\n' && src[i] != '\r' ; i++) {
+	for (i = 0 ; i < validLength && src[i] != '\0' && src[i] != '\n' && src[i] != '\r' ; i++) {
 		dest[i] = src[i];
 	}
 
 	/* pad remaining space with \0 */
-	for ( ; i < n ; i++) {
+	for ( ; i < maxLength ; i++) {
 		dest[i] = '\0';
 	}
 
 	/* always null terminate */
-	dest[n-1]='\0';
+	dest[maxLength-1]='\0';
 }
 
 
@@ -412,10 +412,7 @@ void rs485_to_host(void) {
 		/* do something */
 
 		/* put copy in 11th slot no mater what ... for debugging */
-		strncpy_terminate_trim(nmea.sentence[11],buff,NMEA_SENTENCE_LENGTH-1);
-//		strncpy(nmea.sentence[11],buff,NMEA_SENTENCE_LENGTH-1);
-		/* always null terminate final character */
-		nmea.sentence[11][NMEA_SENTENCE_LENGTH-1]='\0';
+		strncpy_terminate_trim(nmea.sentence[11],buff,length,NMEA_SENTENCE_LENGTH);
 
 		/* too short to be a NMEA0183 sentence */
 		if ( length < 6 ) {
@@ -431,7 +428,7 @@ void rs485_to_host(void) {
 			}
 
 			/* copy to appropriate slot */
-			strncpy_terminate_trim(nmea.sentence[i],buff,NMEA_SENTENCE_LENGTH-1);
+			strncpy_terminate_trim(nmea.sentence[i],buff,length,NMEA_SENTENCE_LENGTH);
 		}
 	}
 }
