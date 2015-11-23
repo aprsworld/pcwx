@@ -107,6 +107,8 @@ typedef struct {
 	int8 rda_tx_buff[256];
 	int8 rda_tx_length;
 	int8 rda_tx_pos;
+	int1 now_rda_tx_ready;
+	int1 now_rda_tx_done;
 } struct_time_keep;
 
 
@@ -178,6 +180,8 @@ void init() {
 
 	timers.rda_tx_length=0;
 	timers.rda_tx_pos=0;
+	timers.now_rda_tx_ready=0;
+	timers.now_rda_tx_done=0;
 
 	for ( i=0 ; i<3 ; i++ ) {
 		current.pulse_period[i]=0;
@@ -548,6 +552,37 @@ void main(void) {
 		}
 
 		modbus_process();
+
+
+		/* buffered modbus transmit */
+
+		/* start transmitting */
+		if ( timers.now_rda_tx_ready ) {
+			timers.now_rda_tx_ready=0;
+
+//			output_high(_PIC_TO_PI);
+
+			RCV_OFF();
+
+			/* 3.5 character delay (3500000/baud) */
+			delay_us(61); /* 57600 */
+
+			/* enable transmit buffer empty interrupt. It will feed itself */
+			enable_interrupts(INT_TBE);
+		}
+
+		/* done transmitting */
+		if ( timers.now_rda_tx_done ) {
+			timers.now_rda_tx_done=0;
+
+			/* 3.5 character delay (3500000/baud) */
+			delay_us(61); /* 57600 */
+   			RCV_ON();
+
+//			output_low(_PIC_TO_PI);
+		}
+
+
 
 		if ( timers.now_parse_rda2 ) {
 			timers.now_parse_rda2=0;

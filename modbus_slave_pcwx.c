@@ -293,13 +293,9 @@ void modbus_calc_crc(char data)
 // Inputs:     Character
 // Outputs:    None
 void modbus_serial_putc(int8 c) {
-	fputc(c, STREAM_PI);
+	timers.rda_tx_buff[timers.rda_tx_length]=c;
+	timers.rda_tx_length++;
 	modbus_calc_crc(c);
-
-	/* one stop bit delay */
-//	delay_us(9);
-
-	//delay_us(1000000/MODBUS_SERIAL_BAUD); //one stop bit.  not exact
 }
 
 
@@ -311,47 +307,32 @@ void modbus_serial_putc(int8 c) {
 // Outputs:    TRUE if successful
 //             FALSE if failed
 // Note:       Format:  source | destination | data-length | data | checksum
-void modbus_serial_send_start(int8 to, int8 func)
-{
-	output_high(_PIC_TO_PI);
-   modbus_serial_crc.d=0xFFFF;
-   modbus_serial_new=FALSE;
+void modbus_serial_send_start(int8 to, int8 func) {
+	/* reset out transmit buffer */
+	timers.rda_tx_length=0;
+	timers.rda_tx_pos=0;
 
-   RCV_OFF();
-   
-//	output_high(MODBUS_SERIAL_RX_ENABLE); // JJJ
- //  output_high(MODBUS_SERIAL_ENABLE_PIN);
+	modbus_serial_crc.d=0xFFFF;
+	modbus_serial_new=FALSE;
 
-	/* 3.5 character delay (3500000/baud) */
-	delay_us(61); /* 57600 */
-
-   modbus_serial_putc(to);
-   modbus_serial_putc(func);
+	modbus_serial_putc(to);
+	modbus_serial_putc(func);
 }
 
-void modbus_serial_send_stop()
-{
-   int8 crc_low, crc_high;
+void modbus_serial_send_stop() {
+	int8 crc_low, crc_high;
 
-   crc_high=modbus_serial_crc.b[1];
-   crc_low=modbus_serial_crc.b[0];
+	crc_high=modbus_serial_crc.b[1];
+	crc_low=modbus_serial_crc.b[0];
 
-   modbus_serial_putc(crc_high);
-   modbus_serial_putc(crc_low);
-
-   WAIT_FOR_HW_BUFFER();
-    
-	/* 3.5 character delay (3500000/baud) */
-	delay_us(61); /* 57600 */
+	modbus_serial_putc(crc_high);
+	modbus_serial_putc(crc_low);
 
 
-   RCV_ON();
+	modbus_serial_crc.d=0xFFFF;
 
-//   output_low(MODBUS_SERIAL_ENABLE_PIN);
-//	output_low(MODBUS_SERIAL_RX_ENABLE); // JJJ
-
-   modbus_serial_crc.d=0xFFFF;
-	output_low(_PIC_TO_PI);
+	/* ready to transmit from buffer flag set. Elsewhere we start sending */
+	timers.now_rda_tx_ready=1;
 }
 
 // Purpose:    Get a message from the RS485 bus and store it in a buffer

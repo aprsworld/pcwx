@@ -163,16 +163,21 @@ void isr_rda2() {
 	}
 }
 
-#if 0
+#if 1
 /* transmit buffer empty for Modbus to raspberry pi buffer */
 #int_tbe
 void isr_uart1_tbe() {
-	if ( timers.rda_tx_pos == timers.rda_tx_length ) {
+	output_high(_PIC_TO_PI);
+	if ( timers.rda_tx_pos >= timers.rda_tx_length ) {
 		/* done transmitting */
+		timers.now_rda_tx_done=1;
+		disable_interrupts(INT_TBE);
 	} else {
 		/* put another character into TX buffer */
+		fputc(timers.rda_tx_buff[timers.rda_tx_pos], STREAM_PI);
+		timers.rda_tx_pos++;
 	}
-
+	output_low(_PIC_TO_PI);
 }
 #endif
 
