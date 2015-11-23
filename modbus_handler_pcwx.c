@@ -1,4 +1,4 @@
-#define MAX_STATUS_REGISTER          51
+#define MAX_STATUS_REGISTER          53
 
 #define MIN_CONFIG_REGISTER          1000
 #define MAX_CONFIG_REGISTER          1012
@@ -183,6 +183,8 @@ int16 map_modbus(int16 addr) {
 		case 50: return (int16) current.modbus_last_error;
 		/* triggers a modbus statistics reset */
 		case 51: reset_modbus_stats(); return (int16) 0;
+		case 52: return (int16) current.rda_bytes_received;
+		case 53: return (int16) current.rda2_bytes_received;
 
 		/* configuration */
 //		case 1000: return (int16) input(BUTTON);

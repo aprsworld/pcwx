@@ -131,6 +131,7 @@ void isr_rda2() {
 	int8 c;
 
 	c=fgetc(STREAM_RS485);
+	current.rda2_bytes_received++;
 
 	if ( RS485_MODE_OFF != config.rs485_port_mode ) {
 		/* add to buffer to send to PI */
@@ -151,11 +152,7 @@ void isr_rda() {
 
 	c=fgetc(STREAM_PI);
 
-	if ( current.bridged_uarts ) {
-		/* from PI to debugging cable */
-		fputc(c,STREAM_RS485);
-		return;
-	}
+	current.rda_bytes_received++;
 
 	/* Modbus */
 	if (!modbus_serial_new) {

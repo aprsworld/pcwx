@@ -59,7 +59,6 @@ typedef struct {
 	int16 interval_milliseconds;
 
 	int8 factory_unlocked;
-	int1 bridged_uarts;
 
 	int16 watchdog_seconds;
 
@@ -68,6 +67,10 @@ typedef struct {
 	int16 power_on_delay;
 	int16 power_off_delay;
 	int16 power_override_timeout;
+
+	/* serial byte counters. Roll over */
+	int16 rda_bytes_received;
+	int16 rda2_bytes_received;
 } struct_current;
 
 typedef struct {
@@ -163,8 +166,9 @@ void init() {
 	current.interval_milliseconds=0;
 	current.adc_buffer_index=0;
 	current.factory_unlocked=0;
-	current.bridged_uarts=0;
 	current.watchdog_seconds=0;
+	current.rda_bytes_received=0;
+	current.rda2_bytes_received=0;
 
 	/* zero out NMEA structure */
 	memset(&nmea,0,sizeof(nmea));
@@ -255,18 +259,13 @@ void periodic_millisecond(void) {
 	timers.port_c=port_c;
 
 	/* green LED control */
-	if ( current.bridged_uarts ) {
-		/* always on when ports are bridged */
-		output_high(LED_GREEN);
+	if ( 0==timers.led_on_green ) {
+		output_low(LED_GREEN);
 	} else {
-		/* green LED in Modbus mode */
-		if ( 0==timers.led_on_green ) {
-			output_low(LED_GREEN);
-		} else {
-			output_high(LED_GREEN);
-			timers.led_on_green--;
-		}
+		output_high(LED_GREEN);
+		timers.led_on_green--;
 	}
+
 
 
 
@@ -371,6 +370,24 @@ void periodic_millisecond(void) {
 	}
 }
 
+/* copy up to n characters, stopping at \0 or \n or \r. Due to int8s, we are limited to < 255 characters */
+void strncpy_terminate_trim(int8 *dest, int8 *src, int8 n) {
+	int8 i;
+
+	/* copy until we get to \0 or \n or \r */
+	for (i = 0 ; i < n && src[i] != '\0' && src[i] != '\n' && src[i] != '\r' ; i++) {
+		dest[i] = src[i];
+	}
+
+	/* pad remaining space with \0 */
+	for ( ; i < n ; i++) {
+		dest[i] = '\0';
+	}
+
+	/* always null terminate */
+	dest[n-1]='\0';
+}
+
 
 void rs485_to_host(void) {
 	int8 buff[sizeof(timers.rda2_buff)];
@@ -380,7 +397,7 @@ void rs485_to_host(void) {
 
 	/* get a local copy of our data */
 	length=timers.rda2_buff_pos;
-	timers.rda2_buff_pos=255; /* stop getting more data for a second */
+	timers.rda2_buff_pos=255; /* stop getting data briefly */
 	memcpy(buff,timers.rda2_buff,length);
 	timers.rda2_buff_gap=0;
 	timers.rda2_buff_pos=0;
@@ -393,11 +410,9 @@ void rs485_to_host(void) {
 		}
 	} else if ( RS485_MODE_NMEA0183_RX==config.rs485_port_mode ) {
 		/* do something */
-		/* null terminate buff so we can treat it as a string */
-		buff[length]='\0';
 
 		/* put copy in 11th slot no mater what ... for debugging */
-		strncpy(nmea.sentence[11],buff,NMEA_SENTENCE_LENGTH-1);
+		strncpy_terminate_trim(nmea.sentence[11],buff,NMEA_SENTENCE_LENGTH-1);
 		/* always null terminate final character */
 		nmea.sentence[11][NMEA_SENTENCE_LENGTH-1]='\0';
 
@@ -414,10 +429,8 @@ void rs485_to_host(void) {
 				continue;
 			}
 
-			/* put copy in 11th slot no mater what ... for debugging */
-			strncpy(nmea.sentence[i],buff,NMEA_SENTENCE_LENGTH-1);
-			/* always null terminate final character */
-			nmea.sentence[i][NMEA_SENTENCE_LENGTH-1]='\0';
+			/* copy to appropriate slot */
+			strncpy_terminate_trim(nmea.sentence[i],buff,NMEA_SENTENCE_LENGTH-1);
 		}
 	}
 }
@@ -431,7 +444,7 @@ void main(void) {
 	init();
 
 
-#if 0
+#if 1
 	/* debugging messages sent on RS-485 port ... so we will start transmitting */
 	output_high(RS485_DE);
 	output_high(RS485_NRE);
@@ -483,7 +496,7 @@ void main(void) {
 	current.p_on=config.power_startup;
 
 
-#if 0
+#if 1
 	/* shut off RS-485 transmit once transmit buffer is empty */
 	while ( ! TRMT2 )
 		;
@@ -497,21 +510,6 @@ void main(void) {
 	for ( ; ; ) {
 		restart_wdt();
 
-#if 0
-		if ( current.bridged_uarts ) {
-			disable_interrupts(INT_TIMER2);
-			if ( kbhit(STREAM_RS485) ) {
-				fputc(fgetc(STREAM_RS485),MODBUS_SERIAL);
-			}
-
-			if ( !bit_test(timers.port_b,BUTTON_BIT) ) {
-				current.bridged_uarts=0;
-				enable_interrupts(INT_TIMER2);
-			}
-
-			continue;
-		} 
-#endif
 
 		if ( timers.now_millisecond ) {
 			periodic_millisecond();
@@ -523,10 +521,7 @@ void main(void) {
 			adc_update();
 		}
 
-//		if ( ! current.bridged_uarts ) {
-			modbus_process();
-//		}
-
+		modbus_process();
 
 		if ( timers.now_parse_rda2 ) {
 			timers.now_parse_rda2=0;

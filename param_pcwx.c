@@ -40,7 +40,7 @@ void write_default_param_file() {
 	timers.led_on_green=150;
 
 	config.modbus_address=38;
-	config.rs485_port_mode=RS485_MODE_MODBUS_BRIDGE;
+	config.rs485_port_mode=RS485_MODE_NMEA0183_RX; // RS485_MODE_MODBUS_BRIDGE;
 //	config.modbus_address=128; /* use any address */
 
 	config.serial_prefix='P';
@@ -55,8 +55,9 @@ void write_default_param_file() {
 
 	/* clear NMEA0183 sentence character array */
 	memset(config.nmea0183_sentence,0,sizeof(config.nmea0183_sentence));
-	/* set defaults. Can set the first 11 this way. Have to do them in order.
-	 12th would overrun end of array */
+	/* set defaults. Can set the first 11 this way. They are 6 bytes long, not null terminated.
+	Can use normal string functions (null terminated) to set the first 11 of them in order.
+	12th would go 1 byte past the end of array */
 	strcpy(config.nmea0183_sentence[0],"$GPRMC");
 	strcpy(config.nmea0183_sentence[1],"$WIMDA");
 
