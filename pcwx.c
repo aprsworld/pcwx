@@ -364,7 +364,7 @@ void periodic_millisecond(void) {
 		timers.rda2_buff_gap++;
 	}
 
-	/* RS-485: if we have data and we have >=3 miliseconds gap, we parse */
+	/* RS-485: if we have data and we have >=10 miliseconds gap, we parse */
 	if ( timers.rda2_buff_gap >= 10 && timers.rda2_buff_pos>0 ) {
 		timers.now_parse_rda2=1;	
 	}
@@ -413,6 +413,7 @@ void rs485_to_host(void) {
 
 		/* put copy in 11th slot no mater what ... for debugging */
 		strncpy_terminate_trim(nmea.sentence[11],buff,NMEA_SENTENCE_LENGTH-1);
+//		strncpy(nmea.sentence[11],buff,NMEA_SENTENCE_LENGTH-1);
 		/* always null terminate final character */
 		nmea.sentence[11][NMEA_SENTENCE_LENGTH-1]='\0';
 

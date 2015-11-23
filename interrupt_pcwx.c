@@ -143,6 +143,13 @@ void isr_rda2() {
 			timers.rda2_buff_pos++;
 		}
 	}
+
+	/* if we are in NMEA mode, we can also recognize \n or \r as the end of a sentence */
+	if ( RS485_MODE_NMEA0183_RX == config.rs485_port_mode ) {
+		if ( '\n' == c || '\r' == c ) {
+			timers.rda2_buff_gap=20;
+		}
+	}
 }
 
 /*  Raspberry PI connected serial port*/

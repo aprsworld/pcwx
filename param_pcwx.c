@@ -59,7 +59,10 @@ void write_default_param_file() {
 	Can use normal string functions (null terminated) to set the first 11 of them in order.
 	12th would go 1 byte past the end of array */
 	strcpy(config.nmea0183_sentence[0],"$GPRMC");
-	strcpy(config.nmea0183_sentence[1],"$WIMDA");
+	strcpy(config.nmea0183_sentence[1],"$GPGGA");
+	strcpy(config.nmea0183_sentence[2],"$GPGSV");
+
+	strcpy(config.nmea0183_sentence[10],"$WIMDA");
 
 	/* write them so next time we use from EEPROM */
 	write_param_file();
