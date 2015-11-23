@@ -1,7 +1,7 @@
 #define MAX_STATUS_REGISTER          53
 
 #define MIN_CONFIG_REGISTER          1000
-#define MAX_CONFIG_REGISTER          1012
+#define MAX_CONFIG_REGISTER          1013
 
 #define MIN_NMEA0183_CONFIG_REGISTER 1100
 #define MAX_NMEA0183_CONFIG_REGISTER 1100 + N_NMEA0183_SENTENCES*6
@@ -187,8 +187,6 @@ int16 map_modbus(int16 addr) {
 		case 53: return (int16) current.rda2_bytes_received;
 
 		/* configuration */
-//		case 1000: return (int16) input(BUTTON);
-//		case 1000: return (int16) modbus_rx.len;
 		case 1000: return (int16) config.serial_prefix;
 		case 1001: return (int16) config.serial_number;
 		case 1002: return (int16) 'P';
@@ -202,6 +200,15 @@ int16 map_modbus(int16 addr) {
 		case 1010: return (int16) config.pi_offtime_seconds;
 		case 1011: return (int16) config.power_startup;
 		case 1012: return (int16) config.rs485_port_mode;
+		case 1013: 
+			if ( RS485_SPEED_1200 == config.rs485_port_speed )  return (int16) 1200;
+			if ( RS485_SPEED_2400 == config.rs485_port_speed )  return (int16) 2400;
+			if ( RS485_SPEED_4800 == config.rs485_port_speed )  return (int16) 4800;
+			if ( RS485_SPEED_19200 == config.rs485_port_speed ) return (int16) 19200;
+			if ( RS485_SPEED_38400 == config.rs485_port_speed ) return (int16) 38400;
+			if ( RS485_SPEED_57600 == config.rs485_port_speed ) return (int16) 57600;
+
+			return (int16) 9600;
 
 		/* we should have range checked, and never gotten here */
 		default: return (int16) 65535;
@@ -350,12 +357,24 @@ exception modbus_write_register(int16 address, int16 value) {
 			if ( value > 1 ) return ILLEGAL_DATA_VALUE;
 			config.power_startup=value;
 			break;
-
+		
 		case 1012:
 			if ( value > 2 ) return ILLEGAL_DATA_VALUE;
 			config.rs485_port_mode=value;
 			break;
 		
+		case 1013:
+			if ( value > RS485_SPEED_57600 ) return ILLEGAL_DATA_VALUE;
+
+			if ( 1200 == value )  config.rs485_port_speed=RS485_SPEED_1200;
+			if ( 2400 == value )  config.rs485_port_speed=RS485_SPEED_2400;
+			if ( 4800 == value )  config.rs485_port_speed=RS485_SPEED_4800;
+			if ( 9600 == value )  config.rs485_port_speed=RS485_SPEED_9600;
+			if ( 19200 == value ) config.rs485_port_speed=RS485_SPEED_19200;
+			if ( 38400 == value ) config.rs485_port_speed=RS485_SPEED_38400;
+			if ( 57600 == value ) config.rs485_port_speed=RS485_SPEED_57600;
+
+			set_rs485_speed();
 
 		case 1996:
 			/* zero out NMEA structure */

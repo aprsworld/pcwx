@@ -4,6 +4,14 @@
 #define RS485_MODE_MODBUS_BRIDGE 1
 #define RS485_MODE_NMEA0183_RX   2
 
+#define RS485_SPEED_1200  0
+#define RS485_SPEED_2400  1
+#define RS485_SPEED_4800  2
+#define RS485_SPEED_9600  3
+#define RS485_SPEED_19200 4
+#define RS485_SPEED_38400 5
+#define RS485_SPEED_57600 6
+
 #define N_NMEA0183_SENTENCES 12
 
 typedef struct {
@@ -11,6 +19,7 @@ typedef struct {
 	int8 modbus_mode;
 
 	int8 rs485_port_mode;
+	int8 rs485_port_speed;
 
 	int8 serial_prefix;
 	int16 serial_number;
@@ -110,6 +119,10 @@ struct_current current;
 struct_time_keep timers;
 struct_nmea nmea;
 
+/* declarations */
+void set_rs485_speed(void);
+
+
 #include "mcp3208_pcwx.c"
 #include "adc_pcwx.c"
 #include "param_pcwx.c"
@@ -119,6 +132,17 @@ struct_nmea nmea;
 
 #include "interrupt_pcwx.c"
 
+void set_rs485_speed(void) {
+	switch ( config.rs485_port_speed ) {
+		case RS485_SPEED_1200:  set_uart_speed(1200,STREAM_RS485); break;
+		case RS485_SPEED_2400:  set_uart_speed(2400,STREAM_RS485); break;
+		case RS485_SPEED_4800:  set_uart_speed(4800,STREAM_RS485); break;
+		case RS485_SPEED_19200: set_uart_speed(19200,STREAM_RS485); break;
+		case RS485_SPEED_38400: set_uart_speed(38400,STREAM_RS485); break;
+		case RS485_SPEED_57600: set_uart_speed(57600,STREAM_RS485); break;	
+		default: set_uart_speed(9600, STREAM_RS485); break;
+	}
+}
 
 void init() {
 	int8 i;
@@ -178,6 +202,9 @@ void init() {
 	current.power_on_delay=config.power_on_above_delay;
 	current.power_off_delay=config.power_off_below_delay;
 	current.power_override_timeout=0;
+
+	/* UART2 - RS-485 port */
+	set_rs485_speed();
 
 
 	/* interrupts */
