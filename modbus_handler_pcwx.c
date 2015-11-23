@@ -356,7 +356,13 @@ exception modbus_write_register(int16 address, int16 value) {
 			config.rs485_port_mode=value;
 			break;
 		
-		
+
+
+
+		case 1997:
+			/* reset CPU */
+			if ( 1 != value ) return ILLEGAL_DATA_VALUE;
+			reset_cpu();
 		case 1998:
 			/* write default config to EEPROM */
 			if ( 1 != value ) return ILLEGAL_DATA_VALUE;

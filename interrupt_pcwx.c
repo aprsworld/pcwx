@@ -133,7 +133,7 @@ void isr_rda2() {
 	c=fgetc(STREAM_RS485);
 	current.rda2_bytes_received++;
 
-	if ( RS485_MODE_OFF != config.rs485_port_mode ) {
+	if ( RS485_MODE_MODBUS_BRIDGE == config.rs485_port_mode ) {
 		/* add to buffer to send to PI */
 
 		timers.rda2_buff_gap=0;
@@ -142,12 +142,23 @@ void isr_rda2() {
 			timers.rda2_buff[timers.rda2_buff_pos]=c;
 			timers.rda2_buff_pos++;
 		}
-	}
+	} else if ( RS485_MODE_NMEA0183_RX == config.rs485_port_mode ) {
+		/* if we are in NMEA mode, we can also recognize \n or \r as the end of a sentence */
+		if ( '\n' == c || '\r' == c  ) {
+			if  ( timers.rda2_buff_pos > 0 ) {
+				/* mark new packet by a fake gap */
+				timers.rda2_buff_gap=20;
+			}  else {
+				/* do nothing if we are at beginning of next packet */
+			}
+		} else {
+			/* add to buffer */
+			timers.rda2_buff_gap=0;
 
-	/* if we are in NMEA mode, we can also recognize \n or \r as the end of a sentence */
-	if ( RS485_MODE_NMEA0183_RX == config.rs485_port_mode ) {
-		if ( '\n' == c || '\r' == c ) {
-			timers.rda2_buff_gap=20;
+			if ( timers.rda2_buff_pos < sizeof(timers.rda2_buff)-1 ) {
+				timers.rda2_buff[timers.rda2_buff_pos]=c;
+				timers.rda2_buff_pos++;
+			}
 		}
 	}
 }
