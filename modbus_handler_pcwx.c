@@ -364,17 +364,21 @@ exception modbus_write_register(int16 address, int16 value) {
 			break;
 		
 		case 1013:
-			if ( value > RS485_SPEED_57600 ) return ILLEGAL_DATA_VALUE;
 
-			if ( 1200 == value )  config.rs485_port_speed=RS485_SPEED_1200;
-			if ( 2400 == value )  config.rs485_port_speed=RS485_SPEED_2400;
-			if ( 4800 == value )  config.rs485_port_speed=RS485_SPEED_4800;
-			if ( 9600 == value )  config.rs485_port_speed=RS485_SPEED_9600;
-			if ( 19200 == value ) config.rs485_port_speed=RS485_SPEED_19200;
-			if ( 38400 == value ) config.rs485_port_speed=RS485_SPEED_38400;
-			if ( 57600 == value ) config.rs485_port_speed=RS485_SPEED_57600;
+			n=0;
+			if ( 1200 == value )  { n=1; config.rs485_port_speed=RS485_SPEED_1200; }
+			if ( 2400 == value )  { n=1; config.rs485_port_speed=RS485_SPEED_2400; }
+			if ( 4800 == value )  { n=1; config.rs485_port_speed=RS485_SPEED_4800; }
+			if ( 9600 == value )  { n=1; config.rs485_port_speed=RS485_SPEED_9600; }
+			if ( 19200 == value ) { n=1; config.rs485_port_speed=RS485_SPEED_19200; }
+			if ( 38400 == value ) { n=1; config.rs485_port_speed=RS485_SPEED_38400; }
+			if ( 57600 == value ) { n=1; config.rs485_port_speed=RS485_SPEED_57600; }
 
-			set_rs485_speed();
+			if (  1==n ) {
+				set_rs485_speed();
+			}  else {
+				return ILLEGAL_DATA_VALUE;
+			}
 
 		case 1996:
 			/* zero out NMEA structure */
