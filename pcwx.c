@@ -115,7 +115,7 @@ typedef struct {
 
 #define NMEA_SENTENCE_LENGTH 80
 typedef struct {
-	int8 sentence[N_NMEA0183_SENTENCES][80];
+	int8 sentence[N_NMEA0183_SENTENCES][NMEA_SENTENCE_LENGTH];
 } struct_nmea;
 
 
@@ -407,7 +407,7 @@ void strncpy_terminate_trim(int8 *dest, int8 *src, int8 validLength, int8 maxLen
 	int8 i;
 
 	/* copy until we get to \0 or \n or \r */
-	for (i = 0 ; i < validLength && src[i] != '\0' && src[i] != '\n' && src[i] != '\r' ; i++) {
+	for (i = 0 ; i < validLength && i < maxLength && src[i] != '\0' && src[i] != '\n' && src[i] != '\r' ; i++) {
 		dest[i] = src[i];
 	}
 
