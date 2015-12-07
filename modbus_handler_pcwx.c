@@ -1,4 +1,4 @@
-#define MAX_STATUS_REGISTER          53
+#define MAX_STATUS_REGISTER          54
 
 #define MIN_CONFIG_REGISTER          1000
 #define MAX_CONFIG_REGISTER          1013
@@ -14,6 +14,9 @@
 
 #define MIN_NMEA0183_WORD_REGISTER   6000
 #define MAX_NMEA0183_WORD_REGISTER   MIN_NMEA0183_WORD_REGISTER + N_NMEA0183_SENTENCES*40
+
+#define MIN_NMEA0183_META_REGISTER   6500
+#define MAX_NMEA0183_META_REGISTER   MIN_NMEA0183_META_REGISTER + N_NMEA0183_SENTENCES*2
 
 
 /* This function may come in handy for you since MODBUS uses MSB first. */
@@ -107,7 +110,6 @@ int16 map_modbus(int16 addr) {
 	}
 
 
-
 	switch ( addr ) {
 		/* counters */
 		case 0:  return (int16) current.pulse_count[0];
@@ -183,8 +185,11 @@ int16 map_modbus(int16 addr) {
 		case 50: return (int16) current.modbus_last_error;
 		/* triggers a modbus statistics reset */
 		case 51: reset_modbus_stats(); return (int16) 0;
+		
+		/* meta */
 		case 52: return (int16) current.rda_bytes_received;
 		case 53: return (int16) current.rda2_bytes_received;
+		case 54: return (int16) current.button_state;
 
 		/* configuration */
 		case 1000: return (int16) config.serial_prefix;
@@ -210,6 +215,33 @@ int16 map_modbus(int16 addr) {
 
 			return (int16) 9600;
 
+		/* NMEA sentence age and length */
+		case 6500: return (int16) nmea.sentence_age[0];
+		case 6501: return (int16) nmea.sentence_length[0];
+		case 6502: return (int16) nmea.sentence_age[1];
+		case 6503: return (int16) nmea.sentence_length[1];
+		case 6504: return (int16) nmea.sentence_age[2];
+		case 6505: return (int16) nmea.sentence_length[2];
+		case 6506: return (int16) nmea.sentence_age[3];
+		case 6507: return (int16) nmea.sentence_length[3];
+		case 6508: return (int16) nmea.sentence_age[4];
+		case 6509: return (int16) nmea.sentence_length[4];
+		case 6510: return (int16) nmea.sentence_age[5];
+		case 6511: return (int16) nmea.sentence_length[5];
+		case 6512: return (int16) nmea.sentence_age[6];
+		case 6513: return (int16) nmea.sentence_length[6];
+		case 6514: return (int16) nmea.sentence_age[7];
+		case 6515: return (int16) nmea.sentence_length[7];
+		case 6516: return (int16) nmea.sentence_age[8];
+		case 6517: return (int16) nmea.sentence_length[8];
+		case 6518: return (int16) nmea.sentence_age[9];
+		case 6519: return (int16) nmea.sentence_length[9];
+		case 6520: return (int16) nmea.sentence_age[10];
+		case 6521: return (int16) nmea.sentence_length[10];
+		case 6522: return (int16) nmea.sentence_age[11];
+		case 6523: return (int16) nmea.sentence_length[11];
+
+
 		/* we should have range checked, and never gotten here */
 		default: return (int16) 65535;
 	}
@@ -221,6 +253,8 @@ int8 modbus_valid_read_registers(int16 start, int16 end) {
 	if ( 19999==start && 20000==end)
 		return 1;
 
+	if ( start >= MIN_NMEA0183_META_REGISTER && end <= MAX_NMEA0183_META_REGISTER ) 
+		return 1;
 
 	if ( start >= MIN_NMEA0183_WORD_REGISTER && end <= MAX_NMEA0183_WORD_REGISTER ) 
 		return 1;

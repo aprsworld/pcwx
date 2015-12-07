@@ -80,6 +80,9 @@ typedef struct {
 	/* serial byte counters. Roll over */
 	int16 rda_bytes_received;
 	int16 rda2_bytes_received;
+
+	/* push button on board */
+	int8 button_state;
 } struct_current;
 
 typedef struct {
@@ -116,6 +119,8 @@ typedef struct {
 #define NMEA_SENTENCE_LENGTH 80
 typedef struct {
 	int8 sentence[N_NMEA0183_SENTENCES][NMEA_SENTENCE_LENGTH];
+	int16 sentence_age[N_NMEA0183_SENTENCES];
+	int8 sentence_length[N_NMEA0183_SENTENCES];
 } struct_nmea;
 
 
@@ -202,9 +207,14 @@ void init() {
 	current.watchdog_seconds=0;
 	current.rda_bytes_received=0;
 	current.rda2_bytes_received=0;
+	current.button_state=0;
 
 	/* zero out NMEA structure */
 	memset(&nmea,0,sizeof(nmea));
+	for ( i=0 ; i < N_NMEA0183_SENTENCES ; i++ ) {
+		nmea.sentence_age[i]=0xffff;
+		nmea.sentence_length[i]=0;
+	}
 
 
 	/* power control switch */
@@ -233,49 +243,22 @@ void periodic_millisecond(void) {
 	static int16 adcTicks=0;
 	static int16 ticks=0;
 	/* button debouncing */
-//	static int16 b0_state=0; /* bridge push button */
-//	static int16 b1_state=0; /* reset line from PI */
-	static int16 b2_state=0; /* watchdog line from PI */
+	static int16 b0_state=0; /* push button */
 	/* power control */
-	static int16 adcValue; /* updates after each ADC sample run */
+	int8 i;
+
 
 	timers.now_millisecond=0;
 
-//	fputc('.',STREAM_RS485);
-
-#if 0
 	/* button must be down for 12 milliseconds */
 	b0_state=(b0_state<<1) | !bit_test(timers.port_b,BUTTON_BIT) | 0xe000;
 	if ( b0_state==0xf000) {
 		/* button pressed */
-		current.bridged_uarts = !current.bridged_uarts;
-		fprintf(STREAM_RS485,"# bridged=%u\r\n",current.bridged_uarts);
+		current.button_state=1;
+	} else {
+		current.button_State=0;
 	}
 
-	/* if we are in bridged uarts ... only check for button press */
-	if ( current.bridged_uarts ) {
-		return;
-	}
-#endif
-
-#if 0
-	/* reset must be down for 12 milliseconds */
-	b1_state=(b1_state<<1) | !bit_test(timers.port_c,PIC_BOOTLOAD_REQUEST_BIT) | 0xe000;
-	if ( b1_state==0xf000) {
-		/* reset line asserted */
-		if ( config.allow_bootload_request ) {
-			reset_cpu();
-		}
-		/* BUG - I think that bootload request should be high for x milliseconds, rather than low */
-	}
-#endif
-
-	/* watchdog must be down for 12 milliseconds for hit to register */
-	b2_state=(b2_state<<1) | !bit_test(timers.port_c,WATCHDOG_FROM_PI_BIT) | 0xe000;
-	if ( b2_state==0xf000) {
-		/* watchdog hit */
-//		current.watchdog_seconds=0;
-	}
 
 	/* anemometers quit moving */
 	if ( 0xffff == timers.pulse_period[0] )
@@ -298,14 +281,17 @@ void periodic_millisecond(void) {
 		timers.led_on_green--;
 	}
 
-
-
-
-
 	/* some other random stuff that we don't need to do every cycle in main */
 	if ( current.interval_milliseconds < 65535 ) {
 		current.interval_milliseconds++;
 	}
+
+	/* NMEA sentence age */
+	for ( i=0 ; i<N_NMEA0183_SENTENCES ; i++ ) {
+		if ( 0xffff != nmea.sentence_age[i] )
+			nmea.sentence_age[i]++;
+	}
+
 
 	/* seconds */
 	ticks++;
@@ -347,36 +333,6 @@ void periodic_millisecond(void) {
 		}
 	}
 
-#if 0
-	LVD code 
-	if ( 65535 == adcValue ) {
-		/* signaled that a new ADC sample was taken and we need to run again */
-		/* read current ADC value */	
-		adcValue=adc_get(0);
-	}
-
-	if ( adcValue > config.power_on_above_adc ) {
-		if ( current.power_on_delay > 0 ) {
-			current.power_on_delay--;
-		} else {
-			current.p_on=1;
-		}
-	} else {
-		current.power_on_delay=config.power_on_above_delay;
-	}
-			
-
-	if ( adcValue < config.power_off_below_adc ) {
-		if ( current.power_off_delay > 0 ) {
-			current.power_off_delay--;
-		} else {
-			current.p_on=0;
-		}
-	} else {
-		current.power_off_delay=config.power_off_below_delay;
-	}
-#endif	
-
 	/* ADC sample counter */
 	if ( timers.now_adc_reset_count ) {
 		timers.now_adc_reset_count=0;
@@ -388,7 +344,6 @@ void periodic_millisecond(void) {
 	if ( adcTicks == config.adc_sample_ticks ) {
 		adcTicks=0;
 		timers.now_adc_sample=1;
-		adcValue=65535; /* signal power control (above) on next pass to resample */
 	}
 
 	/* for RS-485 port */
@@ -443,8 +398,8 @@ void rs485_to_host(void) {
 	} else if ( RS485_MODE_NMEA0183_RX==config.rs485_port_mode ) {
 		/* do something */
 
-		/* put copy in 11th slot no mater what ... for debugging */
-		strncpy_terminate_trim(nmea.sentence[11],buff,length,NMEA_SENTENCE_LENGTH);
+		/* put copy in the last slot no mater what ... for debugging */
+		strncpy_terminate_trim(nmea.sentence[N_NMEA0183_SENTENCES-1],buff,length,NMEA_SENTENCE_LENGTH);
 
 		/* too short to be a NMEA0183 sentence */
 		if ( length < 6 ) {
@@ -461,6 +416,11 @@ void rs485_to_host(void) {
 
 			/* copy to appropriate slot */
 			strncpy_terminate_trim(nmea.sentence[i],buff,length,NMEA_SENTENCE_LENGTH);
+			nmea.sentence_age[i]=0;
+			nmea.sentence_length[i]=length;
+
+			/* only fill in our first match */
+			break;
 		}
 	}
 }
@@ -496,26 +456,18 @@ void main(void) {
 	fprintf(STREAM_RS485,"\r\n");
 #endif
 
-//	fprintf(STREAM_RS485,"# read_param_file() starting ...");
+
 	read_param_file();
-//	fprintf(STREAM_RS485," complete\r\n");
 
 
 	if ( config.modbus_address > 128 ) {
-//		fprintf(STREAM_RS485,"# write_default_param_file() starting ...");
 		write_default_param_file();
-//		fprintf(STREAM_RS485," complete\r\n");
 	}
-//	fprintf(STREAM_RS485,"# config.modbus_address=%u\r\n",config.modbus_address);
 
 	/* start Modbus slave */
 	setup_uart(TRUE);
 	/* modbus_init turns on global interrupts */
-//	fprintf(STREAM_RS485,"# modbus_init() starting ...");
 	modbus_init();
-//	fprintf(STREAM_RS485," complete\r\n");
-
-//	fprintf(STREAM_RS485,"# bridged_uarts=%u\r\n",current.bridged_uarts);
 
 	/* Prime ADC filter */
 	for ( i=0 ; i<30 ; i++ ) {
