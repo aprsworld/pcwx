@@ -222,8 +222,7 @@ void init() {
 	current.power_off_delay=config.power_off_below_delay;
 	current.power_override_timeout=0;
 
-	/* UART2 - RS-485 port */
-	set_rs485_speed();
+	/* UART2 - RS-485 port speed will be set after parameters are read */
 
 
 	/* interrupts */
@@ -456,6 +455,7 @@ void main(void) {
 
 
 	read_param_file();
+	set_rs485_speed();
 
 
 	if ( config.modbus_address > 128 ) {
