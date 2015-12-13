@@ -62,8 +62,9 @@ void write_default_param_file() {
 	strcpy(config.nmea0183_sentence[0],"$GPRMC");
 	strcpy(config.nmea0183_sentence[1],"$GPGGA");
 	strcpy(config.nmea0183_sentence[2],"$GPGSV");
+	strcpy(config.nmea0183_sentence[3],"$WIMDA");
 
-	strcpy(config.nmea0183_sentence[10],"$WIMDA");
+	strcpy(config.nmea0183_sentence[6],"*"); /* put anything in */
 
 	/* write them so next time we use from EEPROM */
 	write_param_file();

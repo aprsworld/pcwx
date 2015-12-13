@@ -286,10 +286,12 @@ void periodic_millisecond(void) {
 		current.interval_milliseconds++;
 	}
 
-	/* NMEA sentence age */
-	for ( i=0 ; i<N_NMEA0183_SENTENCES ; i++ ) {
-		if ( 0xffff != nmea.sentence_age[i] )
-			nmea.sentence_age[i]++;
+	if ( RS485_MODE_NMEA0183_RX==config.rs485_port_mode ) {
+		/* NMEA sentence age */
+		for ( i=0 ; i<N_NMEA0183_SENTENCES ; i++ ) {
+			if ( 0xffff != nmea.sentence_age[i] )
+				nmea.sentence_age[i]++;
+		}
 	}
 
 
@@ -391,16 +393,12 @@ void rs485_to_host(void) {
 
 
 	if ( RS485_MODE_MODBUS_BRIDGE==config.rs485_port_mode ) {
-		/* transmit back out to the PI */
+		/* transmit MODBUS received data back out to the PI */
 		for ( l=0 ; l<length ; l++ ) {
 			fputc(buff[l],STREAM_PI);
 		}
 	} else if ( RS485_MODE_NMEA0183_RX==config.rs485_port_mode ) {
-		/* do something */
-
-		/* put copy in the last slot no mater what ... for debugging */
-		strncpy_terminate_trim(nmea.sentence[N_NMEA0183_SENTENCES-1],buff,length,NMEA_SENTENCE_LENGTH);
-
+		/* process NMEA0183 sentence */
 		/* too short to be a NMEA0183 sentence */
 		if ( length < 6 ) {
 			return;
@@ -408,8 +406,8 @@ void rs485_to_host(void) {
 
 		/* search through list of sentences to record and see if we exist */
 		for ( i=0 ; i<N_NMEA0183_SENTENCES ; i++ ) {
-			/* compare first six characters */
-			if ( 0 != strncmp(buff,config.nmea0183_sentence[i],6) ) {
+			/* compare first six characters or look for wild card */
+			if ( 0 != strncmp(buff,config.nmea0183_sentence[i],6) && '*' != config.nmea0183_sentence[i][0] ) {
 				/* no match */
 				continue;
 			}
