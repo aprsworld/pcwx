@@ -1,4 +1,4 @@
-#define MAX_STATUS_REGISTER          54
+#define MAX_STATUS_REGISTER          55
 
 #define MIN_CONFIG_REGISTER          1000
 #define MAX_CONFIG_REGISTER          1014
@@ -190,6 +190,7 @@ int16 map_modbus(int16 addr) {
 		case 52: return (int16) current.rda_bytes_received;
 		case 53: return (int16) current.rda2_bytes_received;
 		case 54: return (int16) current.button_state;
+		case 55: return (int16) current.latch_sw_magnet;
 
 		/* configuration */
 		case 1000: return (int16) config.serial_prefix;
@@ -359,7 +360,10 @@ exception modbus_write_register(int16 address, int16 value) {
 
 	/* publicly writeable addresses */
 	switch ( address ) {
-			
+		case 55:
+			if ( 0 != value ) return ILLEGAL_DATA_VALUE;
+			current.latch_sw_magnet=0;
+			break;			
 
 		case 1006:
 			/* Modbus address {0 to 127 or 128 for respond to any} */
