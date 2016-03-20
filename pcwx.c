@@ -38,6 +38,7 @@ typedef struct {
 	int16 power_on_above_adc;
 	int16 power_on_above_delay;
 	int16 power_override_timeout;
+	int8 pic_to_pi_latch_mask;
 
 	/* sentences we make available via modbus */
 	int8 nmea0183_sentence[N_NMEA0183_SENTENCES][6];
@@ -81,8 +82,11 @@ typedef struct {
 	int16 rda_bytes_received;
 	int16 rda2_bytes_received;
 
-	/* push button on board */
+	/* push button / magnetic switch on board */
 	int8 button_state;
+
+	/* push button / magnetic switch on board */
+	int8 latch_sw_magnet;
 } struct_current;
 
 typedef struct {
@@ -208,6 +212,7 @@ void init() {
 	current.rda_bytes_received=0;
 	current.rda2_bytes_received=0;
 	current.button_state=0;
+	current.latch_sw_magnet=0;
 
 	/* zero out NMEA structure */
 	memset(&nmea,0,sizeof(nmea));
@@ -254,10 +259,17 @@ void periodic_millisecond(void) {
 	if ( b0_state==0xf000) {
 		/* button pressed */
 		current.button_state=1;
+		current.latch_sw_magnet=1;
 	} else {
 		current.button_State=0;
 	}
 
+	/* set PIC to PI line based on latch state(s) */
+	if ( bit_test(config.pic_to_pi_latch_mask,0) && current.latch_sw_magnet ) {
+		output_high(PIC_TO_PI);
+	} else {
+		output_low(PIC_TO_PI);
+	}
 
 	/* anemometers quit moving */
 	if ( 0xffff == timers.pulse_period[0] )

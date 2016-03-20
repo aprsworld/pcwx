@@ -189,7 +189,6 @@ void isr_uart1_rx() {
 	/* Modbus */
 	if (!modbus_serial_new) {
 		if(modbus_serial_state == MODBUS_GETADDY) {
-output_high(_PIC_TO_PI);
 			modbus_serial_crc.d = 0xFFFF;
 			modbus_rx.address = c;
 			modbus_serial_state++;

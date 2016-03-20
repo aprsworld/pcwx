@@ -66,7 +66,7 @@ Parameters are stored in EEPROM
 
 #define RS485_NRE                PIN_D0
 #define RS485_DE                 PIN_D1
-#define _PIC_TO_PI                PIN_D3
+#define PIC_TO_PI                PIN_D3
 #define SER_TO_PI                PIN_C6
 #define SER_FROM_PI              PIN_C7
 

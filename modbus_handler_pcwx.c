@@ -1,7 +1,7 @@
 #define MAX_STATUS_REGISTER          54
 
 #define MIN_CONFIG_REGISTER          1000
-#define MAX_CONFIG_REGISTER          1013
+#define MAX_CONFIG_REGISTER          1014
 
 #define MIN_NMEA0183_CONFIG_REGISTER 1100
 #define MAX_NMEA0183_CONFIG_REGISTER 1100 + N_NMEA0183_SENTENCES*6
@@ -214,6 +214,7 @@ int16 map_modbus(int16 addr) {
 			if ( RS485_SPEED_57600 == config.rs485_port_speed ) return (int16) 57600;
 
 			return (int16) 9600;
+		case 1014: return (int16) config.pic_to_pi_latch_mask;
 
 		/* NMEA sentence age and length */
 		case 6500: return (int16) nmea.sentence_age[0];
@@ -415,6 +416,12 @@ exception modbus_write_register(int16 address, int16 value) {
 			}
 			break;
 
+
+		case 1014:
+			if ( value > 1 ) return ILLEGAL_DATA_VALUE;
+			config.pic_to_pi_latch_mask=value;
+			break;
+
 		case 1997:
 			/* reset CPU */
 			if ( 1 != value ) return ILLEGAL_DATA_VALUE;
@@ -458,7 +465,6 @@ void modbus_process(void) {
 
 	/* check for message */
 	if ( modbus_kbhit() ) {
-output_low(_PIC_TO_PI);
 //		output_high(TP_RED);
 
 		if ( RS485_MODE_MODBUS_BRIDGE==config.rs485_port_mode && modbus_rx.address!=config.modbus_address ) {

@@ -53,18 +53,10 @@ void write_default_param_file() {
 	config.watchdog_seconds_max=630; /* 10 minutes & 30 seconds */
 	config.pi_offtime_seconds=2;
 	config.power_startup=0;
+	config.pic_to_pi_latch_mask=1; 
 
-	/* clear NMEA0183 sentence character array */
-	memset(config.nmea0183_sentence,0,sizeof(config.nmea0183_sentence));
-	/* set defaults. Can set the first 11 this way. They are 6 bytes long, not null terminated.
-	Can use normal string functions (null terminated) to set the first 11 of them in order.
-	12th would go 1 byte past the end of array */
-	strcpy(config.nmea0183_sentence[0],"$GPRMC");
-	strcpy(config.nmea0183_sentence[1],"$GPGGA");
-	strcpy(config.nmea0183_sentence[2],"$GPGSV");
-	strcpy(config.nmea0183_sentence[3],"$WIMDA");
-
-	strcpy(config.nmea0183_sentence[6],"*"); /* put anything in */
+	/* set NMEA0183 sentence character array to all '*' */
+	memset(config.nmea0183_sentence,'*',sizeof(config.nmea0183_sentence));
 
 	/* write them so next time we use from EEPROM */
 	write_param_file();
